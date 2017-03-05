@@ -27,12 +27,12 @@ Cherry-picking
 
 The commit sha1 is obtained from the merged pull request on master. 
 
-For example, to cherry-pick `6de2b7817f-some-random-sha1-0f0bbf3d064` into
+For example, to cherry-pick `6de2b7817f-some-commit-sha1-d064` into
 `3.5` and `3.6`:
 
 ::
 
-    $ python -m cherry_picker 6de2b7817f-some-random-sha1-0f0bbf3d064 3.5 3.6
+    $ python -m cherry_picker 6de2b7817f-some-commit-sha1-d064 3.5 3.6
 
 
 What this will do:
@@ -44,13 +44,13 @@ What this will do:
     $ git fetch upstream
     
     $ git checkout -b 6de2b78-3.5 upstream/3.5
-    $ git cherry-pick -x 6de2b7817f-some-random-sha1-0f0bbf3d064 
+    $ git cherry-pick -x 6de2b7817f-some-random-sha1-d064 
     $ git push origin 6de2b78-3.5
     $ git checkout master
     $ git branch -D 6de2b78-3.5
     
     $ git checkout -b 6de2b78-3.6 upstream/3.6
-    $ git cherry-pick -x 6de2b7817f-some-random-sha1-0f0bbf3d064 
+    $ git cherry-pick -x 6de2b7817f-some-random-sha1-d064 
     $ git push origin 6de2b78-3.6
     $ git checkout master
     $ git branch -D 6de2b78-3.6
