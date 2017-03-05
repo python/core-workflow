@@ -44,13 +44,13 @@ What this will do:
     $ git fetch upstream
     
     $ git checkout -b 6de2b78-3.5 upstream/3.5
-    $ git cherry-pick -x 6de2b7817f-some-random-sha1-d064 
+    $ git cherry-pick -x 6de2b7817f-some-commit-sha1-d064 
     $ git push origin 6de2b78-3.5
     $ git checkout master
     $ git branch -D 6de2b78-3.5
     
     $ git checkout -b 6de2b78-3.6 upstream/3.6
-    $ git cherry-pick -x 6de2b7817f-some-random-sha1-d064 
+    $ git cherry-pick -x 6de2b7817f-some-commit-sha1-d064 
     $ git push origin 6de2b78-3.6
     $ git checkout master
     $ git branch -D 6de2b78-3.6
