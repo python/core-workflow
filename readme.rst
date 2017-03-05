@@ -25,6 +25,7 @@ Cherry-picking
 
     $ python -m cherry_picker <commit_sha1> <branches>
 
+The commit sha1 is obtained from the merged pull request on master. 
 
 For example, to cherry-pick `6de2b7817fa9403e81dc38f13f3690f0bbf3d064` into
 `3.5` and `3.6`:
