@@ -40,16 +40,21 @@ What this will do:
 ::
 
     $ cd cpython
+    
     $ git fetch upstream
+    
     $ git checkout -b 6de2b78-3.5 upstream/3.5
     $ git cherry-pick -x 6de2b7817fa9403e81dc38f13f3690f0bbf3d064
     $ git push origin 6de2b78-3.5
     $ git checkout master
     $ git branch -D 6de2b78-3.5
+    
     $ git checkout -b 6de2b78-3.6 upstream/3.6
     $ git cherry-pick -x 6de2b7817fa9403e81dc38f13f3690f0bbf3d064
     $ git push origin 6de2b78-3.6
     $ git checkout master
+    $ git branch -D 6de2b78-3.6
+    
 
 
 Then go to https://github.com/python/cpython to create the pull requests.
