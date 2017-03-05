@@ -58,3 +58,5 @@ What this will do:
 
 
 Then go to https://github.com/python/cpython to create the pull requests.
+
+In case of merge conflicts, then... the script will fail :P
