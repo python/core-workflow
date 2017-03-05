@@ -1,17 +1,13 @@
 import click
-import json
 import os
 import subprocess
+
 
 @click.command()
 @click.argument('commit_sha1', 'The commit sha1 to cherry-pick')
 @click.argument('branches', 'The branches to backport', nargs=-1)
 def cherry_pick(commit_sha1, branches):
-    config_data = {}
-    with open("config.json") as config_file:
-        config_data = json.load(config_file)
-    click.echo(f"{config_data['cloned_repo_path']}")
-    os.chdir(config_data['cloned_repo_path'])
+    os.chdir('./cpython/')
     run_cmd("git fetch upstream")
 
     if not branches:
