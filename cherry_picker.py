@@ -8,7 +8,8 @@ import subprocess
 @click.argument('branches', 'The branches to backport', nargs=-1)
 def cherry_pick(commit_sha1, branches):
     os.chdir('./cpython/')
-    run_cmd("git fetch upstream")
+    upstream = get_git_upstream_remote()
+    run_cmd(f"git fetch {upstream}")
 
     if not branches:
         raise ValueError("at least one branch is required")
@@ -18,7 +19,7 @@ def cherry_pick(commit_sha1, branches):
         click.echo(f"checkout the branch sha {commit_sha1[:7]}")
 
         # git checkout -b 61e2bc7-3.5 upstream/3.5
-        cmd = f"git checkout -b {commit_sha1[:7]}-{b} upstream/{b}"
+        cmd = f"git checkout -b {commit_sha1[:7]}-{b} {upstream}/{b}"
         run_cmd(cmd)
 
         cmd = f"git cherry-pick -x {commit_sha1}"
@@ -32,6 +33,18 @@ def cherry_pick(commit_sha1, branches):
 
         cmd = f"git branch -D {commit_sha1[:7]}-{b}"
         run_cmd(cmd)
+
+
+def get_git_upstream_remote():
+    """Get the remote name to use for upstream branches
+    Uses "upstream" if it exists, "origin" otherwise
+    """
+    cmd = "git remote get-url upstream"
+    try:
+        run_cmd(cmd)
+    except subprocess.CalledProcessError:
+        return "origin"
+    return "upstream"
 
 
 def run_cmd(cmd):
