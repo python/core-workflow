@@ -33,8 +33,10 @@ def cherry_pick(commit_sha1, branches):
         run_cmd(cmd)
 
         cmd = f"git branch -D {commit_sha1[:7]}-{branch}"
-        run_cmd(cmd)
-        click.echo(f"branch {commit_sha1[:7]}-{branch} has been deleted.")
+        if run_cmd(cmd):
+            click.echo(f"branch {commit_sha1[:7]}-{branch} has been deleted.")
+        else:
+            click.echo(f"branch {commit_sha1[:7]}-{branch} NOT deleted.")
 
 
 def get_git_upstream_remote():
