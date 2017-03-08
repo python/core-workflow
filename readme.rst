@@ -1,5 +1,16 @@
 .. contents::
 
+About
+=====
+
+Use this to backport cpython changes from ``master`` into one or more of the maintenance
+branches (``3.6``, ``3.5``, ``2.7``).  
+
+This script will become obsolete once the cherry-picking bot is implemented.
+
+There is no unit tests :sob: .... I tested this in production :sweat_smile:
+
+
 Setup Info
 ==========
 
@@ -18,7 +29,7 @@ Requires Python 3.6 and virtualenv.
     (venv) $ cd ../
 
 
-Cherry-picking
+Cherry-picking :snake: :cherries: :pick:
 ==============
 
 (Setup first! See prev section)
@@ -27,7 +38,7 @@ Cherry-picking
 
     (venv) $ python -m cherry_picker <commit_sha1> <branches>
 
-The commit sha1 is obtained from the merged pull request on master. 
+The commit sha1 is obtained from the merged pull request on ``master``. 
 
 For example, to cherry-pick ``6de2b7817f-some-commit-sha1-d064`` into
 ``3.5`` and ``3.6``:
@@ -57,7 +68,7 @@ What this will do:
     (venv) $ git checkout master
     (venv) $ git branch -D 6de2b78-3.6
 
-In case of merge conflicts or errors, then... the script will fail :P
+In case of merge conflicts or errors, then... the script will fail :stuck_out_tongue:
 
 
 Creating Pull Requests
