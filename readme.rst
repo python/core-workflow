@@ -1,3 +1,9 @@
+Usage::
+   
+   python -m cherry_picker <commit_sha1> <branches>
+   
+
+
 .. contents::
 
 About
