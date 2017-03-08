@@ -29,8 +29,8 @@ Cherry-picking
 
 The commit sha1 is obtained from the merged pull request on master. 
 
-For example, to cherry-pick `6de2b7817f-some-commit-sha1-d064` into
-`3.5` and `3.6`:
+For example, to cherry-pick ``6de2b7817f-some-commit-sha1-d064`` into
+``3.5`` and ``3.6``:
 
 ::
 
@@ -60,14 +60,25 @@ What this will do:
 In case of merge conflicts or errors, then... the script will fail :P
 
 
-Create a Pull Request
-=====================
+Creating Pull Requests
+======================
 
-1. Go to https://github.com/python/cpython to create the pull requests.
+When a cherry-pick was applied successfully, this script will open up a browser
+tab that points to the pull request creation page.
 
-2. Prefix the pull request description with the branch `[X.Y]`, e.g.::
+The url of the pull request page looks similar to the following::
+
+   https://github.com/python/cpython/compare/3.5...Mariatta:6de2b78-3.5?expand=1
+
+
+
+1. Prefix the pull request description with the branch ``[X.Y]``, e.g.::
 
      [3.6] bpo-xxxxx: Fix this and that
 
-3. Apply the appropriate `cherry-pick for ...` label
+2. Apply the appropriate ``cherry-pick for ...`` label
 
+3. Press the ``Create Pull Request`` button.
+
+4. Remove the ``needs backport to ...`` label from the original pull request
+   against ``master``.
