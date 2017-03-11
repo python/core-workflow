@@ -12,7 +12,7 @@ def cherry_pick(commit_sha1, branches):
     upstream = get_git_upstream_remote()
     username = get_forked_repo_name()
 
-    click.echo("fetchin upstream")
+    click.echo("fetching upstream ...")
     run_cmd(f"git fetch {upstream}")
 
     if not branches:
