@@ -8,7 +8,8 @@ import webbrowser
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked')
 @click.argument('branches', 'The branches to backport to', nargs=-1)
 def cherry_pick(commit_sha1, branches):
-    os.chdir('./cpython/')
+    if not os.path.exists('./pyconfig.h.in'):
+        os.chdir('./cpython/')
     upstream = get_git_upstream_remote()
     username = get_forked_repo_name()
 
