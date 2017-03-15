@@ -24,12 +24,12 @@ Requires Python 3.6 and virtualenv.
 
 ::
 
-    $ git clone https://github.com/Mariatta/chic_a_cherry_picker.git
-    $ cd chic_a_cherry_picker
+    $ git clone https://github.com/python/core-workflow.git
+    $ cd core-workflow/cherry_picker
     $ virtualenv venv
     $ source venv/bin/activate
     (venv) $ pip install -r requirements.txt
-    (venv) $ git clone https://github.com/Mariatta/cpython.git  #or your own cpython fork
+    (venv) $ git clone https://github.com/<username>/cpython.git  # your own cpython fork
     (venv) $ cd cpython
     (venv) $ git remote add upstream https://github.com/python/cpython.git
     (venv) $ cd ../
@@ -85,7 +85,7 @@ tab that points to the pull request creation page.
 
 The url of the pull request page looks similar to the following::
 
-   https://github.com/python/cpython/compare/3.5...Mariatta:6de2b78-3.5?expand=1
+   https://github.com/python/cpython/compare/3.5...<username>:6de2b78-3.5?expand=1
 
 
 
