@@ -87,3 +87,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# CPython checkout for cherry_picker.
+cherry_picker/cpython
