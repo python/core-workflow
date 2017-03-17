@@ -20,15 +20,15 @@ There is no unit tests :sob: .... I tested this in production :sweat_smile:
 Setup Info
 ==========
 
-Requires Python 3.6 and virtualenv.
+Requires Python 3.6.
 
 ::
 
     $ git clone https://github.com/python/core-workflow.git
     $ cd core-workflow/cherry_picker
-    $ virtualenv venv
+    $ python3 -m venv venv
     $ source venv/bin/activate
-    (venv) $ pip install -r requirements.txt
+    (venv) $ python3 -m pip install -r requirements.txt
     (venv) $ git clone https://github.com/<username>/cpython.git  # your own cpython fork
     (venv) $ cd cpython
     (venv) $ git remote add upstream https://github.com/python/cpython.git
