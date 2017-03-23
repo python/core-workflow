@@ -14,7 +14,7 @@ branches (``3.6``, ``3.5``, ``2.7``).
 
 This script will become obsolete once the cherry-picking bot is implemented.
 
-There is no unit tests :sob: .... I tested this in production :sweat_smile:
+Tests are to be written using pytest.
 
 
 Setup Info
@@ -127,3 +127,13 @@ The url of the pull request page looks similar to the following::
 
 4. Remove the ``needs backport to ...`` label from the original pull request
    against ``master``.
+
+
+Running Tests
+=============
+
+Install pytest: ``pip install -U pytest``
+
+::
+
+    $ pytest test.py
