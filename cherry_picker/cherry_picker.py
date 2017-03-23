@@ -26,7 +26,7 @@ def cherry_pick(dry_run, pr_remote, commit_sha1, branches):
     if not branches:
         raise ValueError("at least one branch is required")
 
-    for branch in branches:
+    for branch in sorted(branches, reverse=True):
         click.echo(f"Now backporting '{commit_sha1}' into '{branch}'")
 
         # git checkout -b 61e2bc7-3.5 upstream/3.5
