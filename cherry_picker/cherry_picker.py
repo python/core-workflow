@@ -26,7 +26,7 @@ def cherry_pick(dry_run, pr_remote, commit_sha1, branches):
     if not branches:
         raise ValueError("at least one branch is required")
 
-    for branch in branches:
+    for branch in get_sorted_branch(branches):
         click.echo(f"Now backporting '{commit_sha1}' into '{branch}'")
 
         # git checkout -b 61e2bc7-3.5 upstream/3.5
@@ -103,6 +103,13 @@ def open_pr(forked_repo, base_branch, cherry_pick_branch, *, dry_run=False):
         click.echo(f"  dry-run: Create new PR: {url}")
         return
     webbrowser.open_new_tab(url)
+
+
+def get_sorted_branch(branches):
+    return sorted(
+        branches,
+        reverse=True,
+        key=lambda v: tuple(map(int, v.split('.'))))
 
 
 if __name__ == '__main__':
