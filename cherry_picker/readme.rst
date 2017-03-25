@@ -1,6 +1,6 @@
 Usage::
    
-   python -m cherry_picker [--push REMOTE] [--dry-run] <commit_sha1> <branches>
+   python -m cherry_picker [--push REMOTE] [--dry-run] [--abort/--continue] <commit_sha1> <branches>
    
 
 
@@ -43,6 +43,7 @@ repository are pushed to `origin`. If this is incorrect, then the correct
 remote will need be specified using the ``--push`` option (e.g.
 ``--push pr`` to use a remote named ``pr``).
 
+
 Cherry-picking :snake: :cherries: :pick:
 ==============
 
@@ -50,9 +51,25 @@ Cherry-picking :snake: :cherries: :pick:
 
 ::
 
-    (venv) $ python -m cherry_picker <commit_sha1> <branches>
+    (venv) $ python -m cherry_picker [--dry-run] [--abort/--continue] <commit_sha1> <branches>
 
-The commit sha1 is obtained from the merged pull request on ``master``. 
+The commit sha1 is obtained from the merged pull request on ``master``.
+
+
+Options
+-------
+
+::
+
+    -- dry-run      Dry Run Mode.  Prints out the commands, but not executed.
+    -- abort        Stop at the first cherry-pick failure.  This is the default
+                    value.
+    -- continue     Continue backporting other branches if it encounters failure.
+    -- push REMOTE  Specify the branch to push into.  Default is 'origin'.
+
+
+Example
+-------
 
 For example, to cherry-pick ``6de2b7817f-some-commit-sha1-d064`` into
 ``3.5`` and ``3.6``:
@@ -105,6 +122,7 @@ steps it would execute without actually executing any of them. For example::
     dry_run: Create new PR: https://github.com/python/cpython/compare/3.5...ncoghlan:backport-1e32a1b-3.5?expand=1
     dry_run: git checkout master
     dry_run: git branch -D backport-1e32a1b-3.5
+
 
 Creating Pull Requests
 ======================
