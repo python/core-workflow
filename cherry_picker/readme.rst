@@ -62,10 +62,19 @@ Options
 ::
 
     -- dry-run      Dry Run Mode.  Prints out the commands, but not executed.
-    -- abort        Stop at the first cherry-pick failure.  This is the default
-                    value.
-    -- continue     Continue backporting other branches if it encounters failure.
     -- push REMOTE  Specify the branch to push into.  Default is 'origin'.
+
+
+Additional options::
+
+    -- abort        Abort current cherry-pick and clean up branch
+    -- continue     Continue cherry-pick, push, and clean up branch
+
+
+Demo
+----
+
+https://asciinema.org/a/dfalzy45oq8b3c6dvakwfs6la
 
 
 Example
@@ -99,7 +108,22 @@ What this will do:
     (venv) $ git checkout master
     (venv) $ git branch -D backport-6de2b78-3.6
 
-In case of merge conflicts or errors, then... the script will fail :stuck_out_tongue:
+In case of merge conflicts or errors, the following message will be displayed::
+
+    Failed to cherry-pick 554626ada769abf82a5dabe6966afa4265acb6a6 into 2.7 :frowning_face:
+    ... Stopping here.
+
+    To continue and resolve the conflict:
+        $ cd cpython
+        $ git status # to find out which files need attention
+        # Fix the conflict
+        $ git status # should now say `all conflicts fixed`
+        $ cd ..
+        $ python -m cherry_picker --continue
+
+    To abort the cherry-pick and cleanup:
+        $ python -m cherry_picker --abort
+
 
 Passing the `--dry-run` option will cause the script to print out all the
 steps it would execute without actually executing any of them. For example::

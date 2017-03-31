@@ -13,9 +13,9 @@ import webbrowser
 @click.option('--push', 'pr_remote', metavar='REMOTE',
               help='git remote to use for PR branches', default='origin')
 @click.option('--abort', 'abort', flag_value=True, default=None,
-              help="")
+              help="Abort current cherry-pick and clean up branch")
 @click.option('--continue', 'abort', flag_value=False, default=None,
-              help="")
+              help="Continue cherry-pick, push, and clean up branch")
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
                 default = "")
 @click.argument('branches', 'The branches to backport to', nargs=-1)
