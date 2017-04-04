@@ -9,8 +9,11 @@ Usage::
 About
 =====
 
-Use this to backport cpython changes from ``master`` into one or more of the maintenance
-branches (``3.6``, ``3.5``, ``2.7``).  
+Use this to backport cpython changes from ``master`` into one or more of the
+maintenance branches (``3.6``, ``3.5``, ``2.7``).
+
+It will prefix the commit message with the branch, e.g. ``[3.6]``, and then
+opens up the pull request page.
 
 This script will become obsolete once the cherry-picking bot is implemented.
 
@@ -75,7 +78,7 @@ Additional options::
 Demo
 ----
 
-https://asciinema.org/a/dfalzy45oq8b3c6dvakwfs6la
+https://asciinema.org/a/dtayqmjvd5hy5389oubkdk323
 
 
 Example
@@ -148,6 +151,22 @@ steps it would execute without actually executing any of them. For example::
     dry_run: git checkout master
     dry_run: git branch -D backport-1e32a1b-3.5
 
+
+`--status` option
+-----------------
+
+This will do `git status` for the CPython directory.
+
+`--abort` option
+----------------
+
+Cancels the current cherry-pick and cleans up the cherry-pick branch.
+
+`--continue` option
+-------------------
+
+Continues the current cherry-pick, commits, pushes the current branch to origin,
+opens the PR page, and cleans up the branch.
 
 Creating Pull Requests
 ======================
