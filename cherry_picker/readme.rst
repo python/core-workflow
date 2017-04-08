@@ -2,6 +2,10 @@ Usage::
    
    python -m cherry_picker [--push REMOTE] [--dry-run] <commit_sha1> <branches>
    
+Alternate Usage (from an existing cpython directory)::
+
+   python <path to cherry_picker.py> [--push REMOTE] [--dry-run] <commit_sha1> <branches>
+
 
 
 .. contents::
