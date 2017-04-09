@@ -5,7 +5,7 @@ import click
 import os
 import subprocess
 import webbrowser
-
+import sys
 
 class CherryPicker:
 
@@ -83,7 +83,7 @@ class CherryPicker:
         Return the commit message for the current commit hash,
         replace #<PRID> with GH-<PRID>
         """
-        cmd = f"git show -s --format=%B {commit_sha}"
+        cmd = f"git log {commit_sha} --pretty=%B"
         output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
         updated_commit_message = output.strip().decode('utf-8').replace('#', 'GH-')
         return updated_commit_message
@@ -128,8 +128,11 @@ To abort the cherry-pick and cleanup:
         """ prefix the commit message with (X.Y) """
         base_branch = get_base_branch(cherry_pick_branch)
 
-        cmd = f"git commit --amend -m '[{base_branch}]: {self.get_commit_message(self.commit_sha1)}{os.linesep}(cherry picked from commit {self.commit_sha1})'"
-        self.run_cmd(cmd, shell=True)
+        updated_commit_message = f"[{base_branch}] {self.get_commit_message(self.commit_sha1)}{os.linesep}(cherry picked from commit {self.commit_sha1})"
+
+        subprocess.check_output(["git", "commit", "--amend", "-m",
+                                 updated_commit_message],
+                                stderr=subprocess.STDOUT)
 
     def push_to_remote(self, base_branch, head_branch):
         """ git push <origin> <branchname> """
@@ -179,6 +182,7 @@ To abort the cherry-pick and cleanup:
                 self.amend_commit_message(cherry_pick_branch)
             except subprocess.CalledProcessError:
                 click.echo(self.get_exit_message(maint_branch))
+                sys.exit(-1)
             else:
                 self.push_to_remote(maint_branch, cherry_pick_branch)
                 self.cleanup_branch(cherry_pick_branch)
@@ -190,7 +194,7 @@ To abort the cherry-pick and cleanup:
         """
         cmd = "git cherry-pick --abort"
         try:
-            self.run_cmd(cmd) #, stdout=subprocess.PIPE)
+            self.run_cmd(cmd)
         except subprocess.CalledProcessError:
             pass
         else:
@@ -211,9 +215,8 @@ To abort the cherry-pick and cleanup:
             short_sha = cherry_pick_branch[cherry_pick_branch.index('-')+1:cherry_pick_branch.index(base)-1]
             full_sha = get_full_sha_from_short(short_sha)
             commit_message = self.get_commit_message(short_sha)
-
-            cmd = f"git commit -am '[{base}]: {commit_message}. \n(cherry picked from commit {full_sha})' --allow-empty"
-            self.run_cmd(cmd, shell=True)
+            updated_commit_message = f'[{base}]: {commit_message}. \n(cherry picked from commit {full_sha})'
+            subprocess.check_output(["git", "commit", "-am", updated_commit_message, "--allow-empty"], stderr=subprocess.STDOUT)
 
             self.push_to_remote(base, cherry_pick_branch)
 
