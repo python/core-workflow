@@ -83,7 +83,7 @@ class CherryPicker:
         Return the commit message for the current commit hash,
         replace #<PRID> with GH-<PRID>
         """
-        cmd = f"git log {commit_sha} --pretty=%B"
+        cmd = f"git show -s --format=%B {commit_sha}"
         output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
         updated_commit_message = output.strip().decode('utf-8').replace('#', 'GH-')
         return updated_commit_message
@@ -129,7 +129,7 @@ To abort the cherry-pick and cleanup:
         base_branch = get_base_branch(cherry_pick_branch)
 
         updated_commit_message = f"[{base_branch}] {self.get_commit_message(self.commit_sha1)}{os.linesep}(cherry picked from commit {self.commit_sha1})"
-
+        updated_commit_message = updated_commit_message.replace('#', 'GH-')
         subprocess.check_output(["git", "commit", "--amend", "-m",
                                  updated_commit_message],
                                 stderr=subprocess.STDOUT)
