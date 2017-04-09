@@ -1,6 +1,6 @@
 Usage::
    
-   python -m cherry_picker [--push REMOTE] [--dry-run] <commit_sha1> <branches>
+   python -m cherry_picker [--push REMOTE] [--dry-run] [--abort/--continue] <commit_sha1> <branches>
    
 Alternate Usage (from an existing cpython directory)::
 
@@ -47,6 +47,7 @@ repository are pushed to `origin`. If this is incorrect, then the correct
 remote will need be specified using the ``--push`` option (e.g.
 ``--push pr`` to use a remote named ``pr``).
 
+
 Cherry-picking :snake: :cherries: :pick:
 ==============
 
@@ -54,9 +55,34 @@ Cherry-picking :snake: :cherries: :pick:
 
 ::
 
-    (venv) $ python -m cherry_picker <commit_sha1> <branches>
+    (venv) $ python -m cherry_picker [--dry-run] [--abort/--continue] <commit_sha1> <branches>
 
-The commit sha1 is obtained from the merged pull request on ``master``. 
+The commit sha1 is obtained from the merged pull request on ``master``.
+
+
+Options
+-------
+
+::
+
+    -- dry-run      Dry Run Mode.  Prints out the commands, but not executed.
+    -- push REMOTE  Specify the branch to push into.  Default is 'origin'.
+
+
+Additional options::
+
+    -- abort        Abort current cherry-pick and clean up branch
+    -- continue     Continue cherry-pick, push, and clean up branch
+
+
+Demo
+----
+
+https://asciinema.org/a/dfalzy45oq8b3c6dvakwfs6la
+
+
+Example
+-------
 
 For example, to cherry-pick ``6de2b7817f-some-commit-sha1-d064`` into
 ``3.5`` and ``3.6``:
@@ -86,7 +112,22 @@ What this will do:
     (venv) $ git checkout master
     (venv) $ git branch -D backport-6de2b78-3.6
 
-In case of merge conflicts or errors, then... the script will fail :stuck_out_tongue:
+In case of merge conflicts or errors, the following message will be displayed::
+
+    Failed to cherry-pick 554626ada769abf82a5dabe6966afa4265acb6a6 into 2.7 :frowning_face:
+    ... Stopping here.
+
+    To continue and resolve the conflict:
+        $ cd cpython
+        $ git status # to find out which files need attention
+        # Fix the conflict
+        $ git status # should now say `all conflicts fixed`
+        $ cd ..
+        $ python -m cherry_picker --continue
+
+    To abort the cherry-pick and cleanup:
+        $ python -m cherry_picker --abort
+
 
 Passing the `--dry-run` option will cause the script to print out all the
 steps it would execute without actually executing any of them. For example::
@@ -109,6 +150,7 @@ steps it would execute without actually executing any of them. For example::
     dry_run: Create new PR: https://github.com/python/cpython/compare/3.5...ncoghlan:backport-1e32a1b-3.5?expand=1
     dry_run: git checkout master
     dry_run: git branch -D backport-1e32a1b-3.5
+
 
 Creating Pull Requests
 ======================
