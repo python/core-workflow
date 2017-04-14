@@ -65,7 +65,7 @@ Options
 ::
 
     -- dry-run      Dry Run Mode.  Prints out the commands, but not executed.
-    -- push REMOTE  Specify the branch to push into.  Default is 'origin'.
+    -- push REMOTE  Specify the git remote to push into.  Default is 'origin'.
     -- status       Do `git status` in cpython directory.
 
 
