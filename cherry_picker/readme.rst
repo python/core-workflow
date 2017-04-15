@@ -1,6 +1,6 @@
 Usage::
    
-   python -m cherry_picker [--push REMOTE] [--dry-run] <commit_sha1> <branches>
+   python -m cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] <commit_sha1> <branches>
    
 Alternate Usage (from an existing cpython directory)::
 
@@ -13,8 +13,11 @@ Alternate Usage (from an existing cpython directory)::
 About
 =====
 
-Use this to backport cpython changes from ``master`` into one or more of the maintenance
-branches (``3.6``, ``3.5``, ``2.7``).  
+Use this to backport cpython changes from ``master`` into one or more of the
+maintenance branches (``3.6``, ``3.5``, ``2.7``).
+
+It will prefix the commit message with the branch, e.g. ``[3.6]``, and then
+opens up the pull request page.
 
 This script will become obsolete once the cherry-picking bot is implemented.
 
@@ -47,6 +50,7 @@ repository are pushed to `origin`. If this is incorrect, then the correct
 remote will need be specified using the ``--push`` option (e.g.
 ``--push pr`` to use a remote named ``pr``).
 
+
 Cherry-picking :snake: :cherries: :pick:
 ==============
 
@@ -54,9 +58,35 @@ Cherry-picking :snake: :cherries: :pick:
 
 ::
 
-    (venv) $ python -m cherry_picker <commit_sha1> <branches>
+    (venv) $ python -m cherry_picker [--dry-run] [--abort/--continue] [--status] <commit_sha1> <branches>
 
-The commit sha1 is obtained from the merged pull request on ``master``. 
+The commit sha1 is obtained from the merged pull request on ``master``.
+
+
+Options
+-------
+
+::
+
+    -- dry-run      Dry Run Mode.  Prints out the commands, but not executed.
+    -- push REMOTE  Specify the git remote to push into.  Default is 'origin'.
+    -- status       Do `git status` in cpython directory.
+
+
+Additional options::
+
+    -- abort        Abort current cherry-pick and clean up branch
+    -- continue     Continue cherry-pick, push, and clean up branch
+
+
+Demo
+----
+
+https://asciinema.org/a/dtayqmjvd5hy5389oubkdk323
+
+
+Example
+-------
 
 For example, to cherry-pick ``6de2b7817f-some-commit-sha1-d064`` into
 ``3.5`` and ``3.6``:
@@ -86,7 +116,22 @@ What this will do:
     (venv) $ git checkout master
     (venv) $ git branch -D backport-6de2b78-3.6
 
-In case of merge conflicts or errors, then... the script will fail :stuck_out_tongue:
+In case of merge conflicts or errors, the following message will be displayed::
+
+    Failed to cherry-pick 554626ada769abf82a5dabe6966afa4265acb6a6 into 2.7 :frowning_face:
+    ... Stopping here.
+
+    To continue and resolve the conflict:
+        $ python -m cherry_picker --status  # to find out which files need attention
+        $ cd cpython
+        # Fix the conflict
+        $ cd ..
+        $ python -m cherry_picker --status  # should now say 'all conflict fixed'
+        $ python -m cherry_picker --continue
+
+    To abort the cherry-pick and cleanup:
+        $ python -m cherry_picker --abort
+
 
 Passing the `--dry-run` option will cause the script to print out all the
 steps it would execute without actually executing any of them. For example::
@@ -110,6 +155,23 @@ steps it would execute without actually executing any of them. For example::
     dry_run: git checkout master
     dry_run: git branch -D backport-1e32a1b-3.5
 
+
+`--status` option
+-----------------
+
+This will do `git status` for the CPython directory.
+
+`--abort` option
+----------------
+
+Cancels the current cherry-pick and cleans up the cherry-pick branch.
+
+`--continue` option
+-------------------
+
+Continues the current cherry-pick, commits, pushes the current branch to origin,
+opens the PR page, and cleans up the branch.
+
 Creating Pull Requests
 ======================
 
@@ -121,15 +183,11 @@ The url of the pull request page looks similar to the following::
    https://github.com/python/cpython/compare/3.5...<username>:backport-6de2b78-3.5?expand=1
 
 
-1. Prefix the pull request description with the branch ``[X.Y]``, e.g.::
+1. Apply the appropriate ``cherry-pick for ...`` label
 
-     [3.6] bpo-xxxxx: Fix this and that
+2. Press the ``Create Pull Request`` button.
 
-2. Apply the appropriate ``cherry-pick for ...`` label
-
-3. Press the ``Create Pull Request`` button.
-
-4. Remove the ``needs backport to ...`` label from the original pull request
+3. Remove the ``needs backport to ...`` label from the original pull request
    against ``master``.
 
 
