@@ -257,7 +257,7 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, commit_sha1, branches):
     pyconfig_path = os.path.join(current_dir, '/pyconfig.h.in')
 
     if not os.path.exists(pyconfig_path):
-        os.chdir(os.path.join(current_dir, 'cpython'))
+        os.chdir(os.path.join(os.getcwd(), 'cpython'))
 
     if dry_run:
        click.echo("Dry run requested, listing expected command sequence")
