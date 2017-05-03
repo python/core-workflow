@@ -60,7 +60,18 @@ Cherry-picking :snake: :cherries: :pick:
 
     (venv) $ python -m cherry_picker [--dry-run] [--abort/--continue] [--status] <commit_sha1> <branches>
 
-The commit sha1 is obtained from the merged pull request on ``master``.
+
+Commit sha1
+-----------
+
+The commit sha1 for cherry-picking is the squashed commit that was merged to
+the ``master`` branch.  On the merged pull request, scroll to the bottom of the
+page.  Find the event that says something like::
+
+   <coredeveloper> merged commit <commit_sha1> into python:master <sometime> ago.
+
+By following the link to ``<commit_sha1>``, you will get the full commit hash.
+Use the full commit hash for ``cherry_picker.py``.
 
 
 Options
