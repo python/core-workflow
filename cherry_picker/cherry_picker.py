@@ -10,11 +10,12 @@ import sys
 class CherryPicker:
 
     def __init__(self, pr_remote, commit_sha1, branches,
-                 *, dry_run=False):
+                 *, dry_run=False, push=True):
         self.pr_remote = pr_remote
         self.commit_sha1 = commit_sha1
         self.branches = branches
         self.dry_run = dry_run
+        self.push = push
 
     @property
     def upstream(self):
@@ -192,8 +193,21 @@ To abort the cherry-pick and cleanup:
                 click.echo(self.get_exit_message(maint_branch))
                 sys.exit(-1)
             else:
-                self.push_to_remote(maint_branch, cherry_pick_branch)
-                self.cleanup_branch(cherry_pick_branch)
+                if self.push:
+                    self.push_to_remote(maint_branch, cherry_pick_branch)
+                    self.cleanup_branch(cherry_pick_branch)
+                else:
+                    click.echo(\
+f"""
+Finished cherry-pick {self.commit_sha1} into {cherry_pick_branch} \U0001F600
+--no-push option used.
+... Stopping here.
+To continue and push the changes:
+    $ python -m cherry_picker --continue
+
+To abort the cherry-pick and cleanup:
+    $ python -m cherry_picker --abort
+""")
 
     def abort_cherry_pick(self):
         """
@@ -204,7 +218,8 @@ To abort the cherry-pick and cleanup:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as cpe:
             click.echo(cpe.output)
-        else:
+        # only delete backport branch created by cherry_picker.py
+        if get_current_branch().startswith('backport-'):
             self.cleanup_branch(get_current_branch())
 
     def continue_cherry_pick(self):
@@ -245,12 +260,15 @@ To abort the cherry-pick and cleanup:
               help="Abort current cherry-pick and clean up branch")
 @click.option('--continue', 'abort', flag_value=False, default=None,
               help="Continue cherry-pick, push, and clean up branch")
-@click.option('--status', 'status', flag_value = True, default=None,
+@click.option('--status', 'status', flag_value=True, default=None,
               help="Get the status of cherry-pick")
+@click.option('--push/--no-push', 'push', is_flag=True, default=True,
+              help="Changes won't be pushed to remote")
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
                 default = "")
 @click.argument('branches', 'The branches to backport to', nargs=-1)
-def cherry_pick_cli(dry_run, pr_remote, abort, status, commit_sha1, branches):
+def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
+                    commit_sha1, branches):
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -262,7 +280,9 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, commit_sha1, branches):
     if dry_run:
        click.echo("Dry run requested, listing expected command sequence")
 
-    cherry_picker = CherryPicker(pr_remote, commit_sha1, branches, dry_run=dry_run)
+    cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
+                                 dry_run=dry_run,
+                                 push=push)
 
     if abort is not None:
         if abort:
