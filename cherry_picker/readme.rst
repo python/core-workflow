@@ -1,6 +1,6 @@
 Usage::
    
-   python -m cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] <commit_sha1> <branches>
+   python -m cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
    
 Alternate Usage (from an existing cpython directory)::
 
@@ -88,7 +88,7 @@ Additional options::
 
     -- abort        Abort current cherry-pick and clean up branch
     -- continue     Continue cherry-pick, push, and clean up branch
-
+    -- no-push      Changes won't be pushed to remote
 
 Demo
 ----
@@ -182,6 +182,14 @@ Cancels the current cherry-pick and cleans up the cherry-pick branch.
 
 Continues the current cherry-pick, commits, pushes the current branch to origin,
 opens the PR page, and cleans up the branch.
+
+`--no-push` option
+------------------
+
+Changes won't be pushed to remote.  This allows you to test and make additional
+changes.  Once you're satisfied with local changes, use `--continue` to complete
+the backport, or `--abort` to cancel and clean up the branch.
+
 
 Creating Pull Requests
 ======================
