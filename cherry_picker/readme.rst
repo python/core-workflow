@@ -4,7 +4,7 @@ Usage::
    
 Alternate Usage (from an existing cpython directory)::
 
-   python <path to cherry_picker.py> [--push REMOTE] [--dry-run] <commit_sha1> <branches>
+   python <path to cherry_picker.py> [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
 
 
 
@@ -58,7 +58,7 @@ Cherry-picking :snake: :cherries: :pick:
 
 ::
 
-    (venv) $ python -m cherry_picker [--dry-run] [--abort/--continue] [--status] <commit_sha1> <branches>
+    (venv) $ python -m cherry_picker [--dry-run] [--abort/--continue] [--status] [--no-push] <commit_sha1> <branches>
 
 
 Commit sha1
