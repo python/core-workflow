@@ -187,8 +187,11 @@ opens the PR page, and cleans up the branch.
 ------------------
 
 Changes won't be pushed to remote.  This allows you to test and make additional
-changes.  Once you're satisfied with local changes, use `--continue` to complete
-the backport, or `--abort` to cancel and clean up the branch.
+changes.  Once you're satisfied with local changes, use ``--continue`` to complete
+the backport, or ``--abort`` to cancel and clean up the branch.  You can also
+cherry-pick additional commits, by::
+
+   $ git cherry-pick -x <commit_sha1>
 
 
 Creating Pull Requests
