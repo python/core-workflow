@@ -251,7 +251,9 @@ To abort the cherry-pick and cleanup:
             click.echo(u"Currently in `master` branch.  Will not continue. \U0001F61B")
 
 
-@click.command()
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+
+@click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--dry-run', is_flag=True,
               help="Prints out the commands, but not executed.")
 @click.option('--push', 'pr_remote', metavar='REMOTE',
