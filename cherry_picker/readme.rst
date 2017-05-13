@@ -205,11 +205,9 @@ The url of the pull request page looks similar to the following::
    https://github.com/python/cpython/compare/3.5...<username>:backport-6de2b78-3.5?expand=1
 
 
-1. Apply the appropriate ``cherry-pick for ...`` label
+1. Press the ``Create Pull Request`` button.
 
-2. Press the ``Create Pull Request`` button.
-
-3. Remove the ``needs backport to ...`` label from the original pull request
+2. Remove the ``needs backport to ...`` label from the original pull request
    against ``master``.
 
 
