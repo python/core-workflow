@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 #  -*- coding: utf-8 -*-
 
-import click
 import os
 import subprocess
-import webbrowser
 import sys
+import textwrap
+import webbrowser
+
+import click
+
 
 class CherryPicker:
 
@@ -78,7 +81,8 @@ class CherryPicker:
             click.echo("error checking out branch")
             click.echo(err.output)
 
-    def get_commit_message(self, commit_sha):
+    @staticmethod
+    def get_commit_message(commit_sha):
         """
         Return the commit message for the current commit hash,
         replace #<PRID> with GH-<PRID>
@@ -107,22 +111,21 @@ class CherryPicker:
         self.run_cmd(cmd)
 
     def get_exit_message(self, branch):
-        return \
-f"""
-Failed to cherry-pick {self.commit_sha1} into {branch} \u2639
-... Stopping here.
-
-To continue and resolve the conflict:
-    $ python -m cherry_picker --status  # to find out which files need attention
-    $ cd cpython
-    # Fix the conflict
-    $ cd ..
-    $ python -m cherry_picker --status  # should now say 'all conflict fixed'
-    $ python -m cherry_picker --continue
-
-To abort the cherry-pick and cleanup:
-    $ python -m cherry_picker --abort
-"""
+        return textwrap.dedent(f"""
+            Failed to cherry-pick {self.commit_sha1} into {branch} \u2639
+            ... Stopping here.
+            
+            To continue and resolve the conflict:
+                $ python -m cherry_picker --status  # to find out which files need attention
+                $ cd cpython
+                # Fix the conflict
+                $ cd ..
+                $ python -m cherry_picker --status  # should now say 'all conflict fixed'
+                $ python -m cherry_picker --continue
+            
+            To abort the cherry-pick and cleanup:
+                $ python -m cherry_picker --abort
+            """)
 
     def amend_commit_message(self, cherry_pick_branch):
         """ prefix the commit message with (X.Y) """
@@ -136,11 +139,10 @@ To abort the cherry-pick and cleanup:
             try:
                 subprocess.check_output(["git", "commit", "--amend", "-m",
                                          updated_commit_message],
-                                         stderr=subprocess.STDOUT)
+                                        stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as cpe:
                 click.echo("Failed to amend the commit message  \u2639")
                 click.echo(cpe.output)
-
 
     def push_to_remote(self, base_branch, head_branch):
         """ git push <origin> <branchname> """
@@ -197,17 +199,16 @@ To abort the cherry-pick and cleanup:
                     self.push_to_remote(maint_branch, cherry_pick_branch)
                     self.cleanup_branch(cherry_pick_branch)
                 else:
-                    click.echo(\
-f"""
-Finished cherry-pick {self.commit_sha1} into {cherry_pick_branch} \U0001F600
---no-push option used.
-... Stopping here.
-To continue and push the changes:
-    $ python -m cherry_picker --continue
-
-To abort the cherry-pick and cleanup:
-    $ python -m cherry_picker --abort
-""")
+                    click.echo(textwrap.dedent(f"""
+                        Finished cherry-pick {self.commit_sha1} into {cherry_pick_branch} \U0001F600
+                        --no-push option used.
+                        ... Stopping here.
+                        To continue and push the changes:
+                            $ python -m cherry_picker --continue
+                        
+                        To abort the cherry-pick and cleanup:
+                            $ python -m cherry_picker --abort
+                        """))
 
     def abort_cherry_pick(self):
         """
@@ -236,7 +237,9 @@ To abort the cherry-pick and cleanup:
             short_sha = cherry_pick_branch[cherry_pick_branch.index('-')+1:cherry_pick_branch.index(base)-1]
             full_sha = get_full_sha_from_short(short_sha)
             commit_message = self.get_commit_message(short_sha)
-            updated_commit_message = f'[{base}] {commit_message}. \n(cherry picked from commit {full_sha})'
+            updated_commit_message = textwrap.dedent(f"""
+                [{base}] {commit_message}.
+                (cherry picked from commit {full_sha})""")
             if self.dry_run:
                 click.echo(f"  dry-run: git commit -am '{updated_commit_message}' --allow-empty")
             else:
@@ -253,6 +256,7 @@ To abort the cherry-pick and cleanup:
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
+
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--dry-run', is_flag=True,
               help="Prints out the commands, but not executed.")
@@ -267,7 +271,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.option('--push/--no-push', 'push', is_flag=True, default=True,
               help="Changes won't be pushed to remote")
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
-                default = "")
+                default="")
 @click.argument('branches', 'The branches to backport to', nargs=-1)
 def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
                     commit_sha1, branches):
@@ -280,7 +284,7 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
         os.chdir(os.path.join(current_dir, 'cpython'))
 
     if dry_run:
-       click.echo("Dry run requested, listing expected command sequence")
+        click.echo("Dry run requested, listing expected command sequence")
 
     cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
                                  dry_run=dry_run,
