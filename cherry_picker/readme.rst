@@ -2,11 +2,9 @@ Usage::
    
    python -m cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
    
-Alternate Usage (from an existing cpython directory)::
+Alternate Usage (virtual env installation)::
 
-   python <path to cherry_picker.py> [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
-
-
+   /path/to/venv/bin/cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
 
 .. contents::
 
@@ -32,10 +30,10 @@ Requires Python 3.6.
 ::
 
     $ git clone https://github.com/python/core-workflow.git
-    $ cd core-workflow/cherry_picker
+    $ cd core-workflow
     $ python -m venv venv
     $ source venv/bin/activate
-    (venv) $ python -m pip install -r requirements.txt
+    (venv) $ python -m pip install --upgrade .
     (venv) $ git clone https://github.com/<username>/cpython.git  # your own cpython fork
     (venv) $ cd cpython
     (venv) $ git remote add upstream https://github.com/python/cpython.git
@@ -58,7 +56,7 @@ Cherry-picking :snake: :cherries: :pick:
 
 ::
 
-    (venv) $ python -m cherry_picker [--dry-run] [--abort/--continue] [--status] [--no-push] <commit_sha1> <branches>
+    (venv) $ cherry_picker [--dry-run] [--abort/--continue] [--status] [--no-push] <commit_sha1> <branches>
 
 
 Commit sha1
@@ -104,7 +102,7 @@ For example, to cherry-pick ``6de2b7817f-some-commit-sha1-d064`` into
 
 ::
 
-    (venv) $ python -m cherry_picker 6de2b7817f-some-commit-sha1-d064 3.5 3.6
+    (venv) $ cherry_picker 6de2b7817f-some-commit-sha1-d064 3.5 3.6
 
 
 What this will do:
@@ -133,21 +131,21 @@ In case of merge conflicts or errors, the following message will be displayed::
     ... Stopping here.
 
     To continue and resolve the conflict:
-        $ python -m cherry_picker --status  # to find out which files need attention
+        $ cherry_picker --status  # to find out which files need attention
         $ cd cpython
         # Fix the conflict
         $ cd ..
-        $ python -m cherry_picker --status  # should now say 'all conflict fixed'
-        $ python -m cherry_picker --continue
+        $ cherry_picker --status  # should now say 'all conflict fixed'
+        $ cherry_picker --continue
 
     To abort the cherry-pick and cleanup:
-        $ python -m cherry_picker --abort
+        $ cherry_picker --abort
 
 
 Passing the `--dry-run` option will cause the script to print out all the
 steps it would execute without actually executing any of them. For example::
 
-    $ python -m cherry_picker --dry-run --push pr 1e32a1be4a1705e34011770026cb64ada2d340b5 3.6 3.5
+    $ cherry_picker --dry-run --push pr 1e32a1be4a1705e34011770026cb64ada2d340b5 3.6 3.5
     Dry run requested, listing expected command sequence
     fetching upstream ...
     dry_run: git fetch origin
