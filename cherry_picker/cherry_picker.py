@@ -113,15 +113,13 @@ Failed to cherry-pick {self.commit_sha1} into {branch} \u2639
 ... Stopping here.
 
 To continue and resolve the conflict:
-    $ python -m cherry_picker --status  # to find out which files need attention
-    $ cd cpython
+    $ cherry_picker --status  # to find out which files need attention
     # Fix the conflict
-    $ cd ..
-    $ python -m cherry_picker --status  # should now say 'all conflict fixed'
-    $ python -m cherry_picker --continue
+    $ cherry_picker --status  # should now say 'all conflict fixed'
+    $ cherry_picker --continue
 
 To abort the cherry-pick and cleanup:
-    $ python -m cherry_picker --abort
+    $ cherry_picker --abort
 """
 
     def amend_commit_message(self, cherry_pick_branch):
@@ -203,10 +201,10 @@ Finished cherry-pick {self.commit_sha1} into {cherry_pick_branch} \U0001F600
 --no-push option used.
 ... Stopping here.
 To continue and push the changes:
-    $ python -m cherry_picker --continue
+    $ cherry_picker --continue
 
 To abort the cherry-pick and cleanup:
-    $ python -m cherry_picker --abort
+    $ cherry_picker --abort
 """)
 
     def abort_cherry_pick(self):
