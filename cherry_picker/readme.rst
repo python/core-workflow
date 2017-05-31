@@ -1,4 +1,4 @@
-Usage::
+Usage (from a cloned CPython directory) ::
    
    cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
    
