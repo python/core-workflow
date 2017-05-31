@@ -1,19 +1,14 @@
-Usage::
+Usage (from a cloned CPython directory) ::
    
-   python -m cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
+   cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
    
-Alternate Usage (from an existing cpython directory)::
-
-   python <path to cherry_picker.py> [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
-
-
 
 .. contents::
 
 About
 =====
 
-Use this to backport cpython changes from ``master`` into one or more of the
+Use this to backport CPython changes from ``master`` into one or more of the
 maintenance branches (``3.6``, ``3.5``, ``2.7``).
 
 It will prefix the commit message with the branch, e.g. ``[3.6]``, and then
@@ -32,14 +27,15 @@ Requires Python 3.6.
 ::
 
     $ git clone https://github.com/python/core-workflow.git
-    $ cd core-workflow/cherry_picker
-    $ python -m venv venv
+    $ cd core-workflow
+    $ python3 -m venv venv
     $ source venv/bin/activate
-    (venv) $ python -m pip install -r requirements.txt
-    (venv) $ git clone https://github.com/<username>/cpython.git  # your own cpython fork
-    (venv) $ cd cpython
-    (venv) $ git remote add upstream https://github.com/python/cpython.git
-    (venv) $ cd ../
+    (venv) $ python -m pip install --upgrade .
+
+Specify an `upstream` remote in the cloned CPython repository::
+
+   $ git remote add upstream https://github.com/python/cpython.git
+
 
 The cherry picking script assumes that if an `upstream` remote is defined, then
 it should be used as the source of upstream changes and as the base for
@@ -56,9 +52,11 @@ Cherry-picking :snake: :cherries: :pick:
 
 (Setup first! See prev section)
 
+From the cloned CPython directory:
+
 ::
 
-    (venv) $ python -m cherry_picker [--dry-run] [--abort/--continue] [--status] [--no-push] <commit_sha1> <branches>
+    (venv) $ cherry_picker [--dry-run] [--abort/--continue] [--status] [--no-push] <commit_sha1> <branches>
 
 
 Commit sha1
@@ -93,26 +91,25 @@ Additional options::
 Demo
 ----
 
-https://asciinema.org/a/dtayqmjvd5hy5389oubkdk323
+https://asciinema.org/a/122815
 
 
 Example
 -------
 
 For example, to cherry-pick ``6de2b7817f-some-commit-sha1-d064`` into
-``3.5`` and ``3.6``:
+``3.5`` and ``3.6``, run the following command from the cloned CPython
+directory:
 
 ::
 
-    (venv) $ python -m cherry_picker 6de2b7817f-some-commit-sha1-d064 3.5 3.6
+    (venv) $ cherry_picker 6de2b7817f-some-commit-sha1-d064 3.5 3.6
 
 
 What this will do:
 
 ::
 
-    (venv) $ cd cpython
-    
     (venv) $ git fetch upstream
     
     (venv) $ git checkout -b backport-6de2b78-3.5 upstream/3.5
@@ -133,21 +130,19 @@ In case of merge conflicts or errors, the following message will be displayed::
     ... Stopping here.
 
     To continue and resolve the conflict:
-        $ python -m cherry_picker --status  # to find out which files need attention
-        $ cd cpython
+        $ cherry_picker --status  # to find out which files need attention
         # Fix the conflict
-        $ cd ..
-        $ python -m cherry_picker --status  # should now say 'all conflict fixed'
-        $ python -m cherry_picker --continue
+        $ cherry_picker --status  # should now say 'all conflict fixed'
+        $ cherry_picker --continue
 
     To abort the cherry-pick and cleanup:
-        $ python -m cherry_picker --abort
+        $ cherry_picker --abort
 
 
 Passing the `--dry-run` option will cause the script to print out all the
 steps it would execute without actually executing any of them. For example::
 
-    $ python -m cherry_picker --dry-run --push pr 1e32a1be4a1705e34011770026cb64ada2d340b5 3.6 3.5
+    $ cherry_picker --dry-run --push pr 1e32a1be4a1705e34011770026cb64ada2d340b5 3.6 3.5
     Dry run requested, listing expected command sequence
     fetching upstream ...
     dry_run: git fetch origin
