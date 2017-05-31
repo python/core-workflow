@@ -17,6 +17,8 @@ setup(
     url='https://github.com/python/core-workflow',
     author='Mariatta Wijaya',
     author_email='mariatta.wijaya@gmail.com',
+    maintainer='Python Core Developers',
+    maintainer_email='core-workflow@mail.python.org',
     packages=[
         'cherry_picker',
     ],
