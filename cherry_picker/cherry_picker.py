@@ -42,10 +42,10 @@ class CherryPicker:
         raw_result = subprocess.check_output(cmd.split(),
                                              stderr=subprocess.STDOUT)
         result = raw_result.decode('utf-8')
-        username_end = result.index('/cpython.git')
-        if result.startswith("https"):
-            username = result[len("https://github.com/"):username_end]
+        if result.startswith(("https://", "ssh://")):
+            proto,_, domain, username, *_ = result.split('/')
         else:
+            username_end = result.index('/cpython.git')
             username = result[len("git@github.com:"):username_end]
         return username
 
@@ -254,7 +254,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--dry-run', is_flag=True,
               help="Prints out the commands, but not executed.")
-@click.option('--push', 'pr_remote', metavar='REMOTE',
+@click.option('--remote', 'pr_remote', metavar='REMOTE',
               help='git remote to use for PR branches', default='origin')
 @click.option('--abort', 'abort', flag_value=True, default=None,
               help="Abort current cherry-pick and clean up branch")
@@ -269,7 +269,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.argument('branches', 'The branches to backport to', nargs=-1)
 def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
                     commit_sha1, branches):
-
+    
     click.echo("\U0001F40D \U0001F352 \u26CF")
     current_dir = os.getcwd()
     pyconfig_path = os.path.join(current_dir, 'pyconfig.h.in')
@@ -278,7 +278,7 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
         os.chdir(os.path.join(current_dir, 'cpython'))
 
     if dry_run:
-       click.echo("Dry run requested, listing expected command sequence")
+        click.echo("Dry run requested, listing expected command sequence")
 
     cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
                                  dry_run=dry_run,
