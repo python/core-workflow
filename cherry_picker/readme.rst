@@ -1,6 +1,6 @@
 Usage (from a cloned CPython directory) ::
    
-   cherry_picker [--pr-remote REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
+   cherry_picker [--pr-remote REMOTE] [--dry-run] [--status] [--abort/--continue] [--push/--no-push] <commit_sha1> <branches>
    
 
 .. contents::
@@ -57,7 +57,7 @@ From the cloned CPython directory:
 
 ::
 
-    (venv) $ cherry_picker [--dry-run] [--abort/--continue] [--status] [--no-push] <commit_sha1> <branches>
+    (venv) $ cherry_picker [--pr-remote REMOTE] [--dry-run] [--abort/--continue] [--status] [--push/--no-push] <commit_sha1> <branches>
 
 
 Commit sha1

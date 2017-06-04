@@ -42,10 +42,10 @@ class CherryPicker:
         raw_result = subprocess.check_output(cmd.split(),
                                              stderr=subprocess.STDOUT)
         result = raw_result.decode('utf-8')
-        username_end = result.index('/cpython.git')
-        if result.startswith("https"):
-            username = result[len("https://github.com/"):username_end]
+        if result.startswith(("https://", "ssh://")):
+            proto,_, domain, username, *_ = result.split('/')
         else:
+            username_end = result.index('/cpython.git')
             username = result[len("git@github.com:"):username_end]
         return username
 
@@ -278,7 +278,7 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
         os.chdir(os.path.join(current_dir, 'cpython'))
 
     if dry_run:
-       click.echo("Dry run requested, listing expected command sequence")
+        click.echo("Dry run requested, listing expected command sequence")
 
     cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
                                  dry_run=dry_run,
