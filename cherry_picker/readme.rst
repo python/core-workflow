@@ -1,6 +1,6 @@
 Usage (from a cloned CPython directory) ::
    
-   cherry_picker [--push REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
+   cherry_picker [--pr-remote REMOTE] [--dry-run] [--status] [--abort/--continue] [--no-push] <commit_sha1> <branches>
    
 
 .. contents::
@@ -44,8 +44,8 @@ cherry-pick branches. Otherwise, `origin` is used for that purpose.
 
 By default, the PR branches used to submit pull requests back to the main
 repository are pushed to `origin`. If this is incorrect, then the correct
-remote will need be specified using the ``--push`` option (e.g.
-``--push pr`` to use a remote named ``pr``).
+remote will need be specified using the ``--pr-remote`` option (e.g.
+``--pr-remote pr`` to use a remote named ``pr``).
 
 
 Cherry-picking :snake: :cherries: :pick:
@@ -78,9 +78,9 @@ Options
 
 ::
 
-    -- dry-run      Dry Run Mode.  Prints out the commands, but not executed.
-    -- push REMOTE  Specify the git remote to push into.  Default is 'origin'.
-    -- status       Do `git status` in cpython directory.
+    -- dry-run           Dry Run Mode.  Prints out the commands, but not executed.
+    -- pr-remote REMOTE  Specify the git remote to push into.  Default is 'origin'.
+    -- status            Do `git status` in cpython directory.
 
 
 Additional options::
@@ -143,7 +143,7 @@ In case of merge conflicts or errors, the following message will be displayed::
 Passing the `--dry-run` option will cause the script to print out all the
 steps it would execute without actually executing any of them. For example::
 
-    $ cherry_picker --dry-run --push pr 1e32a1be4a1705e34011770026cb64ada2d340b5 3.6 3.5
+    $ cherry_picker --dry-run --pr-remote pr 1e32a1be4a1705e34011770026cb64ada2d340b5 3.6 3.5
     Dry run requested, listing expected command sequence
     fetching upstream ...
     dry_run: git fetch origin
@@ -161,6 +161,12 @@ steps it would execute without actually executing any of them. For example::
     dry_run: Create new PR: https://github.com/python/cpython/compare/3.5...ncoghlan:backport-1e32a1b-3.5?expand=1
     dry_run: git checkout master
     dry_run: git branch -D backport-1e32a1b-3.5
+
+`--pr-remote` option
+-----------------
+
+This will generate pull requests through a remote other than ``origin``
+(e.g. ``pr``)
 
 
 `--status` option

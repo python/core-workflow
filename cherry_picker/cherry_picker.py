@@ -254,7 +254,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option('--dry-run', is_flag=True,
               help="Prints out the commands, but not executed.")
-@click.option('--push', 'pr_remote', metavar='REMOTE',
+@click.option('--pr-remote', 'pr_remote', metavar='REMOTE',
               help='git remote to use for PR branches', default='origin')
 @click.option('--abort', 'abort', flag_value=True, default=None,
               help="Abort current cherry-pick and clean up branch")
