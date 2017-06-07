@@ -245,6 +245,9 @@ To abort the cherry-pick and cleanup:
 
             self.cleanup_branch(cherry_pick_branch)
 
+            click.echo("\nBackport PR:\n")
+            click.echo(updated_commit_message)
+
         else:
             click.echo(u"Currently in `master` branch.  Will not continue. \U0001F61B")
 
