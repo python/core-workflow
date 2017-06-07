@@ -5,5 +5,6 @@ Issue tracker for CPython's workflow
 
 ## cherry_picker  :snake: :cherries: :pick:
 Utility script for backporting/cherry-picking CPython changes from ``master``
-into one of the maintenance branches.  See readme.rst inside cherry_picker
+into one of the maintenance branches.  See the
+[cherry_picker](https://github.com/python/core-workflow/tree/master/cherry_picker)
 directory for more details.
