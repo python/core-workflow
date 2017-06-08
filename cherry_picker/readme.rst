@@ -28,6 +28,7 @@ Requires Python 3.6.
 
     $ python3 -m venv venv
     $ source venv/bin/activate
+    (venv) $ python -m pip install wheel
     (venv) $ python -m pip install --upgrade git+https://github.com/python/core-workflow
 
 Specify an `upstream` remote in the cloned CPython repository::
