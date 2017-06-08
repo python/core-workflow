@@ -175,7 +175,7 @@ To abort the cherry-pick and cleanup:
 
     def backport(self):
         if not self.branches:
-            raise ValueError("At least one branch must be specified.")
+            raise click.UsageError("At least one branch must be specified.")
         self.fetch_upstream()
 
         for maint_branch in self.sorted_branches:
