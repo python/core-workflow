@@ -1,5 +1,7 @@
 from unittest import mock
 
+import pytest
+
 from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, CherryPicker
 
@@ -69,26 +71,20 @@ def test_get_pr_url(subprocess_check_output, os_path_exists):
            == "https://github.com/python/cpython/compare/3.6...mock_user:backport-22a594a-3.6?expand=1"
 
 
-@mock.patch('os.path.exists')
-@mock.patch('subprocess.check_output')
-def test_username_ssh(subprocess_check_output, os_path_exists):
-    os_path_exists.return_value = True
-    subprocess_check_output.return_value = b'git@github.com:mock_user/cpython.git'
-    branches = ["3.6"]
-    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                      branches)
-    assert cp.username == 'mock_user'
-
-
-@mock.patch('os.path.exists')
-@mock.patch('subprocess.check_output')
-def test_username_https(subprocess_check_output, os_path_exists):
-    os_path_exists.return_value = True
-    subprocess_check_output.return_value = b'https://github.com/mock_user/cpython.git'
-    branches = ["3.6"]
-    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                      branches)
-    assert cp.username == 'mock_user'
+@pytest.mark.parametrize('url', [
+    b'git@github.com:mock_user/cpython.git',
+    b'git@github.com:mock_user/cpython',
+    b'ssh://git@github.com/mock_user/cpython.git',
+    b'ssh://git@github.com/mock_user/cpython',
+    b'https://github.com/mock_user/cpython.git',
+    b'https://github.com/mock_user/cpython',
+    ])
+def test_username(url):
+    with mock.patch('subprocess.check_output', return_value=url):
+        branches = ["3.6"]
+        cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
+                          branches)
+        assert cp.username == 'mock_user'
 
 
 @mock.patch('os.path.exists')

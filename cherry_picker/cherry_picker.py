@@ -42,11 +42,8 @@ class CherryPicker:
         raw_result = subprocess.check_output(cmd.split(),
                                              stderr=subprocess.STDOUT)
         result = raw_result.decode('utf-8')
-        if result.startswith(("https://", "ssh://")):
-            proto,_, domain, username, *_ = result.split('/')
-        else:
-            username_end = result.index('/cpython.git')
-            username = result[len("git@github.com:"):username_end]
+        # implicit ssh URIs use : to separate host from user, others just use /
+        username = result.replace(':', '/').split('/')[-2]
         return username
 
     def get_cherry_pick_branch(self, maint_branch):
