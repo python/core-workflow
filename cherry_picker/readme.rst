@@ -140,7 +140,7 @@ In case of merge conflicts or errors, the following message will be displayed::
         $ cherry_picker --abort
 
 
-Passing the `--dry-run` option will cause the script to print out all the
+Passing the ``--dry-run`` option will cause the script to print out all the
 steps it would execute without actually executing any of them. For example::
 
     $ cherry_picker --dry-run --pr-remote pr 1e32a1be4a1705e34011770026cb64ada2d340b5 3.6 3.5
