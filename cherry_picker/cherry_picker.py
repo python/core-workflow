@@ -224,8 +224,7 @@ To abort the cherry-pick and cleanup:
         clean up branch
         """
         cherry_pick_branch = get_current_branch()
-
-        if cherry_pick_branch != 'master':
+        if cherry_pick_branch.startswith('backport-'):
             # amend the commit message, prefix with [X.Y]
             base = get_base_branch(cherry_pick_branch)
             short_sha = cherry_pick_branch[cherry_pick_branch.index('-')+1:cherry_pick_branch.index(base)-1]
@@ -246,7 +245,7 @@ To abort the cherry-pick and cleanup:
             click.echo(updated_commit_message)
 
         else:
-            click.echo(u"Currently in `master` branch.  Will not continue. \U0001F61B")
+            click.echo(f"Current branch ({cherry_pick_branch}) is not a backport branch.  Will not continue. \U0001F61B")
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -308,7 +307,7 @@ def get_current_branch():
     """
     Return the current branch
     """
-    cmd = "git symbolic-ref HEAD | sed 's!refs\/heads\/!!'"
+    cmd = "git rev-parse --abbrev-ref HEAD"
     output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
     return output.strip().decode('utf-8')
 
