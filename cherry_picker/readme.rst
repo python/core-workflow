@@ -48,8 +48,8 @@ remote will need be specified using the ``--pr-remote`` option (e.g.
 ``--pr-remote pr`` to use a remote named ``pr``).
 
 
-Cherry-picking :snake: :cherries: :pick:
-==============
+Cherry-picking 🐍🍒⛏️
+=====================
 
 (Setup first! See prev section)
 
@@ -163,7 +163,7 @@ steps it would execute without actually executing any of them. For example::
     dry_run: git branch -D backport-1e32a1b-3.5
 
 `--pr-remote` option
------------------
+--------------------
 
 This will generate pull requests through a remote other than ``origin``
 (e.g. ``pr``)
