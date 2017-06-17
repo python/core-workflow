@@ -1,2 +1,3 @@
-# Include the readme file
+# Include the readme and requirements files
 include cherry_picker/readme.rst
+include cherry_picker/requirements.txt
