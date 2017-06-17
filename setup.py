@@ -19,7 +19,7 @@ setup(
     author_email='mariatta.wijaya@gmail.com',
     maintainer='Python Core Developers',
     maintainer_email='core-workflow@mail.python.org',
-    version='0.0.1',
+    version='0.0.3',
     packages=[
         'cherry_picker',
     ],
