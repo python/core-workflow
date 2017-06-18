@@ -207,10 +207,10 @@ The url of the pull request page looks similar to the following::
    https://github.com/python/cpython/compare/3.5...<username>:backport-6de2b78-3.5?expand=1
 
 
-1. Press the ``Create Pull Request`` button.
+Press the ``Create Pull Request`` button.
 
-2. Remove the ``needs backport to ...`` label from the original pull request
-   against ``master``.
+Bedevere will then remove the ``needs backport to ...`` label from the original
+pull request against ``master``.
 
 
 Running Tests
