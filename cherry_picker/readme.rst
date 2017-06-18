@@ -1,7 +1,15 @@
 Usage (from a cloned CPython directory) ::
    
    cherry_picker [--pr-remote REMOTE] [--dry-run] [--status] [--abort/--continue] [--push/--no-push] <commit_sha1> <branches>
-   
+
+|version status|
+|travis status|
+
+
+.. image:: https://badge.fury.io/py/cherry-picker.svg
+    :target: https://badge.fury.io/py/cherry-picker
+
+
 
 .. contents::
 
