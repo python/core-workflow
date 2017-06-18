@@ -4,6 +4,7 @@ Usage (from a cloned CPython directory) ::
 
 |pyversion status|
 |pypi status|
+|travis status|
 
 .. contents::
 
@@ -229,3 +230,6 @@ Install pytest: ``pip install -U pytest``
    
 .. |pypi status| image:: https://img.shields.io/pypi/v/cherry-picker.svg
    :target: https://pypi.python.org/pypi/cherry-picker 
+
+.. |travis status| image:: https://travis-ci.org/python/core-workflow.png?branch=master
+   :target: https://travis-ci.org/python/core-workflow
