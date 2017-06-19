@@ -31,14 +31,21 @@ Requires Python 3.6.
     $ source venv/bin/activate
     (venv) $ python -m pip install cherry_picker
 
-Ensure that an ``upstream`` remote is specified in the cloned CPython repository::
-
-   $ git remote add upstream https://github.com/python/cpython.git
-
-
 The cherry picking script assumes that if an ``upstream`` remote is defined, then
 it should be used as the source of upstream changes and as the base for
 cherry-pick branches. Otherwise, ``origin`` is used for that purpose.
+
+Verify that an ``upstream`` remote is set to the CPython repository::
+
+    $ git remote -v
+    ...
+    upstream	https://github.com/python/cpython (fetch)
+    upstream	https://github.com/python/cpython (push)
+
+If needed, create the ``upstream`` remote::
+
+    $ git remote add upstream https://github.com/python/cpython.git
+
 
 By default, the PR branches used to submit pull requests back to the main
 repository are pushed to ``origin``. If this is incorrect, then the correct
