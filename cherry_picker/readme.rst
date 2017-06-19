@@ -90,9 +90,9 @@ Additional options::
 Demo
 ----
 
-- How to install: https://asciinema.org/a/125254
+- Installation: https://asciinema.org/a/125254
 
-- How to backport: https://asciinema.org/a/125256
+- Backport: https://asciinema.org/a/125256
 
 
 Example
