@@ -17,8 +17,6 @@ maintenance branches (``3.6``, ``3.5``, ``2.7``).
 It will prefix the commit message with the branch, e.g. ``[3.6]``, and then
 opens up the pull request page.
 
-This script will become obsolete once the cherry-picking bot is implemented.
-
 Tests are to be written using pytest.
 
 
@@ -29,24 +27,21 @@ Requires Python 3.6.
 
 ::
 
-    $ git clone https://github.com/python/core-workflow.git
-    $ cd core-workflow
     $ python3 -m venv venv
     $ source venv/bin/activate
-    (venv) $ python -m pip install wheel
-    (venv) $ python -m pip install --upgrade .
+    (venv) $ python -m pip install cherry_picker
 
-Specify an `upstream` remote in the cloned CPython repository::
+Ensure that an ``upstream`` remote is specified in the cloned CPython repository::
 
    $ git remote add upstream https://github.com/python/cpython.git
 
 
-The cherry picking script assumes that if an `upstream` remote is defined, then
+The cherry picking script assumes that if an ``upstream`` remote is defined, then
 it should be used as the source of upstream changes and as the base for
-cherry-pick branches. Otherwise, `origin` is used for that purpose.
+cherry-pick branches. Otherwise, ``origin`` is used for that purpose.
 
 By default, the PR branches used to submit pull requests back to the main
-repository are pushed to `origin`. If this is incorrect, then the correct
+repository are pushed to ``origin``. If this is incorrect, then the correct
 remote will need be specified using the ``--pr-remote`` option (e.g.
 ``--pr-remote pr`` to use a remote named ``pr``).
 
@@ -95,7 +90,9 @@ Additional options::
 Demo
 ----
 
-https://asciinema.org/a/122815
+- How to install: https://asciinema.org/a/125254
+
+- How to backport: https://asciinema.org/a/125256
 
 
 Example
@@ -175,7 +172,7 @@ This will generate pull requests through a remote other than ``origin``
 `--status` option
 -----------------
 
-This will do `git status` for the CPython directory.
+This will do ``git status`` for the CPython directory.
 
 `--abort` option
 ----------------
@@ -185,8 +182,8 @@ Cancels the current cherry-pick and cleans up the cherry-pick branch.
 `--continue` option
 -------------------
 
-Continues the current cherry-pick, commits, pushes the current branch to origin,
-opens the PR page, and cleans up the branch.
+Continues the current cherry-pick, commits, pushes the current branch to
+``origin``, opens the PR page, and cleans up the branch.
 
 `--no-push` option
 ------------------
