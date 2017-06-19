@@ -29,12 +29,10 @@ Requires Python 3.6.
 
 ::
 
-    $ git clone https://github.com/python/core-workflow.git
-    $ cd core-workflow
     $ python3 -m venv venv
     $ source venv/bin/activate
     (venv) $ python -m pip install wheel
-    (venv) $ python -m pip install --upgrade .
+    (venv) $ python -m pip install --upgrade git+https://github.com/python/core-workflow
 
 Specify an `upstream` remote in the cloned CPython repository::
 
