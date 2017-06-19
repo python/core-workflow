@@ -1,7 +1,10 @@
 Usage (from a cloned CPython directory) ::
    
    cherry_picker [--pr-remote REMOTE] [--dry-run] [--status] [--abort/--continue] [--push/--no-push] <commit_sha1> <branches>
-   
+
+|pyversion status|
+|pypi status|
+|travis status|
 
 .. contents::
 
@@ -221,3 +224,12 @@ Install pytest: ``pip install -U pytest``
 ::
 
     $ pytest test.py
+
+.. |pyversion status| image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
+   :target: https://pypi.python.org/pypi/cherry-picker
+   
+.. |pypi status| image:: https://img.shields.io/pypi/v/cherry-picker.svg
+   :target: https://pypi.python.org/pypi/cherry-picker 
+
+.. |travis status| image:: https://travis-ci.org/python/core-workflow.png?branch=master
+   :target: https://travis-ci.org/python/core-workflow
