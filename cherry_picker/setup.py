@@ -1,11 +1,11 @@
 from setuptools import setup
 
 
-with open('readme.rst') as f:
+with open('cherry_picker/readme.rst') as f:
     long_description = f.read()
 
 
-with open('requirements.txt') as f:
+with open('cherry_picker/requirements.txt') as f:
     requirements = [l.strip() for l in f.read().split('\n')]
 
 
@@ -25,7 +25,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'cherry_picker = cherry_picker:cherry_pick_cli',
+            'cherry_picker = cherry_picker.cherry_picker:cherry_pick_cli',
         ],
     },
     classifiers=[
