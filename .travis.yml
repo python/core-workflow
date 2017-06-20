@@ -6,6 +6,6 @@ sudo: false
 cache: pip
 
 install:
-    - pip install -r cherry_picker/requirements.txt
+    - pip install -r cherry_picker/cherry_picker/requirements.txt
 script:
-    - pytest cherry_picker/test.py -v
+    - pytest cherry_picker/cherry_picker/test.py -v
