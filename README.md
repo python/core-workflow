@@ -12,3 +12,7 @@ Utility script for backporting/cherry-picking CPython changes from ``master``
 into one of the maintenance branches.  See the
 [cherry_picker](https://github.com/python/core-workflow/tree/master/cherry_picker)
 directory for more details.
+
+## blurb
+
+Interactive utility for writing CPython ``Misc/NEWS`` entries.

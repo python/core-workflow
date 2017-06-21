@@ -1,31 +1,29 @@
 from setuptools import setup
 
 
-with open('cherry_picker/readme.rst') as f:
-    long_description = f.read()
-
-
 with open('cherry_picker/requirements.txt') as f:
     requirements = [l.strip() for l in f.read().split('\n')]
 
+description = "Tools for working with CPython's new core development workflow."
 
 setup(
-    name='cherry_picker',
-    description='backport cpython changes from master to maintenance branches',
-    long_description=long_description,
+    name='core-workflow',
+    description=description,
+    long_description=description,
     license='Apache',
     url='https://github.com/python/core-workflow',
-    author='Mariatta Wijaya',
-    author_email='mariatta.wijaya@gmail.com',
+    author='Python Core Developers',
+    author_email='core-workflow@mail.python.org',
     maintainer='Python Core Developers',
     maintainer_email='core-workflow@mail.python.org',
-    version='0.0.2.post1',
+    version='0.0.3',
     packages=[
         'cherry_picker',
     ],
     entry_points={
         'console_scripts': [
             'cherry_picker = cherry_picker.cherry_picker:cherry_pick_cli',
+            'blurb = blurb:main',
         ],
     },
     classifiers=[
