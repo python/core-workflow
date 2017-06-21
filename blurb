@@ -996,7 +996,7 @@ Creates and populates the Misc/NEWS.d directory tree.
         safe_mkdir(dir_path)
         readme_path = f"NEWS.d/next/{dir_name}/README.txt"
         with open(readme_path, "wt", encoding="utf-8") as f:
-            f.write("Put news entry 'blurb' files for the {section} section here.")
+            f.write(f"Put news entry 'blurb' files for the {section} section here.\n")
         git_add_files.append(dir_path)
         git_add_files.append(readme_path)
     flush_git_add_files()

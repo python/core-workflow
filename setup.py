@@ -23,9 +23,11 @@ setup(
     entry_points={
         'console_scripts': [
             'cherry_picker = cherry_picker.cherry_picker:cherry_pick_cli',
-            'blurb = blurb:main',
         ],
     },
+    scripts=[
+        'blurb',
+    ],
     classifiers=[
         'Programming Language :: Python :: 3.6',
         'Intended Audience :: Developers',
