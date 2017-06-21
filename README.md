@@ -10,7 +10,7 @@ Issue tracker for CPython's workflow
 
 Utility script for backporting/cherry-picking CPython changes from ``master``
 into one of the maintenance branches.  See the
-[cherry_picker](https://github.com/python/core-workflow/tree/master/cherry_picker/)
+[cherry_picker](https://github.com/python/core-workflow/tree/master/cherry_picker)
 directory for more details.
 
 ## blurb
