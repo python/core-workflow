@@ -1,11 +1,11 @@
 from setuptools import setup
 
 
-with open('cherry_picker/readme.rst') as f:
+with open('readme.rst') as f:
     long_description = f.read()
 
 
-with open('cherry_picker/requirements.txt') as f:
+with open('requirements.txt') as f:
     requirements = [l.strip() for l in f.read().split('\n')]
 
 
