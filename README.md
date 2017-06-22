@@ -7,6 +7,7 @@ Issue tracker for CPython's workflow
 
 [![PyVersion Status](https://img.shields.io/pypi/pyversions/cherry-picker.svg)](https://pypi.org/project/cherry-picker/)
 [![PyPI Status](https://img.shields.io/pypi/v/cherry-picker.svg)](https://pypi.org/project/cherry-picker/)
+[![License](https://img.shields.io/pypi/l/cherry-picker.svg)](https://github.com/python/core-workflow/blob/master/LICENSE/)
 
 Utility script for backporting/cherry-picking CPython changes from ``master``
 into one of the maintenance branches.  See the
