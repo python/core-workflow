@@ -5,7 +5,7 @@ Issue tracker for CPython's workflow
 
 ## cherry_picker  :snake: :cherries: :pick:
 
-[![PyVersion Status](https://img.shields.io/pypi/pyversions/cherry-picker.svg)](https://img.shields.io/pypi/v/cherry-picker.svg)](https://pypi.org/project/cherry-picker/)
+[![PyVersion Status](https://img.shields.io/pypi/pyversions/cherry-picker.svg)](https://pypi.org/project/cherry-picker/)
 [![PyPI Status](https://img.shields.io/pypi/v/cherry-picker.svg)](https://pypi.org/project/cherry-picker/)
 
 Utility script for backporting/cherry-picking CPython changes from ``master``
