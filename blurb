@@ -77,6 +77,7 @@ template = """
 # Uncomment one of these "section:" lines to specify which section
 # this entry should go in in Misc/NEWS.
 #
+#.. section: Security
 #.. section: Core and Builtins
 #.. section: Library
 #.. section: Documentation
@@ -119,19 +120,34 @@ def unsanitize_section(section):
     return _unsanitize_section.get(section, section)
 
 
-def textwrap_body(body):
+def textwrap_body(body, *, subsequent_indent=''):
     """
     Accepts either a string or an iterable of strings.
     (Iterable is assumed to be individual lines.)
     Returns a string.
     """
-
     if isinstance(body, str):
         text = body
     else:
         text = "\n".join(body).rstrip()
-    body = textwrap.wrap(text, width=76)
-    text = "\n".join(body).rstrip()
+
+    # textwrap merges paragraphs, ARGH
+    # step 1: remove trailing whitespace from individual lines
+    #   (this means that empty lines will just have \n, no invisible whitespace)
+    lines = []
+    for line in text.split("\n"):
+        lines.append(line.rstrip())
+    text = "\n".join(lines)
+    paragraphs = text.split("\n\n")
+    paragraphs2 = []
+    kwargs = {}
+    if subsequent_indent:
+        kwargs['subsequent_indent'] = subsequent_indent
+    for paragraph in paragraphs:
+        paragraphs2.append("\n".join(textwrap.wrap(paragraph.strip(), width=76, **kwargs)).rstrip())
+        if subsequent_indent:
+            kwargs['initial_indent'] = subsequent_indent
+    text = "\n\n".join(paragraphs2).rstrip()
     if not text.endswith("\n"):
         text += "\n"
     return text
@@ -480,7 +496,7 @@ Returns a dict.
         assert section in sections, f"Unknown section {section}"
 
         fields = [x.strip() for x in filename.split(".")]
-        assert len(fields) >= 4
+        assert len(fields) >= 4, f"Can't parse 'next' filename! filename {filename!r} fields {fields}"
         assert fields[-1] == "rst"
 
         metadata = {"date": fields[0], "nonce": fields[-2], "section": section}
@@ -909,7 +925,7 @@ Python News
         blurbs = Blurbs()
         if version == "next":
             for filename in filenames:
-                if not filename.endswith(".rst"):
+                if os.path.basename(filename) == "README.rst":
                     continue
                 blurbs.load_next(filename)
             if not blurbs:
@@ -950,9 +966,9 @@ Python News
             bpo = metadata['bpo']
             if int(bpo):
                 body = "bpo-" + bpo + ": " + body
-            lines = textwrap.wrap(body, 76)
-            body = "- " + "\n  ".join(lines) + "\n"
-            print(body)
+            body = "- " + body
+            text = textwrap_body(body, subsequent_indent='  ')
+            print(text)
     print()
     print("**(For information about older versions, consult the HISTORY file.)**")
     news.close()
@@ -994,9 +1010,9 @@ Creates and populates the Misc/NEWS.d directory tree.
         dir_name = sanitize_section(section)
         dir_path = f"NEWS.d/next/{dir_name}"
         safe_mkdir(dir_path)
-        readme_path = f"NEWS.d/next/{dir_name}/README.txt"
+        readme_path = f"NEWS.d/next/{dir_name}/README.rst"
         with open(readme_path, "wt", encoding="utf-8") as f:
-            f.write(f"Put news entry 'blurb' files for the {section} section here.\n")
+            f.write(f"Put news entry ``blurb`` files for the *{section}* section in this directory.\n")
         git_add_files.append(dir_path)
         git_add_files.append(readme_path)
     flush_git_add_files()
@@ -1109,8 +1125,10 @@ Also runs "blurb populate" for you.
                     assert no_changes
                 metadata["nonce"] = nonceify(body)
                 if security:
-                    metadata["security"] = "True"
-                    security = None
+                    # retroactively change section to "Security"
+                    assert section
+                    metadata["original section"] = metadata["section"]
+                    metadata["section"] = "Security"
 
                 if release_date is not None:
                     assert not len(blurbs)
@@ -1394,14 +1412,13 @@ def main():
     args = sys.argv[1:]
 
     if not args:
-        subcommand = "add"
-    else:
+        args = ["add"]
+    elif args[0] == "-h":
         # slight hack
-        if args[0] == "-h":
-            args[0] = "help"
+        args[0] = "help"
 
-        subcommand = args[0]
-        args = args[1:]
+    subcommand = args[0]
+    args = args[1:]
 
     fn = get_subcommand(subcommand)
 
