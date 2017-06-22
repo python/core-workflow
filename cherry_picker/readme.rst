@@ -230,10 +230,10 @@ Install pytest: ``pip install -U pytest``
     $ pytest test.py
 
 .. |pyversion status| image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
-   :target: https://pypi.python.org/pypi/cherry-picker
+   :target: https://pypi.org/project/cherry-picker/
    
 .. |pypi status| image:: https://img.shields.io/pypi/v/cherry-picker.svg
-   :target: https://pypi.python.org/pypi/cherry-picker 
+   :target: https://pypi.org/project/cherry-picker/
 
 .. |travis status| image:: https://travis-ci.org/python/core-workflow.png?branch=master
    :target: https://travis-ci.org/python/core-workflow
