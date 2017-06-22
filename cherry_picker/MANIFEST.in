@@ -1,0 +1,3 @@
+# Include the readme and requirements files
+include readme.rst
+include requirements.txt
