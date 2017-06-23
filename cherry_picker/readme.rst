@@ -1,5 +1,5 @@
 Usage (from a cloned CPython directory) ::
-   
+
    cherry_picker [--pr-remote REMOTE] [--dry-run] [--status] [--abort/--continue] [--push/--no-push] <commit_sha1> <branches>
 
 |pyversion status|
@@ -120,15 +120,15 @@ What this will do:
 ::
 
     (venv) $ git fetch upstream
-    
+
     (venv) $ git checkout -b backport-6de2b78-3.5 upstream/3.5
-    (venv) $ git cherry-pick -x 6de2b7817f-some-commit-sha1-d064 
+    (venv) $ git cherry-pick -x 6de2b7817f-some-commit-sha1-d064
     (venv) $ git push origin backport-6de2b78-3.5
     (venv) $ git checkout master
     (venv) $ git branch -D backport-6de2b78-3.5
-    
+
     (venv) $ git checkout -b backport-6de2b78-3.6 upstream/3.6
-    (venv) $ git cherry-pick -x 6de2b7817f-some-commit-sha1-d064 
+    (venv) $ git cherry-pick -x 6de2b7817f-some-commit-sha1-d064
     (venv) $ git push origin backport-6de2b78-3.6
     (venv) $ git checkout master
     (venv) $ git branch -D backport-6de2b78-3.6
@@ -232,11 +232,11 @@ Install pytest: ``pip install -U pytest``
 
 .. |pyversion status| image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
    :target: https://pypi.org/project/cherry-picker/
-   
+
 .. |pypi status| image:: https://img.shields.io/pypi/v/cherry-picker.svg
    :target: https://pypi.org/project/cherry-picker/
 
-.. |travis status| image:: https://travis-ci.org/python/core-workflow.png?branch=master
+.. |travis status| image:: https://travis-ci.org/python/core-workflow.svg?branch=master
    :target: https://travis-ci.org/python/core-workflow
 
 .. |license status| image:: https://img.shields.io/pypi/l/cherry-picker.svg
