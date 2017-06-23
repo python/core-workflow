@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ommand-line tool to manage CPython Misc/NEWS.d entries."""
+"""Command-line tool to manage CPython Misc/NEWS.d entries."""
 __version__ = "1.0.0.dev1"
 
 ##
