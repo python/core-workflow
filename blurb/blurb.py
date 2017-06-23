@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Interactive utility for writing CPython ``Misc/NEWS.d`` entries."""
+__version__ = "1.0.1.dev1"
 
 ##
 ## blurb version 1.0
