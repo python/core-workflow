@@ -1,17 +1,8 @@
 blurb
 =====
 
-<<<<<<< HEAD
 .. image:: https://img.shields.io/pypi/v/blurb.svg
     :target: https://pypi.org/project/blurb/
-
-Interactive utility for writing CPython ``Misc/NEWS.d`` entries.
-
-See the
-`committing guide <https://devguide.python.org/committing/#what-s-new-and-news-entries>`__
-in the `CPython developer's guide <https://devguide.python.org>`__ for
-details on the news entries that blurb produces.
-=======
 
 Overview
 --------
@@ -259,4 +250,3 @@ Copyright
 
 **blurb** is Copyright 2015-2017 by Larry Hastings.
 Licensed to the PSF under a contributor agreement.
->>>>>>> forked/master
