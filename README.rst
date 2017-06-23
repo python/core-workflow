@@ -27,6 +27,9 @@ directory for more details.
 blurb
 -----------
 
+.. image:: https://img.shields.io/pypi/v/blurb.svg
+    :target: https://pypi.org/project/blurb/
+
 Interactive utility for writing CPython ``Misc/NEWS.d`` entries. See
 the blurb_ directory for more details.
 
