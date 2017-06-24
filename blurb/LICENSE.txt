@@ -30,4 +30,4 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-Licensed to the PSF under a contributor agreement.
+Licensed to the Python Software Foundation under a contributor agreement.

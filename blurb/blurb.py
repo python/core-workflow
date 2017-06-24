@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Command-line tool to manage CPython Misc/NEWS.d entries."""
+__version__ = "1.0.0.dev1"
 
 ##
 ## blurb version 1.0
@@ -33,7 +35,7 @@
 ## SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
 ##
-## Licensed to the PSF under a contributor agreement.
+## Licensed to the Python Software Foundation under a contributor agreement.
 ##
 
 

@@ -1,6 +1,8 @@
 blurb
 =====
 
+.. image:: https://img.shields.io/pypi/v/blurb.svg
+    :target: https://pypi.org/project/blurb/
 
 Overview
 --------
