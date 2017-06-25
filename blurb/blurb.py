@@ -163,10 +163,10 @@ def sortable_datetime():
 
 
 def prompt(prompt):
-    return input(f"[{prompt}> ")
+    return input("[%s> " % (prompt,))
 
 def require_ok(prompt):
-    prompt = f"[{prompt}> "
+    prompt = "[%s> " % (prompt,)
     while True:
         s = input(prompt).strip()
         if s == 'ok':
@@ -393,7 +393,7 @@ class Blurbs(list):
         line_number = None
 
         def throw(s):
-            raise BlurbError(f"Error in {filename}:{line_number}:\n{s}")
+            raise BlurbError("Error in %s:%s:\n%s" % (filename, line_number, s))
 
         def finish_entry():
             nonlocal body
@@ -473,7 +473,7 @@ Broadly equivalent to blurb.parse(open(filename).read()).
                 add_separator = True
             if metadata:
                 for name, value in sorted(metadata.items()):
-                    add(f".. {name}: {value}\n")
+                    add(".. %s: %s\n" % (name, value))
                 add("\n")
             add(textwrap_body(body))
         return "".join(output)
@@ -495,10 +495,10 @@ Returns a dict.
         components = filename.split("/")
         section, filename = components[-2:]
         section = unsanitize_section(section)
-        assert section in sections, f"Unknown section {section}"
+        assert section in sections, "Unknown section %s" % (section,)
 
         fields = [x.strip() for x in filename.split(".")]
-        assert len(fields) >= 4, f"Can't parse 'next' filename! filename {filename!r} fields {fields}"
+        assert len(fields) >= 4, "Can't parse 'next' filename! filename %r fields %s" % (filename, fields)
         assert fields[-1] == "rst"
 
         metadata = {"date": fields[0], "nonce": fields[-2], "section": section}
@@ -647,7 +647,7 @@ def subcommand(fn):
 def get_subcommand(subcommand):
     fn = subcommands.get(subcommand)
     if not fn:
-        error(f"Unknown subcommand: {subcommand}")
+        error("Unknown subcommand: %s" % (subcommand,))
     return fn
 
 
@@ -704,19 +704,19 @@ If subcommand is not specified, prints one-line summaries for every command.
     for name, p in inspect.signature(fn).parameters.items():
         if p.kind == inspect.Parameter.KEYWORD_ONLY:
             short_option = name[0]
-            options.append(f" [-{short_option}|--{name}]")
+            options.append(" [-%s|--%s]" % (short_option, name))
         elif p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
             positionals.append(" ")
             has_default = (p.default != inspect._empty)
             if has_default:
                 positionals.append("[")
                 nesting += 1
-            positionals.append(f"<{name}>")
+            positionals.append("<%s>" % (name,))
     positionals.append("]" * nesting)
 
 
     parameters = "".join(options + positionals)
-    print(f"blurb {subcommand}{parameters}")
+    print("blurb %s%s" % (subcommand, parameters))
     print()
     print(doc)
     sys.exit(0)
@@ -811,7 +811,7 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
 
         if failure:
             print()
-            print(f"Error: {failure}")
+            print("Error: %s" % (failure,))
             print()
             prompt("Hit return to retry (or Ctrl-C to abort)")
             print()
@@ -841,20 +841,20 @@ This is used by the release manager when cutting a new release.
     if existing_filenames:
         error("Sorry, can't handle appending 'next' files to an existing version (yet).")
 
-    output = f"Misc/NEWS.d/{version}.rst"
+    output = "Misc/NEWS.d/%s.rst" % (version,)
     filenames = glob_blurbs("next")
     blurbs = Blurbs()
     date = current_date()
 
     if not filenames:
-        print(f"No blurbs found.  Setting {version} as having no changes.")
-        body = f"There were no new changes in version {version}.\n"
+        print("No blurbs found.  Setting %s as having no changes." % (version,))
+        body = "There were no new changes in version %s.\n" % (version,)
         metadata = {"no changes": "True", "bpo": "0", "section": "Library", "date": date, "nonce": nonceify(body)}
         blurbs.append((metadata, body))
     else:
         no_changes = None
         count = len(filenames)
-        print(f'Merging {count} blurbs to "{output}".')
+        print('Merging %s blurbs to "%s".' % (count, output))
 
         for filename in filenames:
             if not filename.endswith(".rst"):
@@ -873,9 +873,9 @@ This is used by the release manager when cutting a new release.
     # sanity check: ensuring that saving/reloading the merged blurb file works.
     blurbs2 = Blurbs()
     blurbs2.load(output)
-    assert blurbs2 == blurbs, f"Reloading {output} isn't reproducable?!"
+    assert blurbs2 == blurbs, "Reloading %s isn't reproducable?!" % (output,)
 
-    print(f"Removing {len(filenames)} 'next' files from git.")
+    print("Removing %s 'next' files from git." % (len(filenames),))
     git_rm_files.extend(filenames)
     flush_git_rm_files()
 
@@ -948,7 +948,7 @@ Python News
         metadata, body = blurbs[0]
         release_date = metadata["release date"]
 
-        print(f"*Release date: {release_date}*")
+        print("*Release date: %s*" % (release_date,))
         print()
 
         if "no changes" in metadata:
@@ -1010,11 +1010,11 @@ Creates and populates the Misc/NEWS.d directory tree.
 
     for section in sections:
         dir_name = sanitize_section(section)
-        dir_path = f"NEWS.d/next/{dir_name}"
+        dir_path = "NEWS.d/next/%s" % (dir_name,)
         safe_mkdir(dir_path)
-        readme_path = f"NEWS.d/next/{dir_name}/README.rst"
+        readme_path = "NEWS.d/next/%s/README.rst" % (dir_name,)
         with open(readme_path, "wt", encoding="utf-8") as f:
-            f.write(f"Put news entry ``blurb`` files for the *{section}* section in this directory.\n")
+            f.write("Put news entry ``blurb`` files for the *%s* section in this directory.\n" % (section,))
         git_add_files.append(dir_path)
         git_add_files.append(readme_path)
     flush_git_add_files()
@@ -1025,7 +1025,7 @@ Creates and populates the Misc/NEWS.d directory tree.
 #    """
 #    Test function for blurb command-line processing.
 #    """
-#    print(f"arg: boolean {boolean} option {option}")
+#    print("arg: boolean %s option %s" % (boolean, option))
 
 
 @subcommand
@@ -1110,7 +1110,7 @@ Also runs "blurb populate" for you.
                         fields.append(field)
                     see_also = ", ".join(fields)
                     # print("see_also: ", repr(see_also))
-                    accumulator.append(f"(See also: {see_also})")
+                    accumulator.append("(See also: %s)" % (see_also,))
                     see_also = None
                 if not accumulator:
                     return
@@ -1156,8 +1156,8 @@ Also runs "blurb populate" for you.
         if version is None:
             assert not blurbs, "version should only be None initially, we shouldn't have blurbs yet"
             return
-        assert blurbs, f"No blurbs defined when flushing version {version}!"
-        output = f"NEWS.d/{version}.rst"
+        assert blurbs, "No blurbs defined when flushing version %s!" % (version,)
+        output = "NEWS.d/%s.rst" % (version,)
 
         if released:
             # saving merged blurb file for version, e.g. Misc/NEWS.d/3.7.0a1.rst
@@ -1273,11 +1273,11 @@ Also runs "blurb populate" for you.
             elif line.startswith("- Issue: #15138: base64.urlsafe_{en,de}code() are now 3-4x faster."):
                 line = "- Issue #15138: base64.urlsafe_{en,de}code() are now 3-4x faster."
             elif line.title().startswith(("- Request #", "- Bug #", "- Patch #", "- Patches #")):
-                # print(f"FIXING LINE {line_number}: {line!r}")
+                # print("FIXING LINE %s: %r" % (line_number, line))
                 line = "- Issue #" + line.partition('#')[2]
-                # print(f"FIXED LINE {line!r}")
+                # print("FIXED LINE %r" % (line,))
             # else:
-            #     print(f"NOT FIXING LINE {line_number}: {line!r}")
+            #     print("NOT FIXING LINE %s: %r" % (line_number, line))
 
 
             # 4. determine the actual content of the line
@@ -1341,7 +1341,7 @@ Also runs "blurb populate" for you.
                     line = line[4:]
                     parse_bpo = True
                 else:
-                    # print(f"[[{line_number:8} no bpo]] {line}")
+                    # print("[[%8s no bpo]] %s" % (line_number, line))
                     parse_bpo = False
                 if parse_bpo:
                     # GAAAH
@@ -1381,9 +1381,9 @@ Also runs "blurb populate" for you.
                     try:
                         int(bpo) # this will throw if it's not a legal int
                     except ValueError:
-                        sys.exit(f"Couldn't convert bpo number to int on line {line_number}! " + repr(bpo))
+                        sys.exit("Couldn't convert bpo number to int on line %s! %r" % (line_number, bpo))
                     if see_also == "partially":
-                        sys.exit(f"What the hell on line {line_number}! " + repr(bpo))
+                        sys.exit("What the hell on line %s! %r" % (line_number, bpo))
 
             # 4.6.1 continuation of blurb
             elif line.startswith("  "):
@@ -1392,7 +1392,7 @@ Also runs "blurb populate" for you.
             elif line.startswith(" * "):
                 line = line[3:]
             elif line:
-                sys.exit(f"Didn't recognize line {line_number}! " + repr(line))
+                sys.exit("Didn't recognize line %s! %r" % (line_number, line))
             # only add blank lines if we have an initial line in the accumulator
             if line or accumulator:
                 accumulator.append(line)
@@ -1404,7 +1404,7 @@ Also runs "blurb populate" for you.
     git_rm_files.append("NEWS")
     flush_git_rm_files()
 
-    print(f"Wrote {blurb_count} news items across {version_count} versions.")
+    print("Wrote %s news items across %s versions." % (blurb_count, version_count))
     print()
     print("Ready for commit.")
 
@@ -1451,10 +1451,10 @@ def main():
         def handle_option(s, dict):
             name = dict.get(s, None)
             if not name:
-                sys.exit(f'blurb: Unknown option for {subcommand}: "{s}"')
+                sys.exit('blurb: Unknown option for %s: "%s"' % (subcommand, s))
             kwargs[name] = not kwargs[name]
 
-        # print(f"short_options {short_options} long_options {long_options}")
+        # print("short_options %s long_options %s" % (short_options, long_options))
         for a in args:
             if done_with_options:
                 filtered_args.append(a)
@@ -1488,7 +1488,7 @@ def main():
             # whoops, must be a real type error, reraise
             raise e
 
-        how_many = f"{specified} argument"
+        how_many = "%s argument" % (specified,)
         if specified != 1:
             how_many += "s"
 
@@ -1496,15 +1496,15 @@ def main():
             middle = "accepts no arguments"
         else:
             if total == required:
-                middle = f"requires"
+                middle = "requires"
             else:
                 plural = "" if required == 1 else "s"
-                middle = f"requires at least {required} argument{plural} and at most"
-            middle += f" {total} argument"
+                middle = "requires at least %s argument%s and at most" % (required, plural)
+            middle += " %s argument" % (total,)
             if total != 1:
                 middle += "s"
 
-        print(f'Error: Wrong number of arguments!\n\nblurb {subcommand} {middle},\nand you specified {how_many}.')
+        print('Error: Wrong number of arguments!\n\nblurb %s %s,\nand you specified %s.' % (subcommand, middle, how_many))
         print()
         print("usage: ", end="")
         help(subcommand)
