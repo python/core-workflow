@@ -5,7 +5,10 @@ python:
 sudo: false
 cache: pip
 
+before_install:
+    - cd cherry_picker
 install:
-    - pip install -r cherry_picker/requirements.txt
+    - pip install --upgrade flit
+    - flit install
 script:
-    - pytest cherry_picker/cherry_picker/test.py -v
+    - pytest cherry_picker/test.py -v
