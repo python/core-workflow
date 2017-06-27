@@ -28,7 +28,9 @@ install:
 script:
     - |
         if [[ $CHERRY_PICKER == true ]]; then
+            pushd cherry_picker
             pytest cherry_picker/test.py -v
+            popd
         fi;
     - |
         if [[ $BLURB == true ]]; then
