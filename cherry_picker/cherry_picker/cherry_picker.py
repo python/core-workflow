@@ -271,11 +271,10 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
                     commit_sha1, branches):
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
-    current_dir = os.getcwd()
-    pyconfig_path = os.path.join(current_dir, 'pyconfig.h.in')
 
-    if not os.path.exists(pyconfig_path):
-        os.chdir(os.path.join(current_dir, 'cpython'))
+    if not is_cpython_repo():
+        click.echo("You're not inside a CPython repo right now! 🙅")
+        sys.exit(-1)
 
     if dry_run:
         click.echo("Dry run requested, listing expected command sequence")
@@ -318,6 +317,15 @@ def get_full_sha_from_short(short_sha):
     output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
     full_sha = output.strip().decode('utf-8').split('\n')[0].split()[1]
     return full_sha
+
+
+def is_cpython_repo():
+    cmd = "git log -r 7f777ed95a19224294949e1b4ce56bbffcb1fe9f"
+    try:
+        subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+    except subprocess.SubprocessError:
+        return False
+    return True
 
 
 if __name__ == '__main__':
