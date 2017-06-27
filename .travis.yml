@@ -1,6 +1,10 @@
 language: python
-python:
-    - "3.6"
+matrix:
+    include:
+    - python: "3.5"
+      env: BLURB=true CHERRY_PICKER=false
+    - python: "3.6"
+      env: BLURB=true CHERRY_PICKER=true
 
 sudo: false
 cache: pip
@@ -8,12 +12,20 @@ cache: pip
 before_install:
     - pip install --upgrade flit
 install:
-    - cd cherry_picker
-    - flit install
-    - cd ..
-    - cd blurb
-    - flit install
-    - cd ..
+    - |
+        if [[ $CHERRY_PICKER == true ]]; then
+            pushd cherry_picker
+            flit install
+            popd
+    - |
+        if [[ $BLURB == true ]]; then
+            pushd blurb
+            flit install
+            popd
 script:
-    - pytest cherry_picker/test.py -v
-    - blurb test
+    - |
+        if [[ $CHERRY_PICKER == true ]]; then
+            pytest cherry_picker/test.py -v
+    - |
+        if [[ $BLURB == true ]]; then
+            blurb test
