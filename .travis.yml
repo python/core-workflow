@@ -6,6 +6,7 @@ matrix:
     - python: "3.6"
       env: BLURB=true CHERRY_PICKER=true
 
+dist: trusty
 sudo: false
 cache: pip
 
@@ -17,15 +18,19 @@ install:
             pushd cherry_picker
             flit install
             popd
+        fi;
     - |
         if [[ $BLURB == true ]]; then
             pushd blurb
             flit install
             popd
+        fi;
 script:
     - |
         if [[ $CHERRY_PICKER == true ]]; then
             pytest cherry_picker/test.py -v
+        fi;
     - |
         if [[ $BLURB == true ]]; then
             blurb test
+        fi;
