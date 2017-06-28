@@ -7,6 +7,9 @@ import subprocess
 import webbrowser
 import sys
 
+from . import __version__
+
+
 class CherryPicker:
 
     def __init__(self, pr_remote, commit_sha1, branches,
@@ -251,7 +254,7 @@ To abort the cherry-pick and cleanup:
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version="0.0.2.post2")
+@click.version_option(version=__version__)
 @click.option('--dry-run', is_flag=True,
               help="Prints out the commands, but not executed.")
 @click.option('--pr-remote', 'pr_remote', metavar='REMOTE',
