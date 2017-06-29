@@ -75,8 +75,9 @@ class CherryPicker:
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as err:
-            click.echo("error checking out branch")
+            click.echo(f"Error checking out the branch {branch_name}.")
             click.echo(err.output)
+            sys.exit(-1)
 
     def get_commit_message(self, commit_sha):
         """
