@@ -99,6 +99,7 @@ template = """
 """.lstrip()
 
 root = None
+original_dir = None
 sections = []
 
 for line in template.split('\n'):
@@ -279,6 +280,9 @@ def glob_blurbs(version):
             wildcard = os.path.join(base, sanitize_section(section), "*.rst")
             entries = glob.glob(wildcard)
             entries.sort(reverse=True)
+            deletables = [x for x in entries if x.endswith("/README.rst")]
+            for filename in deletables:
+                entries.remove(filename)
             filenames.extend(entries)
     return filenames
 
@@ -571,6 +575,8 @@ Returns a dict.
         while self:
             metadata, body = self.pop()
             metadata['date'] = str(i).rjust(width, '0')
+            if 'release date' in metadata:
+                del metadata['release date']
             blurb.append((metadata, body))
             filename = blurb._extract_next_filename()
             blurb.save(filename)
@@ -1312,6 +1318,7 @@ Also runs "blurb populate" for you.
             # 4.4 no changes declaration
             if line.strip() in (
                 '- No changes since release candidate 2',
+                'No changes from release candidate 2.',
                 'There were no code changes between 3.5.3rc1 and 3.5.3 final.',
                 'There were no changes between 3.4.6rc1 and 3.4.6 final.',
                 ):
@@ -1411,6 +1418,8 @@ Also runs "blurb populate" for you.
 
 
 def main():
+    global original_dir
+
     args = sys.argv[1:]
 
     if not args:
