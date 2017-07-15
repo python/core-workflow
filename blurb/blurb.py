@@ -819,7 +819,11 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
             print()
             print("Error: {}".format(failure))
             print()
-            prompt("Hit return to retry (or Ctrl-C to abort)")
+            try:
+                prompt("Hit return to retry (or Ctrl-C to abort)")
+            except KeyboardInterrupt:
+                print()
+                return
             print()
             continue
         break
