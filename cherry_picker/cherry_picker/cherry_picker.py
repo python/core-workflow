@@ -7,6 +7,9 @@ import subprocess
 import webbrowser
 import sys
 
+from . import __version__
+
+
 class CherryPicker:
 
     def __init__(self, pr_remote, commit_sha1, branches,
@@ -72,8 +75,9 @@ class CherryPicker:
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as err:
-            click.echo("error checking out branch")
+            click.echo(f"Error checking out the branch {self.get_cherry_pick_branch(branch_name)}.")
             click.echo(err.output)
+            sys.exit(-1)
 
     def get_commit_message(self, commit_sha):
         """
@@ -251,7 +255,7 @@ To abort the cherry-pick and cleanup:
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version="0.0.2.post2")
+@click.version_option(version=__version__)
 @click.option('--dry-run', is_flag=True,
               help="Prints out the commands, but not executed.")
 @click.option('--pr-remote', 'pr_remote', metavar='REMOTE',
@@ -271,11 +275,10 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
                     commit_sha1, branches):
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
-    current_dir = os.getcwd()
-    pyconfig_path = os.path.join(current_dir, 'pyconfig.h.in')
 
-    if not os.path.exists(pyconfig_path):
-        os.chdir(os.path.join(current_dir, 'cpython'))
+    if not is_cpython_repo():
+        click.echo("You're not inside a CPython repo right now! 🙅")
+        sys.exit(-1)
 
     if dry_run:
         click.echo("Dry run requested, listing expected command sequence")
@@ -318,6 +321,15 @@ def get_full_sha_from_short(short_sha):
     output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
     full_sha = output.strip().decode('utf-8').split('\n')[0].split()[1]
     return full_sha
+
+
+def is_cpython_repo():
+    cmd = "git log -r 7f777ed95a19224294949e1b4ce56bbffcb1fe9f"
+    try:
+        subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+    except subprocess.SubprocessError:
+        return False
+    return True
 
 
 if __name__ == '__main__':

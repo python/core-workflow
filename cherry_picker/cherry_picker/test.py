@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from .cherry_picker import get_base_branch, get_current_branch, \
-    get_full_sha_from_short, CherryPicker
+    get_full_sha_from_short, is_cpython_repo, CherryPicker
 
 
 def test_get_base_branch():
@@ -97,3 +97,18 @@ def test_get_updated_commit_message(subprocess_check_output, os_path_exists):
                       branches)
     assert cp.get_commit_message('22a594a0047d7706537ff2ac676cdc0f1dcb329c') \
            == 'bpo-123: Fix Spam Module (GH-113)'
+
+@mock.patch('subprocess.check_output')
+def test_is_cpython_repo(subprocess_check_output):
+    subprocess_check_output.return_value = """commit 7f777ed95a19224294949e1b4ce56bbffcb1fe9f
+Author: Guido van Rossum <guido@python.org>
+Date:   Thu Aug 9 14:25:15 1990 +0000
+
+    Initial revision
+
+"""
+    assert is_cpython_repo() == True
+
+def test_is_not_cpython_repo():
+    assert is_cpython_repo() == False
+
