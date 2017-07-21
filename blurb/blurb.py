@@ -750,6 +750,16 @@ Run unit tests.  Only works inside source repo, not when installed.
     print(tests_run, "tests passed.")
 
 
+def git_core_editor():
+    try:
+        return run('git config --get core.editor').strip()
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            # core.editor not configured
+            return None
+        raise
+
+
 def find_editor():
     # Try environment variables. Check more specific settings first so
     # they can override less specific values.
@@ -779,20 +789,10 @@ def find_editor():
         if found_path and os.path.exists(found_path):
             return found_path
 
-    # For simplicity, recommend the old EDITOR environment varibale. Advanced
-    # users should consult the documention if they want to use more specific
-    # confguration.
+    # For simplicity, recommend the old EDITOR environment variable.
+    # Advanced users should consult the documentation if they want to
+    # use more specific configuration.
     error('Could not find an editor! Set the EDITOR environment variable.')
-
-
-def git_core_editor():
-    try:
-        return run('git config --get core.editor').strip()
-    except subprocess.CalledProcessError as e:
-        if e.returncode == 1:
-            # core.etitor not configured
-            return None
-        raise
 
 
 @subcommand
