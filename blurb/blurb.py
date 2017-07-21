@@ -639,7 +639,7 @@ def chdir_to_repo_root():
 
 def error(*a):
     s = " ".join(str(x) for x in a)
-    sys.exit("Error: " + s)
+    sys.exit("Error: " + s + "\nRun 'blurb help' for help.")
 
 
 subcommands = {}
@@ -726,6 +726,9 @@ If subcommand is not specified, prints one-line summaries for every command.
     print()
     print(doc)
     sys.exit(0)
+
+# Make "blurb --help" work.
+subcommands["--help"] = help
 
 
 @subcommand
