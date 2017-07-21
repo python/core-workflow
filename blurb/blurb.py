@@ -53,6 +53,7 @@ import inspect
 import math
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -806,11 +807,12 @@ def add():
 Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     """
 
-    editor = find_editor()
+    editor_command = shlex.split(find_editor(), posix=os.name == 'posix')
 
     handle, tmp_path = tempfile.mkstemp(".rst")
     os.close(handle)
     atexit.register(lambda : os.unlink(tmp_path))
+    editor_command.append(tmp_path)
 
     def init_tmp_with_template():
         with open(tmp_path, "wt", encoding="utf-8") as f:
@@ -832,7 +834,7 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     init_tmp_with_template()
 
     while True:
-        subprocess.run([editor, tmp_path])
+        subprocess.run(editor_command)
 
         failure = None
         blurb = Blurbs()
