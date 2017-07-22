@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Command-line tool to manage CPython Misc/NEWS.d entries."""
-__version__ = "1.0.2.dev1"
+__version__ = "1.0.3"
 
 ##
 ## blurb version 1.0
@@ -52,6 +52,7 @@ import hashlib
 import inspect
 import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -622,19 +623,49 @@ def run(s):
     return process.stdout.decode('ascii')
 
 
+readme_re = re.compile(r"This is Python version [23]\.\d")
+
 def chdir_to_repo_root():
     global root
-    try:
-        run("git log -r 7f777ed95a19224294949e1b4ce56bbffcb1fe9f")
-    except subprocess.SubprocessError:
-        sys.exit("You're not inside a CPython repo right now!")
 
-    git_dir = run("git rev-parse --git-dir").strip()
+    def fail(where):
+        sys.exit('You\'re not inside a CPython repo right now! (failed at "{}")'.format(where))
+
+    try:
+        git_dir = run("git rev-parse --git-dir").strip()
+    except subprocess.CalledProcessError:
+        fail("git rev-parse")
+
     if '.git/worktrees' in git_dir:
         with open(os.path.join(git_dir, 'gitdir'), "rt", encoding="utf-8") as f:
             git_dir = f.read().strip()
     root = os.path.dirname(os.path.abspath(git_dir))
     os.chdir(root)
+
+    # make totally, absolutely sure we're in a valid CPython repo
+    def test_first_line(filename, test):
+        with open(filename, "rt") as f:
+            lines = f.read().split('\n')
+            if not (lines and test(lines[0])):
+                fail(filename)
+
+    for readme in ("README", "README.rst"):
+        if os.path.exists(readme):
+            test_first_line(readme, readme_re.match)
+            break
+    else:
+        fail(readme)
+
+    test_first_line("LICENSE",  "A. HISTORY OF THE SOFTWARE".__eq__)
+
+    def test_existence(filename):
+        if not os.path.exists(filename):
+            fail(filename)
+        
+    test_existence("Include/Python.h")
+    test_existence("Python/ceval.c")
+
+    return root
 
 
 def error(*a):
@@ -1008,6 +1039,12 @@ def flush_git_rm_files():
                 pass
 
         git_rm_files.clear()
+
+
+# @subcommand
+# def noop():
+#     "Do-nothing command.  Used for blurb smoke-testing."
+#     pass
 
 
 @subcommand
