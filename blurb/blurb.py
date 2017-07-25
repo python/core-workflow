@@ -1503,7 +1503,7 @@ def main():
 
     if not args:
         args = ["add"]
-    elif args[0] == "-h":
+    elif args[0] in ("-h", "--help"):
         # slight hack
         args[0] = "help"
 
