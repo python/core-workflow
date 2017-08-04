@@ -638,22 +638,6 @@ class TestParserFailures(TestParserPasses):
             b.read(filename)
 
 
-
-def run(s):
-    with subprocess.Popen(s.split()) as process:
-        try:
-            stdout, stderr = process.communicate()
-        except:
-            process.kill()
-            process.wait()
-            raise
-        retcode = process.poll()
-        if retcode:
-            raise subprocess.CalledProcessError(
-                retcode, process.args, output=stdout, stderr=stderr)
-        return stdout.decode('ascii')
-
-
 readme_re = re.compile(r"This is Python version [23]\.\d").match
 
 def chdir_to_repo_root():
