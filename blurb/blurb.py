@@ -638,13 +638,6 @@ class TestParserFailures(TestParserPasses):
             b.read(filename)
 
 
-
-def run(s):
-    process = subprocess.run(s.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process.check_returncode()
-    return process.stdout.decode('ascii')
-
-
 readme_re = re.compile(r"This is Python version [23]\.\d").match
 
 def chdir_to_repo_root():
@@ -858,7 +851,7 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     init_tmp_with_template()
 
     while True:
-        subprocess.run([editor, tmp_path])
+        subprocess.call([editor, tmp_path])
 
         failure = None
         blurb = Blurbs()
@@ -1046,16 +1039,15 @@ Python News
 git_add_files = []
 def flush_git_add_files():
     if git_add_files:
-        subprocess.run(["git", "add", *git_add_files], stdout=subprocess.PIPE, stderr=subprocess.PIPE).check_returncode()
+        subprocess.check_call(["git", "add"] + git_add_files,
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         git_add_files.clear()
 
 git_rm_files = []
 def flush_git_rm_files():
     if git_rm_files:
-        try:
-            subprocess.run(["git", "rm", "-f", *git_rm_files], stdout=subprocess.PIPE, stderr=subprocess.PIPE).check_returncode()
-        except subprocess.CalledProcessError:
-            pass
+        subprocess.call(["git", "rm", "-f"] + git_rm_files,
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # clean up
         for path in git_rm_files:
