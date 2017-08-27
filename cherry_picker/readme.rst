@@ -36,7 +36,6 @@ Requires Python 3.6.
     $ source venv/bin/activate
     (venv) $ python -m pip install cherry_picker
 
-
 The cherry picking script assumes that if an ``upstream`` remote is defined, then
 it should be used as the source of upstream changes and as the base for
 cherry-pick branches. Otherwise, ``origin`` is used for that purpose.
