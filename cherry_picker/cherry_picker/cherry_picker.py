@@ -12,6 +12,7 @@ from gidgethub.sansio import create_headers
 
 from . import __version__
 
+CPYTHON_CREATE_PR_URL = "https://api.github.com/repos/python/cpython/pulls"
 
 class CherryPicker:
 
@@ -161,7 +162,6 @@ To abort the cherry-pick and cleanup:
 
     def create_gh_pr(self, base_branch, head_branch, commit_message):
         request_headers = create_headers(self.username, oauth_token=os.getenv("GH_AUTH"))
-        url = "https://api.github.com/repos/python/cpython/pulls"
         title, body = normalize_commit_message(commit_message)
         data = {
           "title": title,
@@ -170,7 +170,7 @@ To abort the cherry-pick and cleanup:
           "base": base_branch,
           "maintainer_can_modify": True
         }
-        response = requests.post(url, headers=request_headers, json=data)
+        response = requests.post(CPYTHON_CREATE_PR_URL, headers=request_headers, json=data)
         if response.status_code == requests.codes.created:
             print(f"Backport PR created at {response.json()['_links']['html']}")
         else:
