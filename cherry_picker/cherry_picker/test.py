@@ -3,7 +3,8 @@ from unittest import mock
 import pytest
 
 from .cherry_picker import get_base_branch, get_current_branch, \
-    get_full_sha_from_short, is_cpython_repo, CherryPicker
+    get_full_sha_from_short, is_cpython_repo, CherryPicker, \
+    normalize_commit_message
 
 
 def test_get_base_branch():
@@ -112,3 +113,24 @@ Date:   Thu Aug 9 14:25:15 1990 +0000
 def test_is_not_cpython_repo():
     assert is_cpython_repo() == False
 
+def test_normalize_long_commit_message():
+    commit_message = """[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)
+
+The `Show Source` was broken because of a change made in sphinx 1.5.1
+In Sphinx 1.4.9, the sourcename was "index.txt".
+In Sphinx 1.5.1+, it is now "index.rst.txt".
+(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)"""
+    title, body = normalize_commit_message(commit_message)
+    assert title == "[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)"
+    assert body == """The `Show Source` was broken because of a change made in sphinx 1.5.1
+In Sphinx 1.4.9, the sourcename was "index.txt".
+In Sphinx 1.5.1+, it is now "index.rst.txt".
+(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)"""
+
+def test_normalize_short_commit_message():
+    commit_message = """[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)
+
+(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)"""
+    title, body = normalize_commit_message(commit_message)
+    assert title == "[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)"
+    assert body == """(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)"""

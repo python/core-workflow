@@ -6,6 +6,9 @@ import os
 import subprocess
 import webbrowser
 import sys
+import requests
+
+from gidgethub.sansio import create_headers
 
 from . import __version__
 
@@ -139,9 +142,10 @@ To abort the cherry-pick and cleanup:
             except subprocess.CalledProcessError as cpe:
                 click.echo("Failed to amend the commit message  \u2639")
                 click.echo(cpe.output)
+        return updated_commit_message
 
 
-    def push_to_remote(self, base_branch, head_branch):
+    def push_to_remote(self, base_branch, head_branch, commit_message=""):
         """ git push <origin> <branchname> """
 
         cmd = f"git push {self.pr_remote} {head_branch}"
@@ -150,7 +154,28 @@ To abort the cherry-pick and cleanup:
         except subprocess.CalledProcessError:
             click.echo(f"Failed to push to {self.pr_remote} \u2639")
         else:
-            self.open_pr(self.get_pr_url(base_branch, head_branch))
+            if os.getenv("GH_AUTH"):
+                self.create_gh_pr(base_branch, head_branch, commit_message)
+            else:
+                self.open_pr(self.get_pr_url(base_branch, head_branch))
+
+    def create_gh_pr(self, base_branch, head_branch, commit_message):
+        request_headers = create_headers(self.username, oauth_token=os.getenv("GH_AUTH"))
+        url = f"https://api.github.com/repos/python/cpython/pulls"
+        title, body = normalize_commit_message(commit_message)
+        data = {
+          "title": title,
+          "body": body,
+          "head": f"{self.username}:{head_branch}",
+          "base": base_branch,
+          "maintainer_can_modify": True
+        }
+        response = requests.post(url, headers=request_headers, json=data)
+        if response.status_code == requests.codes.created:
+            print(f"Backport PR created at {response.json()['_links']['html']}")
+        else:
+            print(response.status_code)
+            print(response.text)
 
     def open_pr(self, url):
         """
@@ -184,16 +209,19 @@ To abort the cherry-pick and cleanup:
 
             cherry_pick_branch = self.get_cherry_pick_branch(maint_branch)
             self.checkout_branch(maint_branch)
+            commit_message = ""
             try:
                 self.cherry_pick()
-                self.amend_commit_message(cherry_pick_branch)
+                commit_message = self.amend_commit_message(cherry_pick_branch)
             except subprocess.CalledProcessError as cpe:
                 click.echo(cpe.output)
                 click.echo(self.get_exit_message(maint_branch))
                 sys.exit(-1)
             else:
                 if self.push:
-                    self.push_to_remote(maint_branch, cherry_pick_branch)
+                    self.push_to_remote(maint_branch,
+                                        cherry_pick_branch,
+                                        commit_message)
                     self.cleanup_branch(cherry_pick_branch)
                 else:
                     click.echo(\
@@ -330,6 +358,15 @@ def is_cpython_repo():
     except subprocess.SubprocessError:
         return False
     return True
+
+def normalize_commit_message(commit_message):
+    """
+    Return a tuple of title and body from the commit message
+    """
+    split_commit_message = commit_message.split("\n")
+    title = split_commit_message[0]
+    body = "\n".join(split_commit_message[1:])
+    return title, body.lstrip("\n")
 
 
 if __name__ == '__main__':
