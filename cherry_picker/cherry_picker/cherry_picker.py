@@ -161,7 +161,7 @@ To abort the cherry-pick and cleanup:
 
     def create_gh_pr(self, base_branch, head_branch, commit_message):
         request_headers = create_headers(self.username, oauth_token=os.getenv("GH_AUTH"))
-        url = f"https://api.github.com/repos/python/cpython/pulls"
+        url = "https://api.github.com/repos/python/cpython/pulls"
         title, body = normalize_commit_message(commit_message)
         data = {
           "title": title,
