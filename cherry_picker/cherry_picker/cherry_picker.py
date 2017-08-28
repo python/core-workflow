@@ -172,10 +172,10 @@ To abort the cherry-pick and cleanup:
         }
         response = requests.post(CPYTHON_CREATE_PR_URL, headers=request_headers, json=data)
         if response.status_code == requests.codes.created:
-            print(f"Backport PR created at {response.json()['_links']['html']}")
+            click.echo(f"Backport PR created at {response.json()['_links']['html']}")
         else:
-            print(response.status_code)
-            print(response.text)
+            click.echo(response.status_code)
+            click.echo(response.text)
 
     def open_pr(self, url):
         """
