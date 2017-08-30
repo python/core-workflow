@@ -8,7 +8,7 @@ import webbrowser
 import sys
 import requests
 
-from gidgethub.sansio import create_headers
+import gidgethub
 
 from . import __version__
 
@@ -155,13 +155,19 @@ To abort the cherry-pick and cleanup:
         except subprocess.CalledProcessError:
             click.echo(f"Failed to push to {self.pr_remote} \u2639")
         else:
-            if os.getenv("GH_AUTH"):
-                self.create_gh_pr(base_branch, head_branch, commit_message)
+            gh_auth = os.getenv("GH_AUTH")
+            if gh_auth:
+                self.create_gh_pr(base_branch, head_branch, commit_message,
+                                  gh_auth)
             else:
                 self.open_pr(self.get_pr_url(base_branch, head_branch))
 
-    def create_gh_pr(self, base_branch, head_branch, commit_message):
-        request_headers = create_headers(self.username, oauth_token=os.getenv("GH_AUTH"))
+    def create_gh_pr(self, base_branch, head_branch, commit_message, gh_auth):
+        """
+        Create PR in GitHub
+        """
+        request_headers = gidgethub.sansio.create_headers(
+            self.username, oauth_token=gh_auth)
         title, body = normalize_commit_message(commit_message)
         data = {
           "title": title,
