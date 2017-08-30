@@ -8,7 +8,7 @@ import webbrowser
 import sys
 import requests
 
-import gidgethub
+from gidgethub import sansio
 
 from . import __version__
 
@@ -166,7 +166,7 @@ To abort the cherry-pick and cleanup:
         """
         Create PR in GitHub
         """
-        request_headers = gidgethub.sansio.create_headers(
+        request_headers = sansio.create_headers(
             self.username, oauth_token=gh_auth)
         title, body = normalize_commit_message(commit_message)
         data = {
