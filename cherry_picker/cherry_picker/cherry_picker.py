@@ -157,12 +157,15 @@ To abort the cherry-pick and cleanup:
         else:
             gh_auth = os.getenv("GH_AUTH")
             if gh_auth:
-                self.create_gh_pr(base_branch, head_branch, commit_message,
-                                  gh_auth)
+                self.create_gh_pr(base_branch, head_branch,
+                                  commit_message=commit_message,
+                                  gh_auth=gh_auth)
             else:
                 self.open_pr(self.get_pr_url(base_branch, head_branch))
 
-    def create_gh_pr(self, base_branch, head_branch, commit_message, gh_auth):
+    def create_gh_pr(self, base_branch, head_branch, *,
+                     commit_message,
+                     gh_auth):
         """
         Create PR in GitHub
         """
