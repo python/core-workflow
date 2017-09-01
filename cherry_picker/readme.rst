@@ -18,7 +18,7 @@ maintenance branches (``3.6``, ``3.5``, ``2.7``).
 It will prefix the commit message with the branch, e.g. ``[3.6]``, and then
 opens up the pull request page.
 
-Tests are to be written using pytest.
+Tests are to be written using `pytest <https://docs.pytest.org/en/latest/>`_.
 
 
 Setup Info
