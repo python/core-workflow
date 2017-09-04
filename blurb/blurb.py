@@ -519,7 +519,7 @@ Broadly equivalent to blurb.parse(open(filename).read()).
 Parses a "next" filename into its equivalent blurb metadata.
 Returns a dict.
         """
-        components = filename.split("/")
+        components = filename.split(os.sep)
         section, filename = components[-2:]
         section = unsanitize_section(section)
         assert section in sections, "Unknown section {}".format(section)
