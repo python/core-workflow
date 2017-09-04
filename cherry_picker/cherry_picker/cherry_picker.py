@@ -193,6 +193,8 @@ To abort the cherry-pick and cleanup:
         if self.dry_run:
             click.echo(f"  dry-run: Create new PR: {url}")
         else:
+            click.echo("Backport PR URL:")
+            click.echo(url)
             webbrowser.open_new_tab(url)
 
     def delete_branch(self, branch):
