@@ -14,6 +14,14 @@ from . import __version__
 
 CPYTHON_CREATE_PR_URL = "https://api.github.com/repos/python/cpython/pulls"
 
+class BranchCheckoutException(Exception):
+    pass
+
+class CherryPickException(Exception):
+    pass
+
+
+
 class CherryPicker:
 
     def __init__(self, pr_remote, commit_sha1, branches,
@@ -81,7 +89,7 @@ class CherryPicker:
         except subprocess.CalledProcessError as err:
             click.echo(f"Error checking out the branch {self.get_cherry_pick_branch(branch_name)}.")
             click.echo(err.output)
-            sys.exit(-1)
+            raise BranchCheckoutException(f"Error checking out the branch {self.get_cherry_pick_branch(branch_name)}.")
 
     def get_commit_message(self, commit_sha):
         """
@@ -109,7 +117,12 @@ class CherryPicker:
     def cherry_pick(self):
         """ git cherry-pick -x <commit_sha1> """
         cmd = f"git cherry-pick -x {self.commit_sha1}"
-        self.run_cmd(cmd)
+        try:
+            self.run_cmd(cmd)
+        except subprocess.CalledProcessError as err:
+            click.echo(f"Error cherry-pick {self.commit_sha1}.")
+            click.echo(err.output)
+            raise CherryPickException(f"Error cherry-pick {self.commit_sha1}.")
 
     def get_exit_message(self, branch):
         return \
@@ -181,7 +194,7 @@ To abort the cherry-pick and cleanup:
         }
         response = requests.post(CPYTHON_CREATE_PR_URL, headers=request_headers, json=data)
         if response.status_code == requests.codes.created:
-            click.echo(f"Backport PR created at {response.json()['_links']['html']}")
+            click.echo(f"Backport PR created at {response.json()['html_url']}")
         else:
             click.echo(response.status_code)
             click.echo(response.text)
@@ -225,7 +238,9 @@ To abort the cherry-pick and cleanup:
             except subprocess.CalledProcessError as cpe:
                 click.echo(cpe.output)
                 click.echo(self.get_exit_message(maint_branch))
-                sys.exit(-1)
+            except CherryPickException:
+                click.echo(self.get_exit_message(maint_branch))
+                raise
             else:
                 if self.push:
                     self.push_to_remote(maint_branch,
@@ -333,7 +348,12 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
     elif status:
         click.echo(cherry_picker.status())
     else:
-        cherry_picker.backport()
+        try:
+            cherry_picker.backport()
+        except BranchCheckoutException:
+            sys.exit(-1)
+        except CherryPickException:
+            sys.exit(-1)
 
 
 def get_base_branch(cherry_pick_branch):
