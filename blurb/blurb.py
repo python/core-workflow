@@ -75,7 +75,7 @@ template = """
 #
 # Please enter the relevant bugs.python.org issue number here:
 #
-.. bpo:
+.. bpo: {bpo}
 
 #
 # Uncomment one of these "section:" lines to specify which section
@@ -838,24 +838,14 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     os.close(handle)
     atexit.register(lambda : os.unlink(tmp_path))
 
-    def init_tmp_with_template():
-        with open(tmp_path, "wt", encoding="utf-8") as f:
-            # hack:
-            # my editor likes to strip trailing whitespace from lines.
-            # normally this is a good idea.  but in the case of the template
-            # it's unhelpful.
-            # so, manually ensure there's a space at the end of the bpo line.
-            text = template
+    # see of the branch name indicated BPO number
+    # makes the 'editor strips trailing whitespace from template lines'
+    # hack obsolete, too.
+    branch_bpo, branch_suffix = get_bpo_git_branch()
 
-            bpo_line = ".. bpo:"
-            without_space = "\n" + bpo_line + "\n"
-            with_space = "\n" + bpo_line + " \n"
-            if without_space not in text:
-                sys.exit("Can't find BPO line to ensure there's a space on the end!")
-            text = text.replace(without_space, with_space)
-            f.write(text)
-
-    init_tmp_with_template()
+    with open(tmp_path, "wt", encoding="utf-8") as f:
+        text = template.format(bpo=branch_bpo)
+        f.write(text)
 
     while True:
         subprocess.run([editor, tmp_path])
@@ -888,6 +878,18 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     path = blurb.save_next()
     git_add_files.append(path)
     flush_git_add_files()
+
+    # For convenience, write a preformatted commit template. Enable template
+    # with ``git config commit.template .git/blurb``.
+    msgfile = os.path.join(root, '.git', 'blurb')
+    if os.path.isdir(os.path.dirname(msgfile)):
+        metadata, text = blurb[0]
+        title = branch_suffix.replace('-', ' ').replace('_', ' ')
+        with open(msgfile, 'wt', encoding="utf-8") as f:
+            f.write(f"bpo-{metadata['bpo']}: {title}\n")
+            f.write("\n")
+            f.write(text)
+
     print("Ready for commit.")
 
 
@@ -1065,6 +1067,29 @@ def flush_git_rm_files():
                 pass
 
         git_rm_files.clear()
+
+
+def get_bpo_git_branch():
+    """Try to detect bpo number from branch name
+
+    Supports:
+       bpo1234
+       bpo_1234
+       bpo-1234
+
+    returns: branch number, branch suffix
+    """
+    try:
+        p = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p.check_returncode()
+    except subprocess.CalledProcessError:
+        return '', ''
+    branch = p.stdout.decode('utf-8').strip()
+    mo = re.match("^bpo[-_]?(\d+)[-_]?(.*)", branch)
+    if mo is not None:
+        return mo.group(1), mo.group(2)
+    else:
+        return '', branch
 
 
 # @subcommand
