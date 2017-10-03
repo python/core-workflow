@@ -34,3 +34,20 @@ Interactive utility for writing CPython ``Misc/NEWS.d`` entries. See
 the blurb_ directory for more details.
 
 .. _blurb: https://github.com/python/core-workflow/tree/master/blurb
+
+
+Other core workflow tools
+-------------------------
+
++------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
+| Name                                                                                                 | Description                                                                                | Issue tracker                                                                 | Owner/Maintainer                                      |
++======================================================================================================+============================================================================================+===============================================================================+=======================================================+
+| `python/bedevere <https://github.com/python/bedevere>`__                                             | A bot to help identify missing information for CPython pull requests                       | `Github <https://github.com/python/bedevere/issues>`__                        | `Brett Cannon <https://github.com/brettcannon>`__     |
++------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
+| `python/the-knights-who-say-ni <https://github.com/python/the-knights-who-say-ni>`__                 | CLA enforcement bot for Python organization projects                                       | `Github <https://github.com/python/the-knights-who-say-ni/issues>`__          | `Brett Cannon <https://github.com/brettcannon>`__     |
++------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
+| `berkerpeksag/cpython-emailer-webhook <https://github.com/berkerpeksag/cpython-emailer-webhook>`__   | A webhook to send every CPython commit to python-checkins mailing list.                    | `Github <https://github.com/berkerpeksag/cpython-emailer-webhook/issues>`__   | `Berker Peksag <https://github.com/berkerpeksag>`__   |
++------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
+| `berkerpeksag/cpython-bpo-linkify <https://github.com/berkerpeksag/cpython-bpo-linkify>`__           | An extension that finds bpo-NNNN annonations and converts them to bugs.python.org links.   | `Github <https://github.com/berkerpeksag/cpython-bpo-linkify/issues>`__       | `Berker Peksag <https://github.com/berkerpeksag>`__   |
++------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
+
