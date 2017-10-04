@@ -39,15 +39,30 @@ the blurb_ directory for more details.
 Other core workflow tools
 -------------------------
 
-+------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
-| Name                                                                                                 | Description                                                                                | Issue tracker                                                                 | Owner/Maintainer                                      |
-+======================================================================================================+============================================================================================+===============================================================================+=======================================================+
-| `python/bedevere <https://github.com/python/bedevere>`__                                             | A bot to help identify missing information for CPython pull requests                       | `Github <https://github.com/python/bedevere/issues>`__                        | `Brett Cannon <https://github.com/brettcannon>`__     |
-+------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
-| `python/the-knights-who-say-ni <https://github.com/python/the-knights-who-say-ni>`__                 | CLA enforcement bot for Python organization projects                                       | `Github <https://github.com/python/the-knights-who-say-ni/issues>`__          | `Brett Cannon <https://github.com/brettcannon>`__     |
-+------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
-| `berkerpeksag/cpython-emailer-webhook <https://github.com/berkerpeksag/cpython-emailer-webhook>`__   | A webhook to send every CPython commit to python-checkins mailing list.                    | `Github <https://github.com/berkerpeksag/cpython-emailer-webhook/issues>`__   | `Berker Peksag <https://github.com/berkerpeksag>`__   |
-+------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
-| `berkerpeksag/cpython-bpo-linkify <https://github.com/berkerpeksag/cpython-bpo-linkify>`__           | An extension that finds bpo-NNNN annonations and converts them to bugs.python.org links.   | `Github <https://github.com/berkerpeksag/cpython-bpo-linkify/issues>`__       | `Berker Peksag <https://github.com/berkerpeksag>`__   |
-+------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------+-------------------------------------------------------+
+======================================= ======================= =============================================== ================
+ Name                                   Description             Issue tracker                                   Owner/Maintainer
+======================================= ======================= =============================================== ================
+`python/bedevere`_                      A bot to help identify  `GitHub <https://github.com/                    `Brett Cannon`_
+                                        missing information for python/bedevere/issues>`__
+                                        CPython pull requests                     
+`python/the-knights-who-say-ni`_        CLA enforcement bot for `GitHub <https://github.com/                    `Brett Cannon`_
+                                        Python organization     python/the-knights-who-say-ni/issues>`__
+                                        projects                
+`berkerpeksag/cpython-emailer-webhook`_ A webhook to send every `GitHub <https://github.com/                    `Berker Peksag`_
+                                        CPython commit to       berkerpeksag/cpython-emailer-webhook/issues>`__
+                                        python-checkins mailing 
+                                        list.
+`berkerpeksag/cpython-bpo-linkify`_     An extension that finds `GitHub <https://github.com/                    `Berker Peksag`_
+                                        bpo-NNNN annonations    berkerpeksag/cpython-bpo-linkify/issues>`__
+                                        and converts them to    
+                                        bugs.python.org links.  
+======================================= ======================= =============================================== ================
+
+.. _`python/bedevere`: https://github.com/python/bedevere
+.. _`python/the-knights-who-say-ni`: https://github.com/python/the-knights-who-say-ni
+.. _`berkerpeksag/cpython-emailer-webhook`: https://github.com/berkerpeksag/cpython-emailer-webhook
+.. _`berkerpeksag/cpython-bpo-linkify`: https://github.com/berkerpeksag/cpython-bpo-linkify
+.. _`Brett Cannon`: https://github.com/brettcannon
+.. _`Berker Peksag`: https://github.com/berkerpeksag
+
 
