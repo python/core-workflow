@@ -46,7 +46,7 @@ Other core workflow tools
                                         missing information for python/bedevere/issues>`__
                                         CPython pull requests.
 `python/miss-islington`_                A bot for backporting   `GitHub <https://github.com/                    `Mariatta`_
-                                        CPython pull requests.   python/miss-islington/issues>`__
+                                        CPython pull requests.  python/miss-islington/issues>`__
 `python/the-knights-who-say-ni`_        CLA enforcement bot for `GitHub <https://github.com/                    `Brett Cannon`_
                                         Python organization     python/the-knights-who-say-ni/issues>`__
                                         projects.
