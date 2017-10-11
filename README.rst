@@ -6,7 +6,7 @@ Issue tracker and relevant tools for CPython's workflow
     :target: https://travis-ci.org/python/core-workflow
 
 cherry_picker 🐍 🍒 ⛏
--------------------------------
+----------------------
 
 .. image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
     :target: https://pypi.org/project/cherry-picker/
@@ -25,7 +25,7 @@ directory for more details.
 
 
 blurb
------------
+-----
 
 .. image:: https://img.shields.io/pypi/v/blurb.svg
     :target: https://pypi.org/project/blurb/
@@ -44,10 +44,12 @@ Other core workflow tools
 ======================================= ======================= =============================================== ================
 `python/bedevere`_                      A bot to help identify  `GitHub <https://github.com/                    `Brett Cannon`_
                                         missing information for python/bedevere/issues>`__
-                                        CPython pull requests                     
+                                        CPython pull requests.
+`python/miss-islington`_                A bot for backporting   `GitHub <https://github.com/                    `Mariatta`_
+                                        CPython pull requests.   python/miss-islington/issues>`__
 `python/the-knights-who-say-ni`_        CLA enforcement bot for `GitHub <https://github.com/                    `Brett Cannon`_
                                         Python organization     python/the-knights-who-say-ni/issues>`__
-                                        projects                
+                                        projects.
 `berkerpeksag/cpython-emailer-webhook`_ A webhook to send every `GitHub <https://github.com/                    `Berker Peksag`_
                                         CPython commit to       berkerpeksag/cpython-emailer-webhook/issues>`__
                                         python-checkins mailing 
@@ -59,10 +61,12 @@ Other core workflow tools
 ======================================= ======================= =============================================== ================
 
 .. _`python/bedevere`: https://github.com/python/bedevere
+.. _`python/miss-islington`: https://github.com/python/miss-islington
 .. _`python/the-knights-who-say-ni`: https://github.com/python/the-knights-who-say-ni
 .. _`berkerpeksag/cpython-emailer-webhook`: https://github.com/berkerpeksag/cpython-emailer-webhook
 .. _`berkerpeksag/cpython-bpo-linkify`: https://github.com/berkerpeksag/cpython-bpo-linkify
 .. _`Brett Cannon`: https://github.com/brettcannon
 .. _`Berker Peksag`: https://github.com/berkerpeksag
+.. _`Mariatta`: https://github.com/mariatta
 
 
