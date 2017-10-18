@@ -1,5 +1,3 @@
-:orphan:
-
 Code of Conduct
 ===============
 
