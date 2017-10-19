@@ -25,12 +25,15 @@ class CherryPickException(Exception):
 class CherryPicker:
 
     def __init__(self, pr_remote, commit_sha1, branches,
-                 *, dry_run=False, push=True):
+                 *, dry_run=False, push=True,
+                 prefix_commit=True
+                 ):
         self.pr_remote = pr_remote
         self.commit_sha1 = commit_sha1
         self.branches = branches
         self.dry_run = dry_run
         self.push = push
+        self.prefix_commit = prefix_commit
 
     @property
     def upstream(self):
@@ -142,9 +145,11 @@ To abort the cherry-pick and cleanup:
 
     def amend_commit_message(self, cherry_pick_branch):
         """ prefix the commit message with (X.Y) """
-        base_branch = get_base_branch(cherry_pick_branch)
 
-        updated_commit_message = f"[{base_branch}] {self.get_commit_message(self.commit_sha1)}{os.linesep}(cherry picked from commit {self.commit_sha1})"
+        commit_prefix = ""
+        if self.prefix_commit:
+            commit_prefix = f"[{get_base_branch(cherry_pick_branch)}] "
+        updated_commit_message = f"{commit_prefix}{self.get_commit_message(self.commit_sha1)}{os.linesep}(cherry picked from commit {self.commit_sha1})"
         updated_commit_message = updated_commit_message.replace('#', 'GH-')
         if self.dry_run:
             click.echo(f"  dry-run: git commit --amend -m '{updated_commit_message}'")
