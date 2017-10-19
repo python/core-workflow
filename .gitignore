@@ -90,5 +90,3 @@ ENV/
 
 # CPython checkout for cherry_picker.
 cherry_picker/cpython
-
-.idea*
