@@ -191,7 +191,7 @@ To abort the cherry-pick and cleanup:
             self.username, oauth_token=gh_auth)
         title, body = normalize_commit_message(commit_message)
         if not self.prefix_commit:
-            title = f"[{base_branch}] title"
+            title = f"[{base_branch}] {title}"
         data = {
           "title": title,
           "body": body,
