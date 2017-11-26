@@ -1,0 +1,20 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "cherry_picker"
+author = "Mariatta Wijaya"
+author-email = "mariatta.wijaya@gmail.com"
+maintainer = "Python Core Developers"
+maintainer-email = "core-workflow@python.org"
+home-page = "https://github.com/python/core-workflow/tree/master/cherry_picker"
+requires = ["click~=6.7", "gidgethub", "requests"]
+dev-requires = ["pytest~=3.0.7"]
+description-file = "readme.rst"
+classifiers = ["Programming Language :: Python :: 3.6", "Intended Audience :: Developers", "License :: OSI Approved :: Apache Software License"]
+requires-python = ">=3.6"
+
+
+[tool.flit.scripts]
+cherry_picker = "cherry_picker.cherry_picker:cherry_pick_cli"
