@@ -167,6 +167,42 @@ def textwrap_body(body, *, subsequent_indent=''):
                 paragraph = "\n".join(lines)
             paragraphs2.append(paragraph)
         else:
+            # Why do we reflow the text twice?  Because it can actually change
+            # between the first and second reflows, and we want the text to
+            # be stable.  The problem is that textwrap.wrap is deliberately
+            # dumb about how many spaces follow a period in prose.
+            #
+            # We're reflowing at 76 columns, but let's pretend it's 30 for
+            # illustration purposes.  If we give textwrap.wrap the following
+            # text--ignore the line of 30 dashes, that's just to help you
+            # with visualization:
+            #
+            #  ------------------------------
+            #  xxxx xxxx xxxx xxxx xxxx.  xxxx
+            #
+            # The first textwrap.wrap will return this:
+            #  "xxxx xxxx xxxx xxxx xxxx.\nxxxx"
+            #
+            # If we reflow it again, textwrap will rejoin the lines, but
+            # only with one space after the period!  So this time it'll
+            # all fit on one line, behold:
+            #  ------------------------------
+            #  xxxx xxxx xxxx xxxx xxxx. xxxx
+            # and so it now returns:
+            #  "xxxx xxxx xxxx xxxx xxxx. xxxx"
+            #
+            # textwrap.wrap supports trying to add two spaces after a peroid:
+            #    https://docs.python.org/3/library/textwrap.html#textwrap.TextWrapper.fix_sentence_endings
+            # But it doesn't work all that well, because it's not smart enough
+            # to do a really good job.
+            #
+            # Since blurbs are eventually turned into ReST and rendered anyway,
+            # and since the Zen says "In the face of ambiguity, refuse the
+            # temptation to guess", I don't sweat it.  I run textwrap.wrap
+            # twice, so it's stable, and this means occasionally it'll
+            # convert two spaces to one space, no big deal.
+
+            paragraph = "\n".join(textwrap.wrap(paragraph.strip(), width=76, **kwargs)).rstrip()
             paragraph = "\n".join(textwrap.wrap(paragraph.strip(), width=76, **kwargs)).rstrip()
             paragraphs2.append(paragraph)
         # don't reflow literal code blocks (I hope)
@@ -937,14 +973,14 @@ This is used by the release manager when cutting a new release.
     git_add_files.append(output)
     flush_git_add_files()
 
-    # sanity check: ensuring that saving/reloading the merged blurb file works.
-    blurbs2 = Blurbs()
-    blurbs2.load(output)
-    assert blurbs2 == blurbs, "Reloading {} isn't reproducable?!".format(output)
-
     print("Removing {} 'next' files from git.".format(len(filenames)))
     git_rm_files.extend(filenames)
     flush_git_rm_files()
+
+    # sanity check: ensuring that saving/reloading the merged blurb file works.
+    blurbs2 = Blurbs()
+    blurbs2.load(output)
+    assert blurbs2 == blurbs, "Reloading {} isn't reproducible?!".format(output)
 
     print()
     print("Ready for commit.")
