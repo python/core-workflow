@@ -677,7 +677,7 @@ If subcommand is not specified, prints one-line summaries for every command.
         summaries = []
         longest_name_len = -1
         for name, fn in subcommands.items():
-            if name == '--help':
+            if name.startswith('-'):
                 continue
             longest_name_len = max(longest_name_len, len(name))
             if not fn.__doc__:
