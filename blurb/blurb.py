@@ -54,6 +54,7 @@ import itertools
 import math
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -893,8 +894,21 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
 
     init_tmp_with_template()
 
+    # We need to be clever about EDITOR.
+    # On the one hand, it might be a legitimate path to an
+    #   executable containing spaces.
+    # On the other hand, it might be a partial command-line
+    #   with options.
+    if shutil.which(editor):
+        args = [editor]
+    else:
+        args = list(shlex.split(editor))
+        if not shutil.which(args[0]):
+            sys.exit("Invalid GIT_EDITOR / EDITOR value: {}".format(editor))
+    args.append(tmp_path)
+
     while True:
-        subprocess.run([editor, tmp_path])
+        subprocess.run(args)
 
         failure = None
         blurb = Blurbs()
