@@ -226,6 +226,29 @@ Running Tests
 
 Install pytest: ``pip install -U pytest``
 
+
+Publishing to PyPI
+==================
+
+Publish to PyPI using ``flit``.
+
+Install flit (preferably in a virtual environment)::
+
+    python3 -m pip install flit
+
+In the directory where ``pyproject.toml`` exists::
+
+    flit publish
+
+
+Local installation
+==================
+
+With flit installed, in the directory where ``pyproject.toml`` exists::
+
+    flit install
+
+
 ::
 
     $ pytest test.py
