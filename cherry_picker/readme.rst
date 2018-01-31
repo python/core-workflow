@@ -226,6 +226,10 @@ Running Tests
 
 Install pytest: ``pip install -U pytest``
 
+::
+
+    $ pytest test.py
+
 
 Publishing to PyPI
 ==================
@@ -249,10 +253,6 @@ in the directory where ``pyproject.toml`` exists::
 
     flit install
 
-
-::
-
-    $ pytest test.py
 
 .. |pyversion status| image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
    :target: https://pypi.org/project/cherry-picker/
