@@ -229,6 +229,30 @@ Install pytest: ``pip install -U pytest``
 
     $ pytest test.py
 
+
+Publishing to PyPI
+==================
+
+Publish to PyPI using `flit <https://flit.readthedocs.io/en/latest/>`_.
+
+Install flit (preferably in a virtual environment)::
+
+    python3 -m pip install flit
+
+In the directory where ``pyproject.toml`` exists::
+
+    flit publish
+
+
+Local installation
+==================
+
+With `flit <https://flit.readthedocs.io/en/latest/>`_ installed,
+in the directory where ``pyproject.toml`` exists::
+
+    flit install
+
+
 .. |pyversion status| image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
    :target: https://pypi.org/project/cherry-picker/
 
