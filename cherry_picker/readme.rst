@@ -230,7 +230,7 @@ Install pytest: ``pip install -U pytest``
 Publishing to PyPI
 ==================
 
-Publish to PyPI using ``flit``.
+Publish to PyPI using `flit <https://flit.readthedocs.io/en/latest/>`_.
 
 Install flit (preferably in a virtual environment)::
 
@@ -244,7 +244,8 @@ In the directory where ``pyproject.toml`` exists::
 Local installation
 ==================
 
-With flit installed, in the directory where ``pyproject.toml`` exists::
+With `flit <https://flit.readthedocs.io/en/latest/>`_ installed,
+in the directory where ``pyproject.toml`` exists::
 
     flit install
 
