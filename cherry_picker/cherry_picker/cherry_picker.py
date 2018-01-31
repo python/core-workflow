@@ -390,9 +390,9 @@ def get_current_branch():
 
 
 def get_full_sha_from_short(short_sha):
-    cmd = f"git show --format=raw {short_sha}"
+    cmd = f"git log -1 --format='%H' {short_sha}"
     output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-    full_sha = output.strip().decode('utf-8').split('\n')[0].split()[1]
+    full_sha = output.strip().decode('utf-8')
     return full_sha
 
 

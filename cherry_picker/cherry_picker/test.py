@@ -28,19 +28,7 @@ def test_get_current_branch(subprocess_check_output):
 
 @mock.patch('subprocess.check_output')
 def test_get_full_sha_from_short(subprocess_check_output):
-    mock_output = b"""commit 22a594a0047d7706537ff2ac676cdc0f1dcb329c
-tree 14ab2ea85e7a28adb9d40f185006308d87a67f47
-parent 5908300e4b0891fc5ab8bd24fba8fac72012eaa7
-author Armin Rigo <armin.rigo@gmail.com> 1492106895 +0200
-committer Mariatta <Mariatta@users.noreply.github.com> 1492106895 -0700
-
-    bpo-29694: race condition in pathlib mkdir with flags parents=True (GH-1089)
-
-diff --git a/Lib/pathlib.py b/Lib/pathlib.py
-index fc7ce5e..1914229 100644
---- a/Lib/pathlib.py
-+++ b/Lib/pathlib.py
-"""
+    mock_output = b"""22a594a0047d7706537ff2ac676cdc0f1dcb329c"""
     subprocess_check_output.return_value = mock_output
     assert get_full_sha_from_short('22a594a') == '22a594a0047d7706537ff2ac676cdc0f1dcb329c'
 
