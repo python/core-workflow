@@ -5,7 +5,6 @@ Usage (from a cloned CPython directory) ::
 |pyversion status|
 |pypi status|
 |travis status|
-|license status|
 
 .. contents::
 
@@ -230,6 +229,30 @@ Install pytest: ``pip install -U pytest``
 
     $ pytest test.py
 
+
+Publishing to PyPI
+==================
+
+Publish to PyPI using `flit <https://flit.readthedocs.io/en/latest/>`_.
+
+Install flit (preferably in a virtual environment)::
+
+    python3 -m pip install flit
+
+In the directory where ``pyproject.toml`` exists::
+
+    flit publish
+
+
+Local installation
+==================
+
+With `flit <https://flit.readthedocs.io/en/latest/>`_ installed,
+in the directory where ``pyproject.toml`` exists::
+
+    flit install
+
+
 .. |pyversion status| image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
    :target: https://pypi.org/project/cherry-picker/
 
@@ -239,5 +262,3 @@ Install pytest: ``pip install -U pytest``
 .. |travis status| image:: https://travis-ci.org/python/core-workflow.svg?branch=master
    :target: https://travis-ci.org/python/core-workflow
 
-.. |license status| image:: https://img.shields.io/pypi/l/cherry-picker.svg
-   :target: https://github.com/python/core-workflow/blob/master/LICENSE

@@ -3,7 +3,8 @@ from unittest import mock
 import pytest
 
 from .cherry_picker import get_base_branch, get_current_branch, \
-    get_full_sha_from_short, is_cpython_repo, CherryPicker, \
+    get_full_sha_from_short, get_author_info_from_short_sha, \
+    is_cpython_repo, CherryPicker, \
     normalize_commit_message
 
 
@@ -27,21 +28,16 @@ def test_get_current_branch(subprocess_check_output):
 
 @mock.patch('subprocess.check_output')
 def test_get_full_sha_from_short(subprocess_check_output):
-    mock_output = b"""commit 22a594a0047d7706537ff2ac676cdc0f1dcb329c
-tree 14ab2ea85e7a28adb9d40f185006308d87a67f47
-parent 5908300e4b0891fc5ab8bd24fba8fac72012eaa7
-author Armin Rigo <armin.rigo@gmail.com> 1492106895 +0200
-committer Mariatta <Mariatta@users.noreply.github.com> 1492106895 -0700
-
-    bpo-29694: race condition in pathlib mkdir with flags parents=True (GH-1089)
-
-diff --git a/Lib/pathlib.py b/Lib/pathlib.py
-index fc7ce5e..1914229 100644
---- a/Lib/pathlib.py
-+++ b/Lib/pathlib.py
-"""
+    mock_output = b"""22a594a0047d7706537ff2ac676cdc0f1dcb329c"""
     subprocess_check_output.return_value = mock_output
     assert get_full_sha_from_short('22a594a') == '22a594a0047d7706537ff2ac676cdc0f1dcb329c'
+
+
+@mock.patch('subprocess.check_output')
+def test_get_author_info_from_short_sha(subprocess_check_output):
+    mock_output = b"Armin Rigo <armin.rigo@gmail.com>"
+    subprocess_check_output.return_value = mock_output
+    assert get_author_info_from_short_sha('22a594a') == 'Armin Rigo <armin.rigo@gmail.com>'
 
 
 @mock.patch('os.path.exists')
@@ -119,18 +115,26 @@ def test_normalize_long_commit_message():
 The `Show Source` was broken because of a change made in sphinx 1.5.1
 In Sphinx 1.4.9, the sourcename was "index.txt".
 In Sphinx 1.5.1+, it is now "index.rst.txt".
-(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)"""
+(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)
+
+Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
     title, body = normalize_commit_message(commit_message)
     assert title == "[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)"
     assert body == """The `Show Source` was broken because of a change made in sphinx 1.5.1
 In Sphinx 1.4.9, the sourcename was "index.txt".
 In Sphinx 1.5.1+, it is now "index.rst.txt".
-(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)"""
+(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)
+
+Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
 
 def test_normalize_short_commit_message():
     commit_message = """[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)
 
-(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)"""
+(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)
+
+Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
     title, body = normalize_commit_message(commit_message)
     assert title == "[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)"
-    assert body == """(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)"""
+    assert body == """(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)
+
+Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
