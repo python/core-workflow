@@ -152,6 +152,7 @@ To abort the cherry-pick and cleanup:
         updated_commit_message = f"""{commit_prefix}{self.get_commit_message(self.commit_sha1)}
 (cherry picked from commit {self.commit_sha1})
 
+
 Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
         updated_commit_message = updated_commit_message.replace('#', 'GH-')
         if self.dry_run:
@@ -301,6 +302,7 @@ To abort the cherry-pick and cleanup:
             co_author_info = f"Co-authored-by: {get_author_info_from_short_sha(short_sha)}"
             updated_commit_message = f"""[{base}] {commit_message}.
 (cherry picked from commit {full_sha})
+
 
 {co_author_info}"""
             if self.dry_run:
