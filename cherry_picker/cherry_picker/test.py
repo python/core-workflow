@@ -117,6 +117,7 @@ In Sphinx 1.4.9, the sourcename was "index.txt".
 In Sphinx 1.5.1+, it is now "index.rst.txt".
 (cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)
 
+
 Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
     title, body = normalize_commit_message(commit_message)
     assert title == "[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)"
@@ -125,6 +126,7 @@ In Sphinx 1.4.9, the sourcename was "index.txt".
 In Sphinx 1.5.1+, it is now "index.rst.txt".
 (cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)
 
+
 Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
 
 def test_normalize_short_commit_message():
@@ -132,9 +134,11 @@ def test_normalize_short_commit_message():
 
 (cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)
 
+
 Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
     title, body = normalize_commit_message(commit_message)
     assert title == "[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)"
     assert body == """(cherry picked from commit b9ff498793611d1c6a9b99df464812931a1e2d69)
+
 
 Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
