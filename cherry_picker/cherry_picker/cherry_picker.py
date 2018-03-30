@@ -13,11 +13,16 @@ from gidgethub import sansio
 from . import __version__
 
 CPYTHON_CREATE_PR_URL = "https://api.github.com/repos/python/cpython/pulls"
+CPYTHON_CHECK_SHA = '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'
 
 class BranchCheckoutException(Exception):
     pass
 
 class CherryPickException(Exception):
+    pass
+
+
+class InvalidRepoException(Exception):
     pass
 
 
@@ -28,6 +33,12 @@ class CherryPicker:
                  *, dry_run=False, push=True,
                  prefix_commit=True
                  ):
+
+        self.check_repo()  # may raise InvalidRepoException
+
+        if dry_run:
+            click.echo("Dry run requested, listing expected command sequence")
+
         self.pr_remote = pr_remote
         self.commit_sha1 = commit_sha1
         self.branches = branches
@@ -321,6 +332,15 @@ To abort the cherry-pick and cleanup:
         else:
             click.echo(f"Current branch ({cherry_pick_branch}) is not a backport branch.  Will not continue. \U0001F61B")
 
+    def check_repo(self):
+        # CPython repo has a commit with
+        # SHA=7f777ed95a19224294949e1b4ce56bbffcb1fe9f
+        cmd = f"git log -r {CPYTHON_CHECK_SHA}"
+        try:
+            subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+        except subprocess.SubprocessError:
+            raise InvalidRepoException()
+
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -346,16 +366,13 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
 
-    if not is_cpython_repo():
+    try:
+        cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
+                                     dry_run=dry_run,
+                                     push=push)
+    except InvalidRepoException:
         click.echo("You're not inside a CPython repo right now! 🙅")
         sys.exit(-1)
-
-    if dry_run:
-        click.echo("Dry run requested, listing expected command sequence")
-
-    cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
-                                 dry_run=dry_run,
-                                 push=push)
 
     if abort is not None:
         if abort:
@@ -404,14 +421,6 @@ def get_author_info_from_short_sha(short_sha):
     author = output.strip().decode('utf-8')
     return author
 
-
-def is_cpython_repo():
-    cmd = "git log -r 7f777ed95a19224294949e1b4ce56bbffcb1fe9f"
-    try:
-        subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
-    except subprocess.SubprocessError:
-        return False
-    return True
 
 def normalize_commit_message(commit_message):
     """
