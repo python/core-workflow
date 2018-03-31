@@ -2,11 +2,14 @@
 #  -*- coding: utf-8 -*-
 
 import click
+import collections
 import os
+import pathlib
 import subprocess
 import webbrowser
 import sys
 import requests
+import toml
 
 from gidgethub import sansio
 
@@ -15,10 +18,10 @@ from . import __version__
 CREATE_PR_URL_TEMPLATE = ("https://api.github.com/repos/"
                           "{config[github][team]}/{config[github][repo]}/"
                           "pulls")
-DEFAULT_CONFIG = {'github':
-                  {'team': 'python',
-                   'repo': 'cpython',
-                   'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'}}
+DEFAULT_CONFIG = collections.ChainMap({
+    'github': {'team': 'python',
+               'repo': 'cpython',
+               'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'}})
 
 
 class BranchCheckoutException(Exception):
@@ -351,6 +354,32 @@ To abort the cherry-pick and cleanup:
             raise InvalidRepoException()
 
 
+def find_project_root():
+    cmd = f"git rev-parse --show-toplevel"
+    output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+    return pathlib.Path(output.decode('utf-8').strip())
+
+
+def find_config():
+    root = find_project_root()
+    if root is not None:
+        child = root / '.cherry_picker.toml'
+        if child.exists() and not child.is_dir():
+            return child
+    return None
+
+
+def load_config(path):
+    if path is None:
+        path = find_config()
+    if path is None:
+        return DEFAULT_CONFIG
+    else:
+        with path.open() as f:
+            d = toml.load(f)
+            return DEFAULT_CONFIG.new_child(d)
+
+
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 @click.command(context_settings=CONTEXT_SETTINGS)
@@ -367,6 +396,10 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help="Get the status of cherry-pick")
 @click.option('--push/--no-push', 'push', is_flag=True, default=True,
               help="Changes won't be pushed to remote")
+@click.option('--config', 'config', metavar='CONFIG',
+              help=("Path to config file, .cherry_picker.toml "
+                    "from project root by default"),
+              default=None)
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
                 default = "")
 @click.argument('branches', 'The branches to backport to', nargs=-1)

@@ -1,3 +1,4 @@
+import pathlib
 from collections import ChainMap
 from unittest import mock
 
@@ -6,7 +7,8 @@ import pytest
 from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, get_author_info_from_short_sha, \
     CherryPicker, InvalidRepoException, \
-    normalize_commit_message, DEFAULT_CONFIG
+    normalize_commit_message, DEFAULT_CONFIG, \
+    find_project_root
 
 @pytest.fixture
 def config():
@@ -125,6 +127,12 @@ def test_is_not_cpython_repo():
     with pytest.raises(InvalidRepoException):
         CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
                      ["3.6"])
+
+
+def test_find_project_root():
+    here = pathlib.Path(__file__)
+    root = here.parent.parent.parent
+    assert find_project_root() == root
 
 
 def test_normalize_long_commit_message():
