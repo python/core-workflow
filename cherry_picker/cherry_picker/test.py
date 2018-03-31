@@ -10,7 +10,7 @@ from .cherry_picker import get_base_branch, get_current_branch, \
 
 @pytest.fixture(autouse=True)
 def patch_cpython_sha():
-    cherry_picker.CPYTHON_CHECK_SHA = 'dc896437c8efe5a4a5dfa50218b7a6dc0cbe2598'
+    cherry_picker.DEFAULT_CHECK_SHA = 'dc896437c8efe5a4a5dfa50218b7a6dc0cbe2598'
 
 
 def test_get_base_branch():
@@ -115,7 +115,7 @@ Date:   Thu Aug 9 14:25:15 1990 +0000
 
 def test_is_not_cpython_repo():
     # revert back patch_cpython_sha fixture change
-    cherry_picker.CPYTHON_CHECK_SHA = '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'
+    cherry_picker.DEFAULT_CHECK_SHA = '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'
     with pytest.raises(InvalidRepoException):
         CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
                      ["3.6"])
