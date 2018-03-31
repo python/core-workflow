@@ -12,13 +12,21 @@ from gidgethub import sansio
 
 from . import __version__
 
-CREATE_PR_URL_TEMPLATE = "https://api.github.com/repos/{team}/{repo}/pulls"
+CREATE_PR_URL_TEMPLATE = ("https://api.github.com/repos/"
+                          "{config[github][team]}/{config[github][repo]}/"
+                          "pulls")
 DEFAULT_TEAM = "python"
 DEFAULT_REPO = "cpython"
 DEFAULT_CHECK_SHA = '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'
+DEFAULT_CONFIG = {'github':
+                  {'team': DEFAULT_TEAM,
+                   'repo': DEFAULT_REPO,
+                   'check_sha': DEFAULT_CHECK_SHA}}
+
 
 class BranchCheckoutException(Exception):
     pass
+
 
 class CherryPickException(Exception):
     pass
@@ -28,14 +36,15 @@ class InvalidRepoException(Exception):
     pass
 
 
-
 class CherryPicker:
 
     def __init__(self, pr_remote, commit_sha1, branches,
                  *, dry_run=False, push=True,
                  prefix_commit=True,
+                 config=DEFAULT_CONFIG,
                  ):
 
+        self.config = config
         self.check_repo()  # may raise InvalidRepoException
 
         if dry_run:
@@ -216,8 +225,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
           "base": base_branch,
           "maintainer_can_modify": True
         }
-        url = CREATE_PR_URL_TEMPLATE.format(team=DEFAULT_TEAM,
-                                            repo=DEFAULT_REPO)
+        url = CREATE_PR_URL_TEMPLATE.format(config=self.config)
         response = requests.post(url, headers=request_headers, json=data)
         if response.status_code == requests.codes.created:
             click.echo(f"Backport PR created at {response.json()['html_url']}")
@@ -339,7 +347,7 @@ To abort the cherry-pick and cleanup:
     def check_repo(self):
         # CPython repo has a commit with
         # SHA=7f777ed95a19224294949e1b4ce56bbffcb1fe9f
-        cmd = f"git log -r {DEFAULT_CHECK_SHA}"
+        cmd = f"git log -r {self.config['github']['check_sha']}"
         try:
             subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:

@@ -1,16 +1,18 @@
+from collections import ChainMap
 from unittest import mock
 
 import pytest
 
-from . import cherry_picker
 from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, get_author_info_from_short_sha, \
     CherryPicker, InvalidRepoException, \
-    normalize_commit_message
+    normalize_commit_message, DEFAULT_CONFIG
 
-@pytest.fixture(autouse=True)
-def patch_cpython_sha():
-    cherry_picker.DEFAULT_CHECK_SHA = 'dc896437c8efe5a4a5dfa50218b7a6dc0cbe2598'
+@pytest.fixture
+def config():
+    check_sha = 'dc896437c8efe5a4a5dfa50218b7a6dc0cbe2598'
+    return ChainMap(DEFAULT_CONFIG).new_child({'github':
+                                               {'check_sha': check_sha}})
 
 
 def test_get_base_branch():
@@ -46,29 +48,31 @@ def test_get_author_info_from_short_sha(subprocess_check_output):
 
 
 @mock.patch('os.path.exists')
-def test_sorted_branch(os_path_exists):
+def test_sorted_branch(os_path_exists, config):
     os_path_exists.return_value = True
     branches = ["3.1", "2.7", "3.10", "3.6"]
-    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c', branches)
+    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
+                      branches, config=config)
     assert cp.sorted_branches == ["3.10", "3.6", "3.1", "2.7"]
 
 
 @mock.patch('os.path.exists')
-def test_get_cherry_pick_branch(os_path_exists):
+def test_get_cherry_pick_branch(os_path_exists, config):
     os_path_exists.return_value = True
     branches = ["3.6"]
-    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c', branches)
+    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
+                      branches, config=config)
     assert cp.get_cherry_pick_branch("3.6") == "backport-22a594a-3.6"
 
 
 @mock.patch('os.path.exists')
 @mock.patch('subprocess.check_output')
-def test_get_pr_url(subprocess_check_output, os_path_exists):
+def test_get_pr_url(subprocess_check_output, os_path_exists, config):
     os_path_exists.return_value = True
     subprocess_check_output.return_value = b'https://github.com/mock_user/cpython.git'
     branches = ["3.6"]
     cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                      branches)
+                      branches, config=config)
     assert cp.get_pr_url("3.6", cp.get_cherry_pick_branch("3.6")) \
            == "https://github.com/python/cpython/compare/3.6...mock_user:backport-22a594a-3.6?expand=1"
 
@@ -81,27 +85,29 @@ def test_get_pr_url(subprocess_check_output, os_path_exists):
     b'https://github.com/mock_user/cpython.git',
     b'https://github.com/mock_user/cpython',
     ])
-def test_username(url):
+def test_username(url, config):
     with mock.patch('subprocess.check_output', return_value=url):
         branches = ["3.6"]
         cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                          branches)
+                          branches, config=config)
         assert cp.username == 'mock_user'
 
 
 @mock.patch('os.path.exists')
 @mock.patch('subprocess.check_output')
-def test_get_updated_commit_message(subprocess_check_output, os_path_exists):
+def test_get_updated_commit_message(subprocess_check_output, os_path_exists,
+                                    config):
     os_path_exists.return_value = True
     subprocess_check_output.return_value = b'bpo-123: Fix Spam Module (#113)'
     branches = ["3.6"]
     cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                      branches)
+                      branches, config=config)
     assert cp.get_commit_message('22a594a0047d7706537ff2ac676cdc0f1dcb329c') \
            == 'bpo-123: Fix Spam Module (GH-113)'
 
+
 @mock.patch('subprocess.check_output')
-def test_is_cpython_repo(subprocess_check_output):
+def test_is_cpython_repo(subprocess_check_output, config):
     subprocess_check_output.return_value = """commit 7f777ed95a19224294949e1b4ce56bbffcb1fe9f
 Author: Guido van Rossum <guido@python.org>
 Date:   Thu Aug 9 14:25:15 1990 +0000
@@ -111,14 +117,15 @@ Date:   Thu Aug 9 14:25:15 1990 +0000
 """
     # should not raise an exception
     CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                 ["3.6"])
+                 ["3.6"], config=config)
+
 
 def test_is_not_cpython_repo():
-    # revert back patch_cpython_sha fixture change
-    cherry_picker.DEFAULT_CHECK_SHA = '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'
+    # use default CPython sha to fail on this repo
     with pytest.raises(InvalidRepoException):
         CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
                      ["3.6"])
+
 
 def test_normalize_long_commit_message():
     commit_message = """[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)
@@ -139,6 +146,7 @@ In Sphinx 1.5.1+, it is now "index.rst.txt".
 
 
 Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
+
 
 def test_normalize_short_commit_message():
     commit_message = """[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)
