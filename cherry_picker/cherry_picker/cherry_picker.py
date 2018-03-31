@@ -89,7 +89,7 @@ class CherryPicker:
         return f"backport-{self.commit_sha1[:7]}-{maint_branch}"
 
     def get_pr_url(self, base_branch, head_branch):
-        return f"https://github.com/python/cpython/compare/{base_branch}...{self.username}:{head_branch}?expand=1"
+        return f"https://github.com/{self.config['team']}/{self.config['repo']}/compare/{base_branch}...{self.username}:{head_branch}?expand=1"
 
     def fetch_upstream(self):
         """ git fetch <upstream> """
@@ -369,24 +369,26 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help="Get the status of cherry-pick")
 @click.option('--push/--no-push', 'push', is_flag=True, default=True,
               help="Changes won't be pushed to remote")
-@click.option('--config', 'config', metavar='CONFIG',
+@click.option('--config-path', 'config_path', metavar='CONFIG',
               help=("Path to config file, .cherry_picker.toml "
                     "from project root by default"),
               default=None)
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
                 default = "")
 @click.argument('branches', 'The branches to backport to', nargs=-1)
-def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
+def cherry_pick_cli(dry_run, pr_remote, abort, status, push, config_path,
                     commit_sha1, branches):
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
 
+    config = load_config(config_path)
+
     try:
         cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
                                      dry_run=dry_run,
-                                     push=push)
+                                     push=push, config=config)
     except InvalidRepoException:
-        click.echo("You're not inside a CPython repo right now! 🙅")
+        click.echo(f"You're not inside a {config['repo']} repo right now! 🙅")
         sys.exit(-1)
 
     if abort is not None:
@@ -468,6 +470,7 @@ def load_config(path):
     if path is None:
         return DEFAULT_CONFIG
     else:
+        path = pathlib.Path(path)  # enforce a cast to pathlib datatype
         with path.open() as f:
             d = toml.load(f)
             return DEFAULT_CONFIG.new_child(d)
