@@ -16,12 +16,11 @@ from gidgethub import sansio
 from . import __version__
 
 CREATE_PR_URL_TEMPLATE = ("https://api.github.com/repos/"
-                          "{config[github][team]}/{config[github][repo]}/"
-                          "pulls")
+                          "{config[team]}/{config[repo]}/pulls")
 DEFAULT_CONFIG = collections.ChainMap({
-    'github': {'team': 'python',
-               'repo': 'cpython',
-               'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'}})
+    'team': 'python',
+    'repo': 'cpython',
+    'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'})
 
 
 class BranchCheckoutException(Exception):
@@ -347,37 +346,11 @@ To abort the cherry-pick and cleanup:
     def check_repo(self):
         # CPython repo has a commit with
         # SHA=7f777ed95a19224294949e1b4ce56bbffcb1fe9f
-        cmd = f"git log -r {self.config['github']['check_sha']}"
+        cmd = f"git log -r {self.config['check_sha']}"
         try:
             subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
             raise InvalidRepoException()
-
-
-def find_project_root():
-    cmd = f"git rev-parse --show-toplevel"
-    output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
-    return pathlib.Path(output.decode('utf-8').strip())
-
-
-def find_config():
-    root = find_project_root()
-    if root is not None:
-        child = root / '.cherry_picker.toml'
-        if child.exists() and not child.is_dir():
-            return child
-    return None
-
-
-def load_config(path):
-    if path is None:
-        path = find_config()
-    if path is None:
-        return DEFAULT_CONFIG
-    else:
-        with path.open() as f:
-            d = toml.load(f)
-            return DEFAULT_CONFIG.new_child(d)
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -472,6 +445,32 @@ def normalize_commit_message(commit_message):
     title = split_commit_message[0]
     body = "\n".join(split_commit_message[1:])
     return title, body.lstrip("\n")
+
+
+def find_project_root():
+    cmd = f"git rev-parse --show-toplevel"
+    output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+    return pathlib.Path(output.decode('utf-8').strip())
+
+
+def find_config():
+    root = find_project_root()
+    if root is not None:
+        child = root / '.cherry_picker.toml'
+        if child.exists() and not child.is_dir():
+            return child
+    return None
+
+
+def load_config(path):
+    if path is None:
+        path = find_config()
+    if path is None:
+        return DEFAULT_CONFIG
+    else:
+        with path.open() as f:
+            d = toml.load(f)
+            return DEFAULT_CONFIG.new_child(d)
 
 
 if __name__ == '__main__':

@@ -10,13 +10,13 @@ from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, get_author_info_from_short_sha, \
     CherryPicker, InvalidRepoException, \
     normalize_commit_message, DEFAULT_CONFIG, \
-    find_project_root, find_config
+    find_project_root, find_config, load_config
+
 
 @pytest.fixture
 def config():
     check_sha = 'dc896437c8efe5a4a5dfa50218b7a6dc0cbe2598'
-    return ChainMap(DEFAULT_CONFIG).new_child({'github':
-                                               {'check_sha': check_sha}})
+    return ChainMap(DEFAULT_CONFIG).new_child({'check_sha': check_sha})
 
 
 @pytest.fixture
@@ -154,7 +154,7 @@ def test_find_config(tmpdir, cd):
     cd(tmpdir)
     subprocess.run('git init .'.split(), check=True)
     cfg = tmpdir.join('.cherry_picker.toml')
-    cfg.write('[github]')
+    cfg.write('param = 1')
     assert str(find_config()) == str(cfg)
 
 
@@ -162,6 +162,32 @@ def test_find_config_not_found(tmpdir, cd):
     cd(tmpdir)
     subprocess.run('git init .'.split(), check=True)
     assert find_config() is None
+
+
+def test_load_config(tmpdir, cd):
+    cd(tmpdir)
+    subprocess.run('git init .'.split(), check=True)
+    cfg = tmpdir.join('.cherry_picker.toml')
+    cfg.write('''\
+    team = "python"
+    repo = "core-workfolow"
+    check_sha = "5f007046b5d4766f971272a0cc99f8461215c1ec"
+    ''')
+    cfg = load_config(None)
+    assert cfg == {'check_sha': '5f007046b5d4766f971272a0cc99f8461215c1ec',
+                   'repo': 'core-workfolow',
+                   'team': 'python'}
+
+
+def test_load_config(tmpdir, cd):
+    cfg = tmpdir.join('.cherry_picker.toml')
+    cfg.write('''\
+    repo = "core-workfolow"
+    ''')
+    cfg = load_config(pathlib.Path(str(cfg)))
+    assert cfg == {'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
+                   'repo': 'core-workfolow',
+                   'team': 'python'}
 
 
 def test_normalize_long_commit_message():
