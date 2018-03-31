@@ -62,7 +62,7 @@ From the cloned CPython directory:
 
 ::
 
-    (venv) $ cherry_picker [--pr-remote REMOTE] [--dry-run] [--abort/--continue] [--status] [--push/--no-push] <commit_sha1> <branches>
+    (venv) $ cherry_picker [--pr-remote REMOTE] [--dry-run] [--config-path CONFIG-PATH] [--abort/--continue] [--status] [--push/--no-push] <commit_sha1> <branches>
 
 
 Commit sha1
@@ -93,6 +93,46 @@ Additional options::
     -- abort        Abort current cherry-pick and clean up branch
     -- continue     Continue cherry-pick, push, and clean up branch
     -- no-push      Changes won't be pushed to remote
+    -- config-path  Path to config file
+                    (`.cherry_picker.toml` from project root by default)
+
+
+Configuration file example::
+
+   team = "aio-libs"
+   repo = "aiohttp"
+   check_sha = "f382b5ffc445e45a110734f5396728da7914aeb6"
+
+Available config options::
+
+   team        github organization or individual nick,
+               e.g "aio-libs" for https://github.com/aio-libs/aiohttp
+               ("python" by default)
+
+   repo        github project name,
+               e.g "aiohttp" for https://github.com/aio-libs/aiohttp
+               ("cpython" by default)
+
+   check_sha   A long hash for any commit from the repo,
+               e.g. a sha1 hash from the very first initial commit
+               ("7f777ed95a19224294949e1b4ce56bbffcb1fe9f" by default)
+
+To setup the tool for using by custom project:
+
+1. Create a file called `.cherry_picker.toml` in the project's root
+   folder (alongside with `.git` forlder).
+
+2. Add `team`, `repo` and `check_sha` config values as described above.
+
+3. Use `git add .cherry_picker.toml` / `git commit` to add the config
+   into git.
+
+4. Add `cherry_picker` to development dependencies or just install it
+   by `pip install cherry_picker`
+
+5. Now everything is ready, use `cherry_picker <commit_sha> <branch1>
+   <branch2>` for cherry-picking changes from `<commit_sha` into
+   maintainance branches.
 
 Demo
 ----

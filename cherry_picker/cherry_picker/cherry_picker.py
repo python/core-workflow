@@ -369,7 +369,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help="Get the status of cherry-pick")
 @click.option('--push/--no-push', 'push', is_flag=True, default=True,
               help="Changes won't be pushed to remote")
-@click.option('--config-path', 'config_path', metavar='CONFIG',
+@click.option('--config-path', 'config_path', metavar='CONFIG-PATH',
               help=("Path to config file, .cherry_picker.toml "
                     "from project root by default"),
               default=None)
