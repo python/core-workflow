@@ -242,6 +242,12 @@ cherry-pick additional commits, by::
 
    $ git cherry-pick -x <commit_sha1>
 
+`--config-path` option
+-------------------
+
+Allows to override default config file path
+(`<PROJ-ROOT>/.cherry_picker.toml`) with a custom one.
+
 
 Creating Pull Requests
 ======================
