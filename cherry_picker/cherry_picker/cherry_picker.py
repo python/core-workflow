@@ -15,13 +15,10 @@ from . import __version__
 CREATE_PR_URL_TEMPLATE = ("https://api.github.com/repos/"
                           "{config[github][team]}/{config[github][repo]}/"
                           "pulls")
-DEFAULT_TEAM = "python"
-DEFAULT_REPO = "cpython"
-DEFAULT_CHECK_SHA = '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'
 DEFAULT_CONFIG = {'github':
-                  {'team': DEFAULT_TEAM,
-                   'repo': DEFAULT_REPO,
-                   'check_sha': DEFAULT_CHECK_SHA}}
+                  {'team': 'python',
+                   'repo': 'cpython',
+                   'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'}}
 
 
 class BranchCheckoutException(Exception):
