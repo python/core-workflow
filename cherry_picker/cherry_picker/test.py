@@ -1,4 +1,6 @@
+import os
 import pathlib
+import subprocess
 from collections import ChainMap
 from unittest import mock
 
@@ -8,13 +10,26 @@ from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, get_author_info_from_short_sha, \
     CherryPicker, InvalidRepoException, \
     normalize_commit_message, DEFAULT_CONFIG, \
-    find_project_root
+    find_project_root, find_config
 
 @pytest.fixture
 def config():
     check_sha = 'dc896437c8efe5a4a5dfa50218b7a6dc0cbe2598'
     return ChainMap(DEFAULT_CONFIG).new_child({'github':
                                                {'check_sha': check_sha}})
+
+
+@pytest.fixture
+def cd():
+    cwd = os.getcwd()
+
+    def changedir(d):
+        os.chdir(d)
+
+    yield changedir
+
+    # restore CWD back
+    os.chdir(cwd)
 
 
 def test_get_base_branch():
@@ -133,6 +148,20 @@ def test_find_project_root():
     here = pathlib.Path(__file__)
     root = here.parent.parent.parent
     assert find_project_root() == root
+
+
+def test_find_config(tmpdir, cd):
+    cd(tmpdir)
+    subprocess.run('git init .'.split(), check=True)
+    cfg = tmpdir.join('.cherry_picker.toml')
+    cfg.write('[github]')
+    assert str(find_config()) == str(cfg)
+
+
+def test_find_config_not_found(tmpdir, cd):
+    cd(tmpdir)
+    subprocess.run('git init .'.split(), check=True)
+    assert find_config() is None
 
 
 def test_normalize_long_commit_message():
