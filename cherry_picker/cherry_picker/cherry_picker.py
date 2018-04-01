@@ -2,21 +2,30 @@
 #  -*- coding: utf-8 -*-
 
 import click
+import collections
 import os
+import pathlib
 import subprocess
 import webbrowser
 import sys
 import requests
+import toml
 
 from gidgethub import sansio
 
 from . import __version__
 
-CPYTHON_CREATE_PR_URL = "https://api.github.com/repos/python/cpython/pulls"
-CPYTHON_CHECK_SHA = '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'
+CREATE_PR_URL_TEMPLATE = ("https://api.github.com/repos/"
+                          "{config[team]}/{config[repo]}/pulls")
+DEFAULT_CONFIG = collections.ChainMap({
+    'team': 'python',
+    'repo': 'cpython',
+    'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'})
+
 
 class BranchCheckoutException(Exception):
     pass
+
 
 class CherryPickException(Exception):
     pass
@@ -26,14 +35,15 @@ class InvalidRepoException(Exception):
     pass
 
 
-
 class CherryPicker:
 
     def __init__(self, pr_remote, commit_sha1, branches,
                  *, dry_run=False, push=True,
-                 prefix_commit=True
+                 prefix_commit=True,
+                 config=DEFAULT_CONFIG,
                  ):
 
+        self.config = config
         self.check_repo()  # may raise InvalidRepoException
 
         if dry_run:
@@ -79,7 +89,7 @@ class CherryPicker:
         return f"backport-{self.commit_sha1[:7]}-{maint_branch}"
 
     def get_pr_url(self, base_branch, head_branch):
-        return f"https://github.com/python/cpython/compare/{base_branch}...{self.username}:{head_branch}?expand=1"
+        return f"https://github.com/{self.config['team']}/{self.config['repo']}/compare/{base_branch}...{self.username}:{head_branch}?expand=1"
 
     def fetch_upstream(self):
         """ git fetch <upstream> """
@@ -214,7 +224,8 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
           "base": base_branch,
           "maintainer_can_modify": True
         }
-        response = requests.post(CPYTHON_CREATE_PR_URL, headers=request_headers, json=data)
+        url = CREATE_PR_URL_TEMPLATE.format(config=self.config)
+        response = requests.post(url, headers=request_headers, json=data)
         if response.status_code == requests.codes.created:
             click.echo(f"Backport PR created at {response.json()['html_url']}")
         else:
@@ -335,7 +346,7 @@ To abort the cherry-pick and cleanup:
     def check_repo(self):
         # CPython repo has a commit with
         # SHA=7f777ed95a19224294949e1b4ce56bbffcb1fe9f
-        cmd = f"git log -r {CPYTHON_CHECK_SHA}"
+        cmd = f"git log -r {self.config['check_sha']}"
         try:
             subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
@@ -358,20 +369,26 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help="Get the status of cherry-pick")
 @click.option('--push/--no-push', 'push', is_flag=True, default=True,
               help="Changes won't be pushed to remote")
+@click.option('--config-path', 'config_path', metavar='CONFIG-PATH',
+              help=("Path to config file, .cherry_picker.toml "
+                    "from project root by default"),
+              default=None)
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
                 default = "")
 @click.argument('branches', 'The branches to backport to', nargs=-1)
-def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
+def cherry_pick_cli(dry_run, pr_remote, abort, status, push, config_path,
                     commit_sha1, branches):
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
 
+    config = load_config(config_path)
+
     try:
         cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
                                      dry_run=dry_run,
-                                     push=push)
+                                     push=push, config=config)
     except InvalidRepoException:
-        click.echo("You're not inside a CPython repo right now! 🙅")
+        click.echo(f"You're not inside a {config['repo']} repo right now! 🙅")
         sys.exit(-1)
 
     if abort is not None:
@@ -430,6 +447,33 @@ def normalize_commit_message(commit_message):
     title = split_commit_message[0]
     body = "\n".join(split_commit_message[1:])
     return title, body.lstrip("\n")
+
+
+def find_project_root():
+    cmd = f"git rev-parse --show-toplevel"
+    output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+    return pathlib.Path(output.decode('utf-8').strip())
+
+
+def find_config():
+    root = find_project_root()
+    if root is not None:
+        child = root / '.cherry_picker.toml'
+        if child.exists() and not child.is_dir():
+            return child
+    return None
+
+
+def load_config(path):
+    if path is None:
+        path = find_config()
+    if path is None:
+        return DEFAULT_CONFIG
+    else:
+        path = pathlib.Path(path)  # enforce a cast to pathlib datatype
+        with path.open() as f:
+            d = toml.load(f)
+            return DEFAULT_CONFIG.new_child(d)
 
 
 if __name__ == '__main__':
