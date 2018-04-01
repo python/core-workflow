@@ -246,7 +246,7 @@ cherry-pick additional commits, by::
 ----------------------
 
 Allows to override default config file path
-(`<PROJ-ROOT>/.cherry_picker.toml`) with a custom one. This allows cherry_picker
+(``<PROJ-ROOT>/.cherry_picker.toml``) with a custom one. This allows cherry_picker
 to backport projects other than CPython.
 
 
