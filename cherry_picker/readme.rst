@@ -315,5 +315,5 @@ Changelog
 1.0.0
 -----
 
-- Support configuration file by using `--config-path` option, or by adding
-  `.cherry-picker.toml` file to the root of the project.
+- Support configuration file by using ``--config-path`` option, or by adding
+  ``.cherry-picker.toml`` file to the root of the project.
