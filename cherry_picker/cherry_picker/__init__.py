@@ -1,2 +1,2 @@
 """Backport CPython changes from master to maintenance branches."""
-__version__ = '0.2.9.dev1'
+__version__ = '1.0.0.dev1'

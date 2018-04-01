@@ -1,6 +1,6 @@
 Usage (from a cloned CPython directory) ::
 
-   cherry_picker [--pr-remote REMOTE] [--dry-run] [--status] [--abort/--continue] [--push/--no-push] <commit_sha1> <branches>
+   cherry_picker [--pr-remote REMOTE] [--dry-run] [--config-path CONFIG-PATH] [--status] [--abort/--continue] [--push/--no-push] <commit_sha1> <branches>
 
 |pyversion status|
 |pypi status|
@@ -117,22 +117,22 @@ Available config options::
                e.g. a sha1 hash from the very first initial commit
                ("7f777ed95a19224294949e1b4ce56bbffcb1fe9f" by default)
 
-To setup the tool for using by custom project:
+To customize the tool for used by other project:
 
-1. Create a file called `.cherry_picker.toml` in the project's root
-   folder (alongside with `.git` forlder).
+1. Create a file called ``.cherry_picker.toml`` in the project's root
+   folder (alongside with ``.git`` folder).
 
-2. Add `team`, `repo` and `check_sha` config values as described above.
+2. Add ``team``, ``repo`` and ``check_sha`` config values as described above.
 
-3. Use `git add .cherry_picker.toml` / `git commit` to add the config
-   into git.
+3. Use ``git add .cherry_picker.toml`` / ``git commit`` to add the config
+   into ``git``.
 
-4. Add `cherry_picker` to development dependencies or just install it
-   by `pip install cherry_picker`
+4. Add ``cherry_picker`` to development dependencies or install it
+   by ``pip install cherry_picker``
 
-5. Now everything is ready, use `cherry_picker <commit_sha> <branch1>
-   <branch2>` for cherry-picking changes from `<commit_sha` into
-   maintainance branches.
+5. Now everything is ready, use ``cherry_picker <commit_sha> <branch1>
+   <branch2>`` for cherry-picking changes from ``<commit_sha`` into
+   maintenance branches.
 
 Demo
 ----
@@ -243,10 +243,11 @@ cherry-pick additional commits, by::
    $ git cherry-pick -x <commit_sha1>
 
 `--config-path` option
--------------------
+----------------------
 
 Allows to override default config file path
-(`<PROJ-ROOT>/.cherry_picker.toml`) with a custom one.
+(`<PROJ-ROOT>/.cherry_picker.toml`) with a custom one. This allows cherry_picker
+to backport projects other than CPython.
 
 
 Creating Pull Requests
@@ -308,3 +309,11 @@ in the directory where ``pyproject.toml`` exists::
 .. |travis status| image:: https://travis-ci.org/python/core-workflow.svg?branch=master
    :target: https://travis-ci.org/python/core-workflow
 
+Changelog
+=========
+
+1.0.0
+-----
+
+- Support configuration file by using `--config-path` option, or by adding
+  `.cherry-picker.toml` file to the root of the project.
