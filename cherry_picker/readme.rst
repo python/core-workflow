@@ -102,27 +102,39 @@ Configuration file example::
    team = "aio-libs"
    repo = "aiohttp"
    check_sha = "f382b5ffc445e45a110734f5396728da7914aeb6"
+   fix_commit_msg = False
+
 
 Available config options::
 
-   team        github organization or individual nick,
-               e.g "aio-libs" for https://github.com/aio-libs/aiohttp
-               ("python" by default)
+   team            github organization or individual nick,
+                   e.g "aio-libs" for https://github.com/aio-libs/aiohttp
+                   ("python" by default)
 
-   repo        github project name,
-               e.g "aiohttp" for https://github.com/aio-libs/aiohttp
-               ("cpython" by default)
+   repo            github project name,
+                   e.g "aiohttp" for https://github.com/aio-libs/aiohttp
+                   ("cpython" by default)
 
-   check_sha   A long hash for any commit from the repo,
-               e.g. a sha1 hash from the very first initial commit
-               ("7f777ed95a19224294949e1b4ce56bbffcb1fe9f" by default)
+   check_sha       A long hash for any commit from the repo,
+                   e.g. a sha1 hash from the very first initial commit
+                   ("7f777ed95a19224294949e1b4ce56bbffcb1fe9f" by default)
+
+   fix_commit_msg  Replace # with GH- in cherry-picked commit message.
+                   It is the default behavior for CPython because of external
+                   Roundup bug tracker (https://bugs.python.org) behavior:
+                   #xxxx should point on issue xxxx but GH-xxxx points
+                   on pull-request xxxx.
+                   For projects with builtin GitHub bug tracker
+                   the option should be disabled most likely (set to False).
+
 
 To customize the tool for used by other project:
 
 1. Create a file called ``.cherry_picker.toml`` in the project's root
    folder (alongside with ``.git`` folder).
 
-2. Add ``team``, ``repo`` and ``check_sha`` config values as described above.
+2. Add ``team``, ``repo``, ``fix_commit_msg`` and ``check_sha``
+   config values as described above.
 
 3. Use ``git add .cherry_picker.toml`` / ``git commit`` to add the config
    into ``git``.

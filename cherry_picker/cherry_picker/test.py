@@ -123,6 +123,20 @@ def test_get_updated_commit_message(subprocess_check_output, os_path_exists,
            == 'bpo-123: Fix Spam Module (GH-113)'
 
 
+@mock.patch('os.path.exists')
+@mock.patch('subprocess.check_output')
+def test_get_updated_commit_message_without_links_replacement(
+        subprocess_check_output, os_path_exists, config):
+    os_path_exists.return_value = True
+    subprocess_check_output.return_value = b'bpo-123: Fix Spam Module (#113)'
+    config['fix_commit_msg'] = False
+    branches = ["3.6"]
+    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
+                      branches, config=config)
+    assert cp.get_commit_message('22a594a0047d7706537ff2ac676cdc0f1dcb329c') \
+           == 'bpo-123: Fix Spam Module (#113)'
+
+
 @mock.patch('subprocess.check_output')
 def test_is_cpython_repo(subprocess_check_output, config):
     subprocess_check_output.return_value = """commit 7f777ed95a19224294949e1b4ce56bbffcb1fe9f
@@ -187,7 +201,8 @@ def test_load_config(tmpdir, cd):
     cfg = load_config(pathlib.Path(str(cfg)))
     assert cfg == {'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
                    'repo': 'core-workfolow',
-                   'team': 'python'}
+                   'team': 'python',
+                   'fix_commit_msg': True}
 
 
 def test_normalize_long_commit_message():

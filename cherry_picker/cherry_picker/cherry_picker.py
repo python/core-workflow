@@ -20,7 +20,8 @@ CREATE_PR_URL_TEMPLATE = ("https://api.github.com/repos/"
 DEFAULT_CONFIG = collections.ChainMap({
     'team': 'python',
     'repo': 'cpython',
-    'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f'})
+    'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
+    'fix_commit_msg': True})
 
 
 class BranchCheckoutException(Exception):
@@ -122,8 +123,11 @@ class CherryPicker:
         """
         cmd = f"git show -s --format=%B {commit_sha}"
         output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
-        updated_commit_message = output.strip().decode('utf-8').replace('#', 'GH-')
-        return updated_commit_message
+        message = output.strip().decode('utf-8')
+        if self.config['fix_commit_msg']:
+            return message.replace('#', 'GH-')
+        else:
+            return message
 
     def checkout_master(self):
         """ git checkout master """
@@ -175,7 +179,7 @@ To abort the cherry-pick and cleanup:
 
 
 Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
-        updated_commit_message = updated_commit_message.replace('#', 'GH-')
+        # updated_commit_message = updated_commit_message.replace('#', 'GH-')
         if self.dry_run:
             click.echo(f"  dry-run: git commit --amend -m '{updated_commit_message}'")
         else:
