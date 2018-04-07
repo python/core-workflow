@@ -21,7 +21,8 @@ DEFAULT_CONFIG = collections.ChainMap({
     'team': 'python',
     'repo': 'cpython',
     'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
-    'fix_commit_msg': True})
+    'fix_commit_msg': True
+})
 
 
 class BranchCheckoutException(Exception):
@@ -179,7 +180,6 @@ To abort the cherry-pick and cleanup:
 
 
 Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
-        # updated_commit_message = updated_commit_message.replace('#', 'GH-')
         if self.dry_run:
             click.echo(f"  dry-run: git commit --amend -m '{updated_commit_message}'")
         else:

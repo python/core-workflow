@@ -124,8 +124,7 @@ Available config options::
                    Roundup bug tracker (https://bugs.python.org) behavior:
                    #xxxx should point on issue xxxx but GH-xxxx points
                    on pull-request xxxx.
-                   For projects with builtin GitHub bug tracker
-                   the option should be disabled most likely (set to False).
+                   For projects using GitHub Issues, this option can be disabled.
 
 
 To customize the tool for used by other project:
