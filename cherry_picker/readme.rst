@@ -323,6 +323,10 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
+1.1.1 (in development)
+----------------------
+
+
 1.1.0
 -----
 
