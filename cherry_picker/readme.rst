@@ -323,11 +323,18 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.0.1 (in development)
-----------------------
+1.1.0
+-----
+
+- Add ``fix_commit_msg`` configuration item. Setting fix_commit_msg to ``True``
+  will replace the issue number in the commit message, from ``#`` to ``GH-``.
+  This is the default behavior for CPython. Other projects can opt out by
+  setting it to ``False``. (`PR #233 <https://github.com/python/core-workflow/pull/233>`_
+  and `aiohttp Issue #2853 <https://github.com/aio-libs/aiohttp/issues/2853>`_).
 
 1.0.0
 -----
 
 - Support configuration file by using ``--config-path`` option, or by adding
-  ``.cherry-picker.toml`` file to the root of the project. (`Issue #225 <https://github.com/python/core-workflow/issues/225>`_)
+  ``.cherry-picker.toml`` file to the root of the project. (`Issue #225
+  <https://github.com/python/core-workflow/issues/225>`_).
