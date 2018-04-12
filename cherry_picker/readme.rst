@@ -102,7 +102,7 @@ Configuration file example::
    team = "aio-libs"
    repo = "aiohttp"
    check_sha = "f382b5ffc445e45a110734f5396728da7914aeb6"
-   fix_commit_msg = False
+   fix_commit_msg = false
 
 
 Available config options::
@@ -330,10 +330,10 @@ Changelog
 1.1.0
 -----
 
-- Add ``fix_commit_msg`` configuration item. Setting fix_commit_msg to ``True``
+- Add ``fix_commit_msg`` configuration item. Setting fix_commit_msg to ``true``
   will replace the issue number in the commit message, from ``#`` to ``GH-``.
   This is the default behavior for CPython. Other projects can opt out by
-  setting it to ``False``. (`PR #233 <https://github.com/python/core-workflow/pull/233>`_
+  setting it to ``false``. (`PR #233 <https://github.com/python/core-workflow/pull/233>`_
   and `aiohttp Issue #2853 <https://github.com/aio-libs/aiohttp/issues/2853>`_).
 
 1.0.0
