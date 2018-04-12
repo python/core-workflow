@@ -330,7 +330,7 @@ Changelog
 1.1.0
 -----
 
-- Add ``fix_commit_msg`` configuration item. Setting fix_commit_msg to ``True``
+- Add ``fix_commit_msg`` configuration item. Setting fix_commit_msg to ``true``
   will replace the issue number in the commit message, from ``#`` to ``GH-``.
   This is the default behavior for CPython. Other projects can opt out by
   setting it to ``false``. (`PR #233 <https://github.com/python/core-workflow/pull/233>`_
