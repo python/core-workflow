@@ -437,7 +437,7 @@ def get_full_sha_from_short(short_sha):
 
 
 def get_author_info_from_short_sha(short_sha):
-    cmd = f"git log -1 --format='%aN <%ae>' {short_sha}"
+    cmd = f'git log -1 --format="%aN <%ae>" {short_sha}'
     output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
     author = output.strip().decode('utf-8')
     return author
