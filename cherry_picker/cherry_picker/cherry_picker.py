@@ -63,9 +63,9 @@ class CherryPicker:
         """Get the remote name to use for upstream branches
         Uses "upstream" if it exists, "origin" otherwise
         """
-        cmd = "git remote get-url upstream"
+        cmd = ["git", "remote", "get-url", "upstream"]
         try:
-            subprocess.check_output(cmd.split(), stderr=subprocess.DEVNULL)
+            subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError:
             return "origin"
         return "upstream"
@@ -79,9 +79,8 @@ class CherryPicker:
 
     @property
     def username(self):
-        cmd = f"git config --get remote.{self.pr_remote}.url"
-        raw_result = subprocess.check_output(cmd.split(),
-                                             stderr=subprocess.STDOUT)
+        cmd = ["git", "config", "--get", f"remote.{self.pr_remote}.url"]
+        raw_result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         result = raw_result.decode('utf-8')
         # implicit ssh URIs use : to separate host from user, others just use /
         username = result.replace(':', '/').split('/')[-2]
@@ -95,21 +94,19 @@ class CherryPicker:
 
     def fetch_upstream(self):
         """ git fetch <upstream> """
-        self.run_cmd(f"git fetch {self.upstream}")
+        cmd = ["git", "fetch", self.upstream]
+        self.run_cmd(cmd)
 
-    def run_cmd(self, cmd, shell=False):
+    def run_cmd(self, cmd):
         if self.dry_run:
-            click.echo(f"  dry-run: {cmd}")
+            click.echo(f"  dry-run: {' '.join(cmd)}")
             return
-        if not shell:
-            output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
-        else:
-            output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         click.echo(output.decode('utf-8'))
 
     def checkout_branch(self, branch_name):
         """ git checkout -b <branch_name> """
-        cmd = f"git checkout -b {self.get_cherry_pick_branch(branch_name)} {self.upstream}/{branch_name}"
+        cmd = ["git", "checkout", "-b", self.get_cherry_pick_branch(branch_name), f"{self.upstream}/{branch_name}"]
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as err:
@@ -122,8 +119,8 @@ class CherryPicker:
         Return the commit message for the current commit hash,
         replace #<PRID> with GH-<PRID>
         """
-        cmd = f"git show -s --format=%B {commit_sha}"
-        output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+        cmd = ["git", "show", "-s", "--format=%B", commit_sha]
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         message = output.strip().decode('utf-8')
         if self.config['fix_commit_msg']:
             return message.replace('#', 'GH-')
@@ -132,7 +129,7 @@ class CherryPicker:
 
     def checkout_master(self):
         """ git checkout master """
-        cmd = "git checkout master"
+        cmd = ["git", "checkout", "master"]
         self.run_cmd(cmd)
 
     def status(self):
@@ -140,12 +137,12 @@ class CherryPicker:
         git status
         :return:
         """
-        cmd = "git status"
+        cmd = ["git", "status"]
         self.run_cmd(cmd)
 
     def cherry_pick(self):
         """ git cherry-pick -x <commit_sha1> """
-        cmd = f"git cherry-pick -x {self.commit_sha1}"
+        cmd = ["git", "cherry-pick", "-x", self.commit_sha1]
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as err:
@@ -183,10 +180,9 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
         if self.dry_run:
             click.echo(f"  dry-run: git commit --amend -m '{updated_commit_message}'")
         else:
+            cmd = ["git", "commit", "--amend", "-m", updated_commit_message]
             try:
-                subprocess.check_output(["git", "commit", "--amend", "-m",
-                                         updated_commit_message],
-                                         stderr=subprocess.STDOUT)
+                subprocess.check_output(cmd, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as cpe:
                 click.echo("Failed to amend the commit message  \u2639")
                 click.echo(cpe.output)
@@ -196,7 +192,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
     def push_to_remote(self, base_branch, head_branch, commit_message=""):
         """ git push <origin> <branchname> """
 
-        cmd = f"git push {self.pr_remote} {head_branch}"
+        cmd = ["git", "push", self.pr_remote, head_branch]
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError:
@@ -248,7 +244,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
             webbrowser.open_new_tab(url)
 
     def delete_branch(self, branch):
-        cmd = f"git branch -D {branch}"
+        cmd = ["git", "branch", "-D", branch]
         self.run_cmd(cmd)
 
     def cleanup_branch(self, branch):
@@ -303,7 +299,7 @@ To abort the cherry-pick and cleanup:
         """
         run `git cherry-pick --abort` and then clean up the branch
         """
-        cmd = "git cherry-pick --abort"
+        cmd = ["git", "cherry-pick", "--abort"]
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as cpe:
@@ -334,8 +330,8 @@ To abort the cherry-pick and cleanup:
             if self.dry_run:
                 click.echo(f"  dry-run: git commit -am '{updated_commit_message}' --allow-empty")
             else:
-                subprocess.check_output(["git", "commit", "-am", updated_commit_message, "--allow-empty"],
-                                        stderr=subprocess.STDOUT)
+                cmd = ["git", "commit", "-am", updated_commit_message, "--allow-empty"]
+                subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
             self.push_to_remote(base, cherry_pick_branch)
 
@@ -350,9 +346,9 @@ To abort the cherry-pick and cleanup:
     def check_repo(self):
         # CPython repo has a commit with
         # SHA=7f777ed95a19224294949e1b4ce56bbffcb1fe9f
-        cmd = f"git log -r {self.config['check_sha']}"
+        cmd = ["git", "log", "-r", self.config["check_sha"]]
         try:
-            subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
             raise InvalidRepoException()
 
@@ -424,21 +420,21 @@ def get_current_branch():
     """
     Return the current branch
     """
-    cmd = "git rev-parse --abbrev-ref HEAD"
-    output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+    cmd = ["git", "rev-parse", "--abbrev-ref", "HEAD"]
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     return output.strip().decode('utf-8')
 
 
 def get_full_sha_from_short(short_sha):
-    cmd = f"git log -1 --format='%H' {short_sha}"
-    output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+    cmd = ["git", "log", "-1", "--format=%H", short_sha]
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     full_sha = output.strip().decode('utf-8')
     return full_sha
 
 
 def get_author_info_from_short_sha(short_sha):
-    cmd = ['git', 'log', '-1', '--format=%aN <%ae>', short_sha]
-    output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+    cmd = ["git", "log", "-1", "--format=%aN <%ae>", short_sha]
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     author = output.strip().decode('utf-8')
     return author
 
@@ -454,8 +450,8 @@ def normalize_commit_message(commit_message):
 
 
 def find_project_root():
-    cmd = f"git rev-parse --show-toplevel"
-    output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
+    cmd = ["git", "rev-parse", "--show-toplevel"]
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     return pathlib.Path(output.decode('utf-8').strip())
 
 
