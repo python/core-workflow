@@ -106,7 +106,7 @@ class CherryPicker:
 
     def checkout_branch(self, branch_name):
         """ git checkout -b <branch_name> """
-        cmd = ["git", "checkout", "-b", self.get_cherry_pick_branch(branch_name), f"{self.upstream}/{branch_name}"]
+        cmd = ["git", "checkout", f"-b self.get_cherry_pick_branch(branch_name)", f"{self.upstream}/{branch_name}"]
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as err:
@@ -180,7 +180,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
         if self.dry_run:
             click.echo(f"  dry-run: git commit --amend -m '{updated_commit_message}'")
         else:
-            cmd = ["git", "commit", "--amend", "-m", updated_commit_message]
+            cmd = ["git", "commit", "--amend", f"-m {updated_commit_message}"]
             try:
                 subprocess.check_output(cmd, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as cpe:
@@ -328,9 +328,9 @@ To abort the cherry-pick and cleanup:
 
 {co_author_info}"""
             if self.dry_run:
-                click.echo(f"  dry-run: git commit -am '{updated_commit_message}' --allow-empty")
+                click.echo(f"  dry-run: git commit -a -m '{updated_commit_message}' --allow-empty")
             else:
-                cmd = ["git", "commit", "-am", updated_commit_message, "--allow-empty"]
+                cmd = ["git", "commit", "-a", f"-m {updated_commit_message}", "--allow-empty"]
                 subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
             self.push_to_remote(base, cherry_pick_branch)
