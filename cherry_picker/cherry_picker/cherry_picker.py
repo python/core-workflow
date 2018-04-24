@@ -106,7 +106,7 @@ class CherryPicker:
 
     def checkout_branch(self, branch_name):
         """ git checkout -b <branch_name> """
-        cmd = ["git", "checkout", f"-b self.get_cherry_pick_branch(branch_name)", f"{self.upstream}/{branch_name}"]
+        cmd = ["git", "checkout", f"-b {self.get_cherry_pick_branch(branch_name)}", f"{self.upstream}/{branch_name}"]
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as err:
