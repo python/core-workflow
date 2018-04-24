@@ -98,7 +98,7 @@ class CherryPicker:
         self.run_cmd(cmd)
 
     def run_cmd(self, cmd):
-        assert isinstance(cmd, collections.abc.Sequence)
+        assert not isinstance(cmd, str)
         if self.dry_run:
             click.echo(f"  dry-run: {' '.join(cmd)}")
             return
