@@ -3,7 +3,11 @@ matrix:
     include:
     - python: "3.5"
       env: BLURB=true CHERRY_PICKER=false
-    - python: "3.6"
+    - python: "3.6-dev"
+      env: BLURB=true CHERRY_PICKER=true
+    - python: "3.7-dev"
+      env: BLURB=true CHERRY_PICKER=true
+    - python: "nightly"
       env: BLURB=true CHERRY_PICKER=true
 
 dist: trusty
