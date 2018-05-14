@@ -323,9 +323,14 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.1.1 (in development)
+1.1.2 (in development)
 ----------------------
 
+1.1.1
+-----
+
+- Change the calls to ``subprocess`` to use lists instead of strings. This fixes
+  the bug that affects users in Windows. (`PR #238 <https://github.com/python/core-workflow/pull/238>`_).
 
 1.1.0
 -----
