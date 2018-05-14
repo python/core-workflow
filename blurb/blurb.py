@@ -849,11 +849,33 @@ Run unit tests.  Only works inside source repo, not when installed.
     print(tests_run, "tests passed.")
 
 
+def git_core_editor():
+    try:
+        return run('git config --get core.editor').strip()
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            # core.editor not configured
+            return None
+        raise
+
+
 def find_editor():
+    # Try environment variables. Check more specific settings first so
+    # they can override less specific values.
     for var in 'GIT_EDITOR', 'EDITOR':
         editor = os.environ.get(var)
         if editor is not None:
             return editor
+
+    # Try git configuration - this checks both project configuration
+    # (.git/config) and global configuration (~/.gitconfig).
+    editor = git_core_editor()
+    if editor:
+        return editor
+
+    # Try to use a user friendly platform specific fallback. We
+    # intentionally not using 'vi' as a fallback, assuming that fallback
+    # is needed for new users.
     if sys.platform == 'win32':
         fallbacks = ['notepad.exe']
     else:
@@ -865,6 +887,10 @@ def find_editor():
             found_path = shutil.which(fallback)
         if found_path and os.path.exists(found_path):
             return found_path
+
+    # For simplicity, recommend the old EDITOR environment variable.
+    # Advanced users should consult the documentation if they want to
+    # use more specific configuration.
     error('Could not find an editor! Set the EDITOR environment variable.')
 
 
