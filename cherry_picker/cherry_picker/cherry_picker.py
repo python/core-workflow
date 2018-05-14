@@ -2,32 +2,70 @@
 #  -*- coding: utf-8 -*-
 
 import click
+import collections
 import os
+import pathlib
 import subprocess
 import webbrowser
 import sys
+import requests
+import toml
+
+from gidgethub import sansio
 
 from . import __version__
+
+CREATE_PR_URL_TEMPLATE = ("https://api.github.com/repos/"
+                          "{config[team]}/{config[repo]}/pulls")
+DEFAULT_CONFIG = collections.ChainMap({
+    'team': 'python',
+    'repo': 'cpython',
+    'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
+    'fix_commit_msg': True
+})
+
+
+class BranchCheckoutException(Exception):
+    pass
+
+
+class CherryPickException(Exception):
+    pass
+
+
+class InvalidRepoException(Exception):
+    pass
 
 
 class CherryPicker:
 
     def __init__(self, pr_remote, commit_sha1, branches,
-                 *, dry_run=False, push=True):
+                 *, dry_run=False, push=True,
+                 prefix_commit=True,
+                 config=DEFAULT_CONFIG,
+                 ):
+
+        self.config = config
+        self.check_repo()  # may raise InvalidRepoException
+
+        if dry_run:
+            click.echo("Dry run requested, listing expected command sequence")
+
         self.pr_remote = pr_remote
         self.commit_sha1 = commit_sha1
         self.branches = branches
         self.dry_run = dry_run
         self.push = push
+        self.prefix_commit = prefix_commit
 
     @property
     def upstream(self):
         """Get the remote name to use for upstream branches
         Uses "upstream" if it exists, "origin" otherwise
         """
-        cmd = "git remote get-url upstream"
+        cmd = ['git', 'remote', 'get-url', 'upstream']
         try:
-            subprocess.check_output(cmd.split(), stderr=subprocess.DEVNULL)
+            subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
         except subprocess.CalledProcessError:
             return "origin"
         return "upstream"
@@ -41,9 +79,8 @@ class CherryPicker:
 
     @property
     def username(self):
-        cmd = f"git config --get remote.{self.pr_remote}.url"
-        raw_result = subprocess.check_output(cmd.split(),
-                                             stderr=subprocess.STDOUT)
+        cmd = ['git', 'config', '--get', f'remote.{self.pr_remote}.url']
+        raw_result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         result = raw_result.decode('utf-8')
         # implicit ssh URIs use : to separate host from user, others just use /
         username = result.replace(':', '/').split('/')[-2]
@@ -53,45 +90,47 @@ class CherryPicker:
         return f"backport-{self.commit_sha1[:7]}-{maint_branch}"
 
     def get_pr_url(self, base_branch, head_branch):
-        return f"https://github.com/python/cpython/compare/{base_branch}...{self.username}:{head_branch}?expand=1"
+        return f"https://github.com/{self.config['team']}/{self.config['repo']}/compare/{base_branch}...{self.username}:{head_branch}?expand=1"
 
     def fetch_upstream(self):
         """ git fetch <upstream> """
-        self.run_cmd(f"git fetch {self.upstream}")
+        cmd = ['git', 'fetch', self.upstream]
+        self.run_cmd(cmd)
 
-    def run_cmd(self, cmd, shell=False):
+    def run_cmd(self, cmd):
+        assert not isinstance(cmd, str)
         if self.dry_run:
-            click.echo(f"  dry-run: {cmd}")
+            click.echo(f"  dry-run: {' '.join(cmd)}")
             return
-        if not shell:
-            output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
-        else:
-            output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         click.echo(output.decode('utf-8'))
 
     def checkout_branch(self, branch_name):
         """ git checkout -b <branch_name> """
-        cmd = f"git checkout -b {self.get_cherry_pick_branch(branch_name)} {self.upstream}/{branch_name}"
+        cmd = ['git', 'checkout', '-b', self.get_cherry_pick_branch(branch_name), f'{self.upstream}/{branch_name}']
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as err:
             click.echo(f"Error checking out the branch {self.get_cherry_pick_branch(branch_name)}.")
             click.echo(err.output)
-            sys.exit(-1)
+            raise BranchCheckoutException(f"Error checking out the branch {self.get_cherry_pick_branch(branch_name)}.")
 
     def get_commit_message(self, commit_sha):
         """
         Return the commit message for the current commit hash,
         replace #<PRID> with GH-<PRID>
         """
-        cmd = f"git show -s --format=%B {commit_sha}"
-        output = subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
-        updated_commit_message = output.strip().decode('utf-8').replace('#', 'GH-')
-        return updated_commit_message
+        cmd = ['git', 'show', '-s', '--format=%B', commit_sha]
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        message = output.strip().decode('utf-8')
+        if self.config['fix_commit_msg']:
+            return message.replace('#', 'GH-')
+        else:
+            return message
 
     def checkout_master(self):
         """ git checkout master """
-        cmd = "git checkout master"
+        cmd = ['git', 'checkout', 'master']
         self.run_cmd(cmd)
 
     def status(self):
@@ -99,13 +138,18 @@ class CherryPicker:
         git status
         :return:
         """
-        cmd = "git status"
+        cmd = ['git', 'status']
         self.run_cmd(cmd)
 
     def cherry_pick(self):
         """ git cherry-pick -x <commit_sha1> """
-        cmd = f"git cherry-pick -x {self.commit_sha1}"
-        self.run_cmd(cmd)
+        cmd = ['git', 'cherry-pick', '-x', self.commit_sha1]
+        try:
+            self.run_cmd(cmd)
+        except subprocess.CalledProcessError as err:
+            click.echo(f"Error cherry-pick {self.commit_sha1}.")
+            click.echo(err.output)
+            raise CherryPickException(f"Error cherry-pick {self.commit_sha1}.")
 
     def get_exit_message(self, branch):
         return \
@@ -125,32 +169,69 @@ To abort the cherry-pick and cleanup:
 
     def amend_commit_message(self, cherry_pick_branch):
         """ prefix the commit message with (X.Y) """
-        base_branch = get_base_branch(cherry_pick_branch)
 
-        updated_commit_message = f"[{base_branch}] {self.get_commit_message(self.commit_sha1)}{os.linesep}(cherry picked from commit {self.commit_sha1})"
-        updated_commit_message = updated_commit_message.replace('#', 'GH-')
+        commit_prefix = ""
+        if self.prefix_commit:
+            commit_prefix = f"[{get_base_branch(cherry_pick_branch)}] "
+        updated_commit_message = f"""{commit_prefix}{self.get_commit_message(self.commit_sha1)}
+(cherry picked from commit {self.commit_sha1})
+
+
+Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
         if self.dry_run:
             click.echo(f"  dry-run: git commit --amend -m '{updated_commit_message}'")
         else:
+            cmd = ['git', 'commit', '--amend', '-m', updated_commit_message]
             try:
-                subprocess.check_output(["git", "commit", "--amend", "-m",
-                                         updated_commit_message],
-                                         stderr=subprocess.STDOUT)
+                subprocess.check_output(cmd, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as cpe:
-                click.echo("Failed to amend the commit message  \u2639")
+                click.echo("Failed to amend the commit message \u2639")
                 click.echo(cpe.output)
+        return updated_commit_message
 
 
-    def push_to_remote(self, base_branch, head_branch):
+    def push_to_remote(self, base_branch, head_branch, commit_message=""):
         """ git push <origin> <branchname> """
 
-        cmd = f"git push {self.pr_remote} {head_branch}"
+        cmd = ['git', 'push', self.pr_remote, head_branch]
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError:
             click.echo(f"Failed to push to {self.pr_remote} \u2639")
         else:
-            self.open_pr(self.get_pr_url(base_branch, head_branch))
+            gh_auth = os.getenv("GH_AUTH")
+            if gh_auth:
+                self.create_gh_pr(base_branch, head_branch,
+                                  commit_message=commit_message,
+                                  gh_auth=gh_auth)
+            else:
+                self.open_pr(self.get_pr_url(base_branch, head_branch))
+
+    def create_gh_pr(self, base_branch, head_branch, *,
+                     commit_message,
+                     gh_auth):
+        """
+        Create PR in GitHub
+        """
+        request_headers = sansio.create_headers(
+            self.username, oauth_token=gh_auth)
+        title, body = normalize_commit_message(commit_message)
+        if not self.prefix_commit:
+            title = f"[{base_branch}] {title}"
+        data = {
+          "title": title,
+          "body": body,
+          "head": f"{self.username}:{head_branch}",
+          "base": base_branch,
+          "maintainer_can_modify": True
+        }
+        url = CREATE_PR_URL_TEMPLATE.format(config=self.config)
+        response = requests.post(url, headers=request_headers, json=data)
+        if response.status_code == requests.codes.created:
+            click.echo(f"Backport PR created at {response.json()['html_url']}")
+        else:
+            click.echo(response.status_code)
+            click.echo(response.text)
 
     def open_pr(self, url):
         """
@@ -159,10 +240,12 @@ To abort the cherry-pick and cleanup:
         if self.dry_run:
             click.echo(f"  dry-run: Create new PR: {url}")
         else:
+            click.echo("Backport PR URL:")
+            click.echo(url)
             webbrowser.open_new_tab(url)
 
     def delete_branch(self, branch):
-        cmd = f"git branch -D {branch}"
+        cmd = ['git', 'branch', '-D', branch]
         self.run_cmd(cmd)
 
     def cleanup_branch(self, branch):
@@ -184,16 +267,21 @@ To abort the cherry-pick and cleanup:
 
             cherry_pick_branch = self.get_cherry_pick_branch(maint_branch)
             self.checkout_branch(maint_branch)
+            commit_message = ""
             try:
                 self.cherry_pick()
-                self.amend_commit_message(cherry_pick_branch)
+                commit_message = self.amend_commit_message(cherry_pick_branch)
             except subprocess.CalledProcessError as cpe:
                 click.echo(cpe.output)
                 click.echo(self.get_exit_message(maint_branch))
-                sys.exit(-1)
+            except CherryPickException:
+                click.echo(self.get_exit_message(maint_branch))
+                raise
             else:
                 if self.push:
-                    self.push_to_remote(maint_branch, cherry_pick_branch)
+                    self.push_to_remote(maint_branch,
+                                        cherry_pick_branch,
+                                        commit_message)
                     self.cleanup_branch(cherry_pick_branch)
                 else:
                     click.echo(\
@@ -212,7 +300,7 @@ To abort the cherry-pick and cleanup:
         """
         run `git cherry-pick --abort` and then clean up the branch
         """
-        cmd = "git cherry-pick --abort"
+        cmd = ['git', 'cherry-pick', '--abort']
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError as cpe:
@@ -234,12 +322,17 @@ To abort the cherry-pick and cleanup:
             short_sha = cherry_pick_branch[cherry_pick_branch.index('-')+1:cherry_pick_branch.index(base)-1]
             full_sha = get_full_sha_from_short(short_sha)
             commit_message = self.get_commit_message(short_sha)
-            updated_commit_message = f'[{base}] {commit_message}. \n(cherry picked from commit {full_sha})'
+            co_author_info = f"Co-authored-by: {get_author_info_from_short_sha(short_sha)}"
+            updated_commit_message = f"""[{base}] {commit_message}.
+(cherry picked from commit {full_sha})
+
+
+{co_author_info}"""
             if self.dry_run:
-                click.echo(f"  dry-run: git commit -am '{updated_commit_message}' --allow-empty")
+                click.echo(f"  dry-run: git commit -a -m '{updated_commit_message}' --allow-empty")
             else:
-                subprocess.check_output(["git", "commit", "-am", updated_commit_message, "--allow-empty"],
-                                        stderr=subprocess.STDOUT)
+                cmd = ['git', 'commit', '-a', '-m', updated_commit_message, '--allow-empty']
+                subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
             self.push_to_remote(base, cherry_pick_branch)
 
@@ -250,6 +343,15 @@ To abort the cherry-pick and cleanup:
 
         else:
             click.echo(f"Current branch ({cherry_pick_branch}) is not a backport branch.  Will not continue. \U0001F61B")
+
+    def check_repo(self):
+        # CPython repo has a commit with
+        # SHA=7f777ed95a19224294949e1b4ce56bbffcb1fe9f
+        cmd = ['git', 'log', '-r', self.config['check_sha']]
+        try:
+            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        except subprocess.SubprocessError:
+            raise InvalidRepoException()
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -268,24 +370,27 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help="Get the status of cherry-pick")
 @click.option('--push/--no-push', 'push', is_flag=True, default=True,
               help="Changes won't be pushed to remote")
+@click.option('--config-path', 'config_path', metavar='CONFIG-PATH',
+              help=("Path to config file, .cherry_picker.toml "
+                    "from project root by default"),
+              default=None)
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
                 default = "")
 @click.argument('branches', 'The branches to backport to', nargs=-1)
-def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
+def cherry_pick_cli(dry_run, pr_remote, abort, status, push, config_path,
                     commit_sha1, branches):
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
 
-    if not is_cpython_repo():
-        click.echo("You're not inside a CPython repo right now! 🙅")
+    config = load_config(config_path)
+
+    try:
+        cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
+                                     dry_run=dry_run,
+                                     push=push, config=config)
+    except InvalidRepoException:
+        click.echo(f"You're not inside a {config['repo']} repo right now! \U0001F645")
         sys.exit(-1)
-
-    if dry_run:
-        click.echo("Dry run requested, listing expected command sequence")
-
-    cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
-                                 dry_run=dry_run,
-                                 push=push)
 
     if abort is not None:
         if abort:
@@ -296,7 +401,12 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push,
     elif status:
         click.echo(cherry_picker.status())
     else:
-        cherry_picker.backport()
+        try:
+            cherry_picker.backport()
+        except BranchCheckoutException:
+            sys.exit(-1)
+        except CherryPickException:
+            sys.exit(-1)
 
 
 def get_base_branch(cherry_pick_branch):
@@ -311,25 +421,60 @@ def get_current_branch():
     """
     Return the current branch
     """
-    cmd = "git rev-parse --abbrev-ref HEAD"
-    output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+    cmd = ['git', 'rev-parse', '--abbrev-ref', 'HEAD']
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
     return output.strip().decode('utf-8')
 
 
 def get_full_sha_from_short(short_sha):
-    cmd = f"git show --format=raw {short_sha}"
-    output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
-    full_sha = output.strip().decode('utf-8').split('\n')[0].split()[1]
+    cmd = ['git', 'log', '-1', '--format=%H', short_sha]
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    full_sha = output.strip().decode('utf-8')
     return full_sha
 
 
-def is_cpython_repo():
-    cmd = "git log -r 7f777ed95a19224294949e1b4ce56bbffcb1fe9f"
-    try:
-        subprocess.check_output(cmd.split(), stderr=subprocess.STDOUT)
-    except subprocess.SubprocessError:
-        return False
-    return True
+def get_author_info_from_short_sha(short_sha):
+    cmd = ['git', 'log', '-1', '--format=%aN <%ae>', short_sha]
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    author = output.strip().decode('utf-8')
+    return author
+
+
+def normalize_commit_message(commit_message):
+    """
+    Return a tuple of title and body from the commit message
+    """
+    split_commit_message = commit_message.split("\n")
+    title = split_commit_message[0]
+    body = "\n".join(split_commit_message[1:])
+    return title, body.lstrip("\n")
+
+
+def find_project_root():
+    cmd = ['git', 'rev-parse', '--show-toplevel']
+    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    return pathlib.Path(output.decode('utf-8').strip())
+
+
+def find_config():
+    root = find_project_root()
+    if root is not None:
+        child = root / '.cherry_picker.toml'
+        if child.exists() and not child.is_dir():
+            return child
+    return None
+
+
+def load_config(path):
+    if path is None:
+        path = find_config()
+    if path is None:
+        return DEFAULT_CONFIG
+    else:
+        path = pathlib.Path(path)  # enforce a cast to pathlib datatype
+        with path.open() as f:
+            d = toml.load(f)
+            return DEFAULT_CONFIG.new_child(d)
 
 
 if __name__ == '__main__':

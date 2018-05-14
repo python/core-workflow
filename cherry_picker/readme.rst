@@ -1,11 +1,10 @@
 Usage (from a cloned CPython directory) ::
 
-   cherry_picker [--pr-remote REMOTE] [--dry-run] [--status] [--abort/--continue] [--push/--no-push] <commit_sha1> <branches>
+   cherry_picker [--pr-remote REMOTE] [--dry-run] [--config-path CONFIG-PATH] [--status] [--abort/--continue] [--push/--no-push] <commit_sha1> <branches>
 
 |pyversion status|
 |pypi status|
 |travis status|
-|license status|
 
 .. contents::
 
@@ -18,7 +17,7 @@ maintenance branches (``3.6``, ``3.5``, ``2.7``).
 It will prefix the commit message with the branch, e.g. ``[3.6]``, and then
 opens up the pull request page.
 
-Tests are to be written using pytest.
+Tests are to be written using `pytest <https://docs.pytest.org/en/latest/>`_.
 
 
 Setup Info
@@ -63,7 +62,7 @@ From the cloned CPython directory:
 
 ::
 
-    (venv) $ cherry_picker [--pr-remote REMOTE] [--dry-run] [--abort/--continue] [--status] [--push/--no-push] <commit_sha1> <branches>
+    (venv) $ cherry_picker [--pr-remote REMOTE] [--dry-run] [--config-path CONFIG-PATH] [--abort/--continue] [--status] [--push/--no-push] <commit_sha1> <branches>
 
 
 Commit sha1
@@ -94,6 +93,57 @@ Additional options::
     -- abort        Abort current cherry-pick and clean up branch
     -- continue     Continue cherry-pick, push, and clean up branch
     -- no-push      Changes won't be pushed to remote
+    -- config-path  Path to config file
+                    (`.cherry_picker.toml` from project root by default)
+
+
+Configuration file example::
+
+   team = "aio-libs"
+   repo = "aiohttp"
+   check_sha = "f382b5ffc445e45a110734f5396728da7914aeb6"
+   fix_commit_msg = false
+
+
+Available config options::
+
+   team            github organization or individual nick,
+                   e.g "aio-libs" for https://github.com/aio-libs/aiohttp
+                   ("python" by default)
+
+   repo            github project name,
+                   e.g "aiohttp" for https://github.com/aio-libs/aiohttp
+                   ("cpython" by default)
+
+   check_sha       A long hash for any commit from the repo,
+                   e.g. a sha1 hash from the very first initial commit
+                   ("7f777ed95a19224294949e1b4ce56bbffcb1fe9f" by default)
+
+   fix_commit_msg  Replace # with GH- in cherry-picked commit message.
+                   It is the default behavior for CPython because of external
+                   Roundup bug tracker (https://bugs.python.org) behavior:
+                   #xxxx should point on issue xxxx but GH-xxxx points
+                   on pull-request xxxx.
+                   For projects using GitHub Issues, this option can be disabled.
+
+
+To customize the tool for used by other project:
+
+1. Create a file called ``.cherry_picker.toml`` in the project's root
+   folder (alongside with ``.git`` folder).
+
+2. Add ``team``, ``repo``, ``fix_commit_msg`` and ``check_sha``
+   config values as described above.
+
+3. Use ``git add .cherry_picker.toml`` / ``git commit`` to add the config
+   into ``git``.
+
+4. Add ``cherry_picker`` to development dependencies or install it
+   by ``pip install cherry_picker``
+
+5. Now everything is ready, use ``cherry_picker <commit_sha> <branch1>
+   <branch2>`` for cherry-picking changes from ``<commit_sha`` into
+   maintenance branches.
 
 Demo
 ----
@@ -203,6 +253,13 @@ cherry-pick additional commits, by::
 
    $ git cherry-pick -x <commit_sha1>
 
+`--config-path` option
+----------------------
+
+Allows to override default config file path
+(``<PROJ-ROOT>/.cherry_picker.toml``) with a custom one. This allows cherry_picker
+to backport projects other than CPython.
+
 
 Creating Pull Requests
 ======================
@@ -230,6 +287,30 @@ Install pytest: ``pip install -U pytest``
 
     $ pytest test.py
 
+
+Publishing to PyPI
+==================
+
+Publish to PyPI using `flit <https://flit.readthedocs.io/en/latest/>`_.
+
+Install flit (preferably in a virtual environment)::
+
+    python3 -m pip install flit
+
+In the directory where ``pyproject.toml`` exists::
+
+    flit publish
+
+
+Local installation
+==================
+
+With `flit <https://flit.readthedocs.io/en/latest/>`_ installed,
+in the directory where ``pyproject.toml`` exists::
+
+    flit install
+
+
 .. |pyversion status| image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
    :target: https://pypi.org/project/cherry-picker/
 
@@ -239,5 +320,30 @@ Install pytest: ``pip install -U pytest``
 .. |travis status| image:: https://travis-ci.org/python/core-workflow.svg?branch=master
    :target: https://travis-ci.org/python/core-workflow
 
-.. |license status| image:: https://img.shields.io/pypi/l/cherry-picker.svg
-   :target: https://github.com/python/core-workflow/blob/master/LICENSE
+Changelog
+=========
+
+1.1.2 (in development)
+----------------------
+
+1.1.1
+-----
+
+- Change the calls to ``subprocess`` to use lists instead of strings. This fixes
+  the bug that affects users in Windows. (`PR #238 <https://github.com/python/core-workflow/pull/238>`_).
+
+1.1.0
+-----
+
+- Add ``fix_commit_msg`` configuration item. Setting fix_commit_msg to ``true``
+  will replace the issue number in the commit message, from ``#`` to ``GH-``.
+  This is the default behavior for CPython. Other projects can opt out by
+  setting it to ``false``. (`PR #233 <https://github.com/python/core-workflow/pull/233>`_
+  and `aiohttp Issue #2853 <https://github.com/aio-libs/aiohttp/issues/2853>`_).
+
+1.0.0
+-----
+
+- Support configuration file by using ``--config-path`` option, or by adding
+  ``.cherry-picker.toml`` file to the root of the project. (`Issue #225
+  <https://github.com/python/core-workflow/issues/225>`_).

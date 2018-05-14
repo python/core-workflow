@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Command-line tool to manage CPython Misc/NEWS.d entries."""
-__version__ = "1.0.3"
+__version__ = "1.0.6"
 
 ##
 ## blurb version 1.0
@@ -50,6 +50,7 @@ from collections import OrderedDict
 import glob
 import hashlib
 import inspect
+import itertools
 import math
 import os
 import re
@@ -137,19 +138,76 @@ def textwrap_body(body, *, subsequent_indent=''):
         text = "\n".join(body).rstrip()
 
     # textwrap merges paragraphs, ARGH
+
     # step 1: remove trailing whitespace from individual lines
     #   (this means that empty lines will just have \n, no invisible whitespace)
     lines = []
     for line in text.split("\n"):
         lines.append(line.rstrip())
     text = "\n".join(lines)
+    # step 2: break into paragraphs and wrap those
     paragraphs = text.split("\n\n")
     paragraphs2 = []
     kwargs = {}
     if subsequent_indent:
         kwargs['subsequent_indent'] = subsequent_indent
+    dont_reflow = False
     for paragraph in paragraphs:
-        paragraphs2.append("\n".join(textwrap.wrap(paragraph.strip(), width=76, **kwargs)).rstrip())
+        # don't reflow bulleted / numbered lists
+        dont_reflow = dont_reflow or paragraph.startswith(("* ", "1. ", "#. "))
+        if dont_reflow:
+            initial = kwargs.get("initial_indent", "")
+            subsequent = kwargs.get("subsequent_indent", "")
+            if initial or subsequent:
+                lines = [line.rstrip() for line in paragraph.split("\n")]
+                indents = itertools.chain(
+                    itertools.repeat(initial, 1),
+                    itertools.repeat(subsequent),
+                    )
+                lines = [indent + line for indent, line in zip(indents, lines)]
+                paragraph = "\n".join(lines)
+            paragraphs2.append(paragraph)
+        else:
+            # Why do we reflow the text twice?  Because it can actually change
+            # between the first and second reflows, and we want the text to
+            # be stable.  The problem is that textwrap.wrap is deliberately
+            # dumb about how many spaces follow a period in prose.
+            #
+            # We're reflowing at 76 columns, but let's pretend it's 30 for
+            # illustration purposes.  If we give textwrap.wrap the following
+            # text--ignore the line of 30 dashes, that's just to help you
+            # with visualization:
+            #
+            #  ------------------------------
+            #  xxxx xxxx xxxx xxxx xxxx.  xxxx
+            #
+            # The first textwrap.wrap will return this:
+            #  "xxxx xxxx xxxx xxxx xxxx.\nxxxx"
+            #
+            # If we reflow it again, textwrap will rejoin the lines, but
+            # only with one space after the period!  So this time it'll
+            # all fit on one line, behold:
+            #  ------------------------------
+            #  xxxx xxxx xxxx xxxx xxxx. xxxx
+            # and so it now returns:
+            #  "xxxx xxxx xxxx xxxx xxxx. xxxx"
+            #
+            # textwrap.wrap supports trying to add two spaces after a peroid:
+            #    https://docs.python.org/3/library/textwrap.html#textwrap.TextWrapper.fix_sentence_endings
+            # But it doesn't work all that well, because it's not smart enough
+            # to do a really good job.
+            #
+            # Since blurbs are eventually turned into ReST and rendered anyway,
+            # and since the Zen says "In the face of ambiguity, refuse the
+            # temptation to guess", I don't sweat it.  I run textwrap.wrap
+            # twice, so it's stable, and this means occasionally it'll
+            # convert two spaces to one space, no big deal.
+
+            paragraph = "\n".join(textwrap.wrap(paragraph.strip(), width=76, **kwargs)).rstrip()
+            paragraph = "\n".join(textwrap.wrap(paragraph.strip(), width=76, **kwargs)).rstrip()
+            paragraphs2.append(paragraph)
+        # don't reflow literal code blocks (I hope)
+        dont_reflow = paragraph.endswith("::")
         if subsequent_indent:
             kwargs['initial_indent'] = subsequent_indent
     text = "\n\n".join(paragraphs2).rstrip()
@@ -498,7 +556,7 @@ Broadly equivalent to blurb.parse(open(filename).read()).
 Parses a "next" filename into its equivalent blurb metadata.
 Returns a dict.
         """
-        components = filename.split("/")
+        components = filename.split(os.sep)
         section, filename = components[-2:]
         section = unsanitize_section(section)
         assert section in sections, "Unknown section {}".format(section)
@@ -624,48 +682,49 @@ def run(s):
     return process.stdout.decode('ascii')
 
 
-readme_re = re.compile(r"This is Python version [23]\.\d")
+readme_re = re.compile(r"This is Python version [23]\.\d").match
 
 def chdir_to_repo_root():
     global root
 
-    def fail(where):
-        sys.exit('You\'re not inside a CPython repo right now! (failed at "{}")'.format(where))
+    # find the root of the local CPython repo
+    # note that we can't ask git, because we might
+    # be in an exported directory tree!
+    
+    # we intentionally start in a (probably nonexistant) subtree
+    # the first thing the while loop does is .., basically
+    path = os.path.abspath("garglemox")
+    while True:
+        next_path = os.path.dirname(path)
+        if next_path == path:
+            sys.exit('You\'re not inside a CPython repo right now!')
+        path = next_path
 
-    try:
-        git_dir = run("git rev-parse --git-dir").strip()
-    except subprocess.CalledProcessError:
-        fail("git rev-parse")
+        os.chdir(path)
 
-    if '.git/worktrees' in git_dir:
-        with open(os.path.join(git_dir, 'gitdir'), "rt", encoding="utf-8") as f:
-            git_dir = f.read().strip()
-    root = os.path.dirname(os.path.abspath(git_dir))
-    os.chdir(root)
+        def test_first_line(filename, test):
+            if not os.path.exists(filename):
+                return False
+            with open(filename, "rt") as f:
+                lines = f.read().split('\n')
+                if not (lines and test(lines[0])):
+                    return False
+            return True
 
-    # make totally, absolutely sure we're in a valid CPython repo
-    def test_first_line(filename, test):
-        with open(filename, "rt") as f:
-            lines = f.read().split('\n')
-            if not (lines and test(lines[0])):
-                fail(filename)
+        if not (test_first_line("README", readme_re)
+            or test_first_line("README.rst", readme_re)):
+            continue
 
-    for readme in ("README", "README.rst"):
-        if os.path.exists(readme):
-            test_first_line(readme, readme_re.match)
-            break
-    else:
-        fail(readme)
+        if not test_first_line("LICENSE",  "A. HISTORY OF THE SOFTWARE".__eq__):
+            continue
+        if not os.path.exists("Include/Python.h"):
+            continue
+        if not os.path.exists("Python/ceval.c"):
+            continue
 
-    test_first_line("LICENSE",  "A. HISTORY OF THE SOFTWARE".__eq__)
+        break
 
-    def test_existence(filename):
-        if not os.path.exists(filename):
-            fail(filename)
-        
-    test_existence("Include/Python.h")
-    test_existence("Python/ceval.c")
-
+    root = path
     return root
 
 
@@ -685,7 +744,7 @@ def subcommand(fn):
 def get_subcommand(subcommand):
     fn = subcommands.get(subcommand)
     if not fn:
-        error("Unknown subcommand: {}".format(subcommand))
+        error("Unknown subcommand: {}\nRun 'blurb help' for help.".format(subcommand))
     return fn
 
 
@@ -700,15 +759,20 @@ If subcommand is not specified, prints one-line summaries for every command.
     """
 
     if not subcommand:
-        print("blurb [subcommand] [options...]")
+        print("blurb version", __version__)
         print()
         print("Management tool for CPython Misc/NEWS and Misc/NEWS.d entries.")
+        print()
+        print("Usage:")
+        print("    blurb [subcommand] [options...]")
         print()
 
         # print list of subcommands
         summaries = []
         longest_name_len = -1
         for name, fn in subcommands.items():
+            if name.startswith('-'):
+                continue
             longest_name_len = max(longest_name_len, len(name))
             if not fn.__doc__:
                 error("help is broken, no docstring for " + fn.__name__)
@@ -758,6 +822,9 @@ If subcommand is not specified, prints one-line summaries for every command.
     print()
     print(doc)
     sys.exit(0)
+
+# Make "blurb --help" work.
+subcommands["--help"] = help
 
 
 @subcommand
@@ -851,8 +918,21 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
 
     init_tmp_with_template()
 
+    # We need to be clever about EDITOR.
+    # On the one hand, it might be a legitimate path to an
+    #   executable containing spaces.
+    # On the other hand, it might be a partial command-line
+    #   with options.
+    if shutil.which(editor):
+        args = [editor]
+    else:
+        args = list(shlex.split(editor))
+        if not shutil.which(args[0]):
+            sys.exit("Invalid GIT_EDITOR / EDITOR value: {}".format(editor))
+    args.append(tmp_path)
+
     while True:
-        subprocess.run(editor_command)
+        subprocess.run(args)
 
         failure = None
         blurb = Blurbs()
@@ -896,7 +976,7 @@ This is used by the release manager when cutting a new release.
     if version == ".":
         # harvest version number from dirname of repo
         # I remind you, we're in the Misc subdir right now
-        version = os.path.basename(os.path.dirname(os.getcwd()))
+        version = os.path.basename(root)
 
     existing_filenames = glob_blurbs(version)
     if existing_filenames:
@@ -931,14 +1011,14 @@ This is used by the release manager when cutting a new release.
     git_add_files.append(output)
     flush_git_add_files()
 
-    # sanity check: ensuring that saving/reloading the merged blurb file works.
-    blurbs2 = Blurbs()
-    blurbs2.load(output)
-    assert blurbs2 == blurbs, "Reloading {} isn't reproducable?!".format(output)
-
     print("Removing {} 'next' files from git.".format(len(filenames)))
     git_rm_files.extend(filenames)
     flush_git_rm_files()
+
+    # sanity check: ensuring that saving/reloading the merged blurb file works.
+    blurbs2 = Blurbs()
+    blurbs2.load(output)
+    assert blurbs2 == blurbs, "Reloading {} isn't reproducible?!".format(output)
 
     print()
     print("Ready for commit.")
@@ -1085,6 +1165,16 @@ Creates and populates the Misc/NEWS.d directory tree.
         git_add_files.append(dir_path)
         git_add_files.append(readme_path)
     flush_git_add_files()
+
+
+@subcommand
+def export():
+    """
+Removes blurb data files, for building release tarballs/installers.
+    """
+    os.chdir("Misc")
+    shutil.rmtree("NEWS.d", ignore_errors=True)
+
 
 
 # @subcommand
@@ -1339,6 +1429,8 @@ Also runs "blurb populate" for you.
                 line = "- Issue #21176: PEP 465: Add the '@' operator for matrix multiplication."
             elif line.startswith("- Issue: #15138: base64.urlsafe_{en,de}code() are now 3-4x faster."):
                 line = "- Issue #15138: base64.urlsafe_{en,de}code() are now 3-4x faster."
+            elif line.startswith("- Issue #9516: Issue #9516: avoid errors in sysconfig when MACOSX_DEPLOYMENT_TARGET"):
+                line = "- Issue #9516 and Issue #9516: avoid errors in sysconfig when MACOSX_DEPLOYMENT_TARGET"
             elif line.title().startswith(("- Request #", "- Bug #", "- Patch #", "- Patches #")):
                 # print("FIXING LINE {}: {!r}".format(line_number), line)
                 line = "- Issue #" + line.partition('#')[2]
