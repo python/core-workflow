@@ -744,7 +744,7 @@ def subcommand(fn):
 def get_subcommand(subcommand):
     fn = subcommands.get(subcommand)
     if not fn:
-        error("Unknown subcommand: {}".format(subcommand))
+        error("Unknown subcommand: {}\nRun 'blurb help' for help.".format(subcommand))
     return fn
 
 
@@ -771,6 +771,8 @@ If subcommand is not specified, prints one-line summaries for every command.
         summaries = []
         longest_name_len = -1
         for name, fn in subcommands.items():
+            if name.startswith('-'):
+                continue
             longest_name_len = max(longest_name_len, len(name))
             if not fn.__doc__:
                 error("help is broken, no docstring for " + fn.__name__)
@@ -820,6 +822,9 @@ If subcommand is not specified, prints one-line summaries for every command.
     print()
     print(doc)
     sys.exit(0)
+
+# Make "blurb --help" work.
+subcommands["--help"] = help
 
 
 @subcommand
