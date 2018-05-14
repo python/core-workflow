@@ -1651,6 +1651,10 @@ def main():
         print()
         print("usage: ", end="")
         help(subcommand)
+    except subprocess.SubprocessError as e:
+        output = e.stdout.decode() + e.stderr.decode()
+        print("Failed running {}, output: \n{}".format(e.cmd, output))
+        raise
 
 
 if __name__ == '__main__':
