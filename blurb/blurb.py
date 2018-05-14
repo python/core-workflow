@@ -1101,7 +1101,7 @@ Python News
 git_add_files = []
 def flush_git_add_files():
     if git_add_files:
-        subprocess.run(["git", "add", *git_add_files], stdout=subprocess.PIPE, stderr=subprocess.PIPE).check_returncode()
+        subprocess.run(["git", "add", "-f", *git_add_files], stdout=subprocess.PIPE, stderr=subprocess.PIPE).check_returncode()
         git_add_files.clear()
 
 git_rm_files = []
