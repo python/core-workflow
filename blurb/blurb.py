@@ -649,7 +649,7 @@ Returns a dict.
 tests_run = 0
 
 class TestParserPasses(unittest.TestCase):
-    directory = "tests/pass"
+    directory = "blurb/tests/pass"
 
     def filename_test(self, filename):
         b = Blurbs()
@@ -667,7 +667,7 @@ class TestParserPasses(unittest.TestCase):
 
 
 class TestParserFailures(TestParserPasses):
-    directory = "tests/fail"
+    directory = "blurb/tests/fail"
 
     def filename_test(self, filename):
         b = Blurbs()
