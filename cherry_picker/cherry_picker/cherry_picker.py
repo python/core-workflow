@@ -7,6 +7,7 @@ import os
 import pathlib
 import subprocess
 import webbrowser
+import re
 import sys
 import requests
 import toml
@@ -72,10 +73,16 @@ class CherryPicker:
 
     @property
     def sorted_branches(self):
+        def version_from_branch(branch):
+            try:
+                return tuple(map(int, re.match(r'^.*(?P<version>\d+(\.\d+)+).*$', branch).groupdict()['version'].split('.')))
+            except AttributeError as attr_err:
+                raise ValueError(f'Branch {branch} seems to not have a version in its name.') from attr_err
+
         return sorted(
             self.branches,
             reverse=True,
-            key=lambda v: tuple(map(int, v.split('.'))))
+            key=version_from_branch)
 
     @property
     def username(self):
