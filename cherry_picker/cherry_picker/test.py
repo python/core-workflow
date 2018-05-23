@@ -76,6 +76,19 @@ def test_sorted_branch(os_path_exists, config, input_branches, sorted_branches):
     assert cp.sorted_branches == sorted_branches
 
 
+@pytest.mark.parametrize('input_branches', [
+    (['3.1', '2.7', '3.x10', '3.6', '']),
+    (['stable-3.1', 'lts-2.7', '3.10-other', 'smth3.6else', 'invalid']),
+])
+@mock.patch('os.path.exists')
+def test_invalid_branches(os_path_exists, config, input_branches):
+    os_path_exists.return_value = True
+    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
+                      input_branches, config=config)
+    with pytest.raises(ValueError):
+        cp.sorted_branches
+
+
 @mock.patch('os.path.exists')
 def test_get_cherry_pick_branch(os_path_exists, config):
     os_path_exists.return_value = True
