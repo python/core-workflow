@@ -18,32 +18,21 @@ install:
 script:
 - blurb test
 
+.mixtures:
+- &install-and-test-cherry-picker
+  install:
+  - pushd cherry_picker
+  - flit install
+  - popd
+  script:
+  - pushd cherry_picker
+  - pytest cherry_picker/test.py -v
+  - popd
 jobs:
   include:
   - python: "3.6-dev"
-    install:
-    - pushd cherry_picker
-    - flit install
-    - popd
-    script:
-    - pushd cherry_picker
-    - pytest cherry_picker/test.py -v
-    - popd
+    <<: *install-and-test-cherry-picker
   - python: "3.7-dev"
-    install:
-    - pushd cherry_picker
-    - flit install
-    - popd
-    script:
-    - pushd cherry_picker
-    - pytest cherry_picker/test.py -v
-    - popd
+    <<: *install-and-test-cherry-picker
   - python: "nightly"
-    install:
-    - pushd cherry_picker
-    - flit install
-    - popd
-    script:
-    - pushd cherry_picker
-    - pytest cherry_picker/test.py -v
-    - popd
+    <<: *install-and-test-cherry-picker
