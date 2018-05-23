@@ -64,13 +64,16 @@ def test_get_author_info_from_short_sha(subprocess_check_output):
     assert get_author_info_from_short_sha('22a594a') == 'Armin Rigo <armin.rigo@gmail.com>'
 
 
+@pytest.mark.parametrize('input_branches,sorted_branches', [
+    (['3.1', '2.7', '3.10', '3.6'], ['3.10', '3.6', '3.1', '2.7']),
+    (['stable-3.1', 'lts-2.7', '3.10-other', 'smth3.6else'], ['3.10-other', 'smth3.6else', 'stable-3.1', 'lts-2.7']),
+])
 @mock.patch('os.path.exists')
-def test_sorted_branch(os_path_exists, config):
+def test_sorted_branch(os_path_exists, config, input_branches, sorted_branches):
     os_path_exists.return_value = True
-    branches = ["3.1", "2.7", "3.10", "3.6"]
     cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                      branches, config=config)
-    assert cp.sorted_branches == ["3.10", "3.6", "3.1", "2.7"]
+                      input_branches, config=config)
+    assert cp.sorted_branches == sorted_branches
 
 
 @mock.patch('os.path.exists')
