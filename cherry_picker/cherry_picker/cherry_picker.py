@@ -104,6 +104,7 @@ class CherryPicker:
             return
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         click.echo(output.decode('utf-8'))
+        return output
 
     def checkout_branch(self, branch_name):
         """ git checkout -b <branch_name> """
@@ -128,9 +129,12 @@ class CherryPicker:
         else:
             return message
 
-    def checkout_master(self):
-        """ git checkout master """
-        cmd = ['git', 'checkout', 'master']
+    def checkout_default_branch(self):
+        """ git checkout default branch """
+        cmd = ["sh", "-c", "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'"]
+        default_branch = self.run_cmd(cmd).strip().decode() or 'master'
+
+        cmd = ['git', 'checkout', default_branch]
         self.run_cmd(cmd)
 
     def status(self):
@@ -249,7 +253,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
         self.run_cmd(cmd)
 
     def cleanup_branch(self, branch):
-        self.checkout_master()
+        self.checkout_default_branch()
         try:
             self.delete_branch(branch)
         except subprocess.CalledProcessError:
