@@ -51,6 +51,8 @@ class CherryPicker:
         if dry_run:
             click.echo("Dry run requested, listing expected command sequence")
 
+        self.remember_current_branch()
+
         self.pr_remote = pr_remote
         self.commit_sha1 = commit_sha1
         self.branches = branches
@@ -131,10 +133,8 @@ class CherryPicker:
 
     def checkout_default_branch(self):
         """ git checkout default branch """
-        cmd = ["sh", "-c", "git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@'"]
-        default_branch = self.run_cmd(cmd).strip().decode() or 'master'
 
-        cmd = ['git', 'checkout', default_branch]
+        cmd = 'git', 'checkout', self._start_branch
         self.run_cmd(cmd)
 
     def status(self):
@@ -356,6 +356,9 @@ To abort the cherry-pick and cleanup:
             subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
             raise InvalidRepoException()
+
+    def remember_current_branch(self):
+        self._start_branch = get_current_branch() or 'master'
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
