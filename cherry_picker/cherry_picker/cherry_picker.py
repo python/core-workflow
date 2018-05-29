@@ -51,7 +51,7 @@ class CherryPicker:
         if dry_run:
             click.echo("Dry run requested, listing expected command sequence")
 
-        self.remember_current_branch()
+        self._start_branch = get_current_branch() or 'master'
 
         self.pr_remote = pr_remote
         self.commit_sha1 = commit_sha1
@@ -356,9 +356,6 @@ To abort the cherry-pick and cleanup:
             subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         except subprocess.SubprocessError:
             raise InvalidRepoException()
-
-    def remember_current_branch(self):
-        self._start_branch = get_current_branch() or 'master'
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
