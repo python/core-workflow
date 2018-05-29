@@ -51,7 +51,7 @@ class CherryPicker:
         if dry_run:
             click.echo("Dry run requested, listing expected command sequence")
 
-        self.start_branch = get_current_branch() or 'master'
+        self.memorized_branch = get_current_branch() or 'master'
 
         self.pr_remote = pr_remote
         self.commit_sha1 = commit_sha1
@@ -134,7 +134,7 @@ class CherryPicker:
     def checkout_default_branch(self):
         """ git checkout default branch """
 
-        cmd = 'git', 'checkout', self.start_branch
+        cmd = 'git', 'checkout', self.memorized_branch
         self.run_cmd(cmd)
 
     def status(self):
