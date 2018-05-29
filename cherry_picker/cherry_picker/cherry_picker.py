@@ -106,7 +106,6 @@ class CherryPicker:
             return
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         click.echo(output.decode('utf-8'))
-        return output
 
     def checkout_branch(self, branch_name):
         """ git checkout -b <branch_name> """
