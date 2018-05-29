@@ -130,7 +130,7 @@ class CherryPicker:
         else:
             return message
 
-    def checkout_default_branch(self):
+    def checkout_memorized_branch(self):
         """ git checkout default branch """
 
         cmd = 'git', 'checkout', self.memorized_branch
@@ -252,7 +252,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
         self.run_cmd(cmd)
 
     def cleanup_branch(self, branch):
-        self.checkout_default_branch()
+        self.checkout_memorized_branch()
         try:
             self.delete_branch(branch)
         except subprocess.CalledProcessError:
