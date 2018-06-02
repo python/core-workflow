@@ -1,42 +1,38 @@
 language: python
-matrix:
-    include:
-    - python: "3.5"
-      env: BLURB=true CHERRY_PICKER=false
-    - python: "3.6-dev"
-      env: BLURB=true CHERRY_PICKER=true
-    - python: "3.7-dev"
-      env: BLURB=true CHERRY_PICKER=true
-    - python: "nightly"
-      env: BLURB=true CHERRY_PICKER=true
+python:
+- "3.5"
+- "3.6-dev"
+- "3.7-dev"
+- "nightly"
 
 dist: trusty
 sudo: false
 cache: pip
 
 before_install:
-    - pip install --upgrade flit
+- pip install --upgrade flit
 install:
-    - |
-        if [[ $CHERRY_PICKER == true ]]; then
-            pushd cherry_picker
-            flit install
-            popd
-        fi;
-    - |
-        if [[ $BLURB == true ]]; then
-            pushd blurb
-            flit install
-            popd
-        fi;
+- pushd blurb
+- flit install
+- popd
 script:
-    - |
-        if [[ $CHERRY_PICKER == true ]]; then
-            pushd cherry_picker
-            pytest cherry_picker/test.py -v
-            popd
-        fi;
-    - |
-        if [[ $BLURB == true ]]; then
-            blurb test
-        fi;
+- blurb test
+
+.mixtures:
+- &install-and-test-cherry-picker
+  install:
+  - pushd cherry_picker
+  - flit install
+  - popd
+  script:
+  - pushd cherry_picker
+  - pytest cherry_picker/test.py -v
+  - popd
+jobs:
+  include:
+  - python: "3.6-dev"
+    <<: *install-and-test-cherry-picker
+  - python: "3.7-dev"
+    <<: *install-and-test-cherry-picker
+  - python: "nightly"
+    <<: *install-and-test-cherry-picker
