@@ -11,8 +11,15 @@ Usage (from a cloned CPython directory) ::
 About
 =====
 
-Use this to backport CPython changes from ``master`` into one or more of the
-maintenance branches (``3.6``, ``3.5``, ``2.7``).
+This tool is used to backport CPython changes from ``master`` into one or more
+of the maintenance branches (``3.6``, ``3.5``, ``2.7``).
+
+``cherry_picker`` can be configured to backport other projects with similar
+workflow as CPython. See the configuration file options below for more details.
+
+The maintenance branch names should contain some sort of version number (X.Y).
+For example: ``3.6``, ``3.5``, ``2.7``, ``stable-2.6``, ``2.5-lts``, are all 
+supported branch names.
 
 It will prefix the commit message with the branch, e.g. ``[3.6]``, and then
 opens up the pull request page.
@@ -142,8 +149,12 @@ To customize the tool for used by other project:
    by ``pip install cherry_picker``
 
 5. Now everything is ready, use ``cherry_picker <commit_sha> <branch1>
-   <branch2>`` for cherry-picking changes from ``<commit_sha`` into
+   <branch2>`` for cherry-picking changes from ``<commit_sha>`` into
    maintenance branches.
+   Branch name should contain at least major and minor version numbers
+   and may have some prefix or suffix.
+   Only the first version-like substring is matched when the version
+   is extracted from branch name.
 
 Demo
 ----
