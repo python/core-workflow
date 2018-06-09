@@ -21,7 +21,8 @@ DEFAULT_CONFIG = collections.ChainMap({
     'team': 'python',
     'repo': 'cpython',
     'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
-    'fix_commit_msg': True
+    'fix_commit_msg': True,
+    'default_branch': 'master',
 })
 
 
@@ -50,8 +51,6 @@ class CherryPicker:
 
         if dry_run:
             click.echo("Dry run requested, listing expected command sequence")
-
-        self.memorized_branch = get_current_branch() or 'master'
 
         self.pr_remote = pr_remote
         self.commit_sha1 = commit_sha1
@@ -130,10 +129,10 @@ class CherryPicker:
         else:
             return message
 
-    def checkout_memorized_branch(self):
+    def checkout_default_branch(self):
         """ git checkout default branch """
 
-        cmd = 'git', 'checkout', self.memorized_branch
+        cmd = 'git', 'checkout', self.config['default_branch']
         self.run_cmd(cmd)
 
     def status(self):
@@ -252,7 +251,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
         self.run_cmd(cmd)
 
     def cleanup_branch(self, branch):
-        self.checkout_memorized_branch()
+        self.checkout_default_branch()
         try:
             self.delete_branch(branch)
         except subprocess.CalledProcessError:
