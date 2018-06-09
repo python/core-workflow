@@ -103,6 +103,7 @@ Configuration file example::
    repo = "aiohttp"
    check_sha = "f382b5ffc445e45a110734f5396728da7914aeb6"
    fix_commit_msg = false
+   default_branch = "devel"
 
 
 Available config options::
@@ -126,14 +127,18 @@ Available config options::
                    on pull-request xxxx.
                    For projects using GitHub Issues, this option can be disabled.
 
+   repo            Project's default branch name,
+                   e.g "devel" for https://github.com/ansible/ansible
+                   ("master" by default)
+
 
 To customize the tool for used by other project:
 
 1. Create a file called ``.cherry_picker.toml`` in the project's root
    folder (alongside with ``.git`` folder).
 
-2. Add ``team``, ``repo``, ``fix_commit_msg`` and ``check_sha``
-   config values as described above.
+2. Add ``team``, ``repo``, ``fix_commit_msg``, ``check_sha`` and
+   ``default_branch`` config values as described above.
 
 3. Use ``git add .cherry_picker.toml`` / ``git commit`` to add the config
    into ``git``.
