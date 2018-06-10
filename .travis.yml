@@ -1,3 +1,5 @@
+version: = 0
+
 language: python
 python:
 - "3.5"
@@ -28,6 +30,34 @@ script:
   - pushd cherry_picker
   - pytest cherry_picker/test.py -v
   - popd
+- &deploy-base
+  stage: Publish dists to PYPI
+  if: tag IS present
+  python: "3.6-dev"
+  script:
+  - flit build
+  # Add an empty setup.py stub, because pypi provider always calls it
+  - touch setup.py
+  deploy:
+    provider: pypi
+    # `skip-cleanup: true` is required to preserve binary wheel and sdist,
+    # built by during `install` step above.
+    skip-cleanup: true
+    # `skip-existing: true` is required to skip uploading dists, already
+    # present in PYPI instead of failing the whole process.
+    # This happenes when other CI (AppVeyor etc.) has already uploaded
+    # the very same dist (usually sdist).
+    skip-existing: true
+    user: Mariatta  # TODO: consider having a separate "uploader user"
+                    # with reduced priviliges for security reasons
+    password:
+      # Encrypt with `travis encrypt -r python/core-workflow --org` while using travis-ci.org;
+      # change to `travis encrypt -r python/core-workflow --api-endpoint 'https://api.travis-ci.com/'`
+      # upon switch to __free__ travis-ci.com:
+      secure: PLACE_YOUR_ENCRYPTED_PASSWORD_HERE
+    on:
+      tags: true
+      all_branches: true
 jobs:
   include:
   - python: "3.6-dev"
@@ -36,3 +66,17 @@ jobs:
     <<: *install-and-test-cherry-picker
   - python: "nightly"
     <<: *install-and-test-cherry-picker
+
+  - <<: *deploy-base
+    if: tag =~ ^cherry\-picker\-v\d+\.\d+\.\d+$
+    env:
+      TARGET_PKG: cherry-picker
+    install:
+    - pushd cherry_picker
+
+  - <<: *deploy-base
+    if: tag =~ ^blurb\-v\d+\.\d+\.\d+$
+    env:
+      TARGET_PKG: blurb
+    install:
+    - pushd blurb
