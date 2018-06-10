@@ -339,8 +339,18 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.1.2 (in development)
+1.2.0 (in development)
 ----------------------
+
+- Add ``default_branch`` configuration item. The default is ``master``, which
+  is the default branch for CPython. It can be configured to other branches like,
+  ``devel``, or ``develop``.  The default branch is the branch cherry_picker
+  will return to after backporting. (`PR #254 <https://github.com/python/core-workflow/pull/254>`_
+  and `Issue #250 <https://github.com/python/core-workflow/issues/250>`_).
+
+- Support additional branch versioning schemes, such as ``something-X.Y``,
+  or ``X.Y-somethingelse``. (`PR #253 <https://github.com/python/core-workflow/pull/253>`_
+  and `Issue #251 <https://github.com/python/core-workflow/issues/251>`_).
 
 1.1.1
 -----
