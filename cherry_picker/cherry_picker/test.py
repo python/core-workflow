@@ -194,7 +194,7 @@ def test_find_config_not_found(tmpdir, cd):
     assert find_config() is None
 
 
-def test_load_config(tmpdir, cd):
+def test_load_full_config(tmpdir, cd):
     cd(tmpdir)
     subprocess.run('git init .'.split(), check=True)
     cfg = tmpdir.join('.cherry_picker.toml')
@@ -202,14 +202,18 @@ def test_load_config(tmpdir, cd):
     team = "python"
     repo = "core-workfolow"
     check_sha = "5f007046b5d4766f971272a0cc99f8461215c1ec"
+    default_branch = "devel"
     ''')
     cfg = load_config(None)
     assert cfg == {'check_sha': '5f007046b5d4766f971272a0cc99f8461215c1ec',
                    'repo': 'core-workfolow',
-                   'team': 'python'}
+                   'team': 'python',
+                   'fix_commit_msg': True,
+                   'default_branch': 'devel',
+                   }
 
 
-def test_load_config(tmpdir, cd):
+def test_load_partial_config(tmpdir, cd):
     cfg = tmpdir.join('.cherry_picker.toml')
     cfg.write('''\
     repo = "core-workfolow"
@@ -218,7 +222,9 @@ def test_load_config(tmpdir, cd):
     assert cfg == {'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
                    'repo': 'core-workfolow',
                    'team': 'python',
-                   'fix_commit_msg': True}
+                   'fix_commit_msg': True,
+                   'default_branch': 'master',
+                   }
 
 
 def test_normalize_long_commit_message():
