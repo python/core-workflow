@@ -339,8 +339,11 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.2.0 (in development)
-----------------------
+1.2.1 (in development)
+-----------------------
+
+1.2.0
+-----
 
 - Add ``default_branch`` configuration item. The default is ``master``, which
   is the default branch for CPython. It can be configured to other branches like,
