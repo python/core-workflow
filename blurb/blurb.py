@@ -148,7 +148,7 @@ def textwrap_body(body, *, subsequent_indent=''):
     # step 2: break into paragraphs and wrap those
     paragraphs = text.split("\n\n")
     paragraphs2 = []
-    kwargs = {}
+    kwargs = {'break_long_words': False, 'break_on_hyphens': False}
     if subsequent_indent:
         kwargs['subsequent_indent'] = subsequent_indent
     dont_reflow = False
@@ -655,11 +655,18 @@ class TestParserPasses(unittest.TestCase):
         b = Blurbs()
         b.load(filename)
         self.assertTrue(b)
+        if os.path.exists(filename + '.res'):
+            with open(filename + '.res', encoding='utf-8') as f:
+                expected = f.read()
+            self.assertEqual(str(b), expected)
 
     def test_files(self):
         global tests_run
         with pushd(self.directory):
             for filename in glob.glob("*"):
+                if filename[-4:] == '.res':
+                    self.assertTrue(os.path.exists(filename[:-4]), filename)
+                    continue
                 self.filename_test(filename)
                 print(".", end="")
                 sys.stdout.flush()
