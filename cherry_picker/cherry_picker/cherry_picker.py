@@ -74,12 +74,7 @@ class CherryPicker:
 
     @property
     def sorted_branches(self):
-        def version_from_branch(branch):
-            try:
-                return tuple(map(int, re.match(r'^.*(?P<version>\d+(\.\d+)+).*$', branch).groupdict()['version'].split('.')))
-            except AttributeError as attr_err:
-                raise ValueError(f'Branch {branch} seems to not have a version in its name.') from attr_err
-
+        """Return the branches to cherry-pick to, sorted by version"""
         return sorted(
             self.branches,
             reverse=True,
@@ -423,7 +418,34 @@ def get_base_branch(cherry_pick_branch):
     return '2.7' from 'backport-sha-2.7'
     """
     prefix, sha, base_branch = cherry_pick_branch.split('-', 2)
+
+    if prefix != 'backport':
+        raise ValueError('branch name is not prefixed with "backport-".  Is this a cherry_picker branch?')
+
+    if not re.match('[0-9a-f]{7,40}', sha):
+        raise ValueError(f'branch name has an invalid sha: {sha}')
+
+    cmd = ['git', 'log', '-r', sha]
+    try:
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    except subprocess.SubprocessError:
+        raise ValueError(f'The sha listed in the branch name, {sha}, is not present in the repository')
+
+    # Subject the parsed base_branch to the same tests as when we generated it
+    # This throws a ValueError if the base_branch doesn't need our requirements
+    version_from_branch(base_branch)
+
     return base_branch
+
+
+def version_from_branch(branch):
+    """
+    return version information from a git branch name
+    """
+    try:
+        return tuple(map(int, re.match(r'^.*(?P<version>\d+(\.\d+)+).*$', branch).groupdict()['version'].split('.')))
+    except AttributeError as attr_err:
+        raise ValueError(f'Branch {branch} seems to not have a version in its name.') from attr_err
 
 
 def get_current_branch():
