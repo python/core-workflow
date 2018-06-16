@@ -422,7 +422,7 @@ def get_base_branch(cherry_pick_branch):
     """
     return '2.7' from 'backport-sha-2.7'
     """
-    prefix, sep, base_branch = cherry_pick_branch.rpartition('-')
+    prefix, sha, base_branch = cherry_pick_branch.split('-', 2)
     return base_branch
 
 
