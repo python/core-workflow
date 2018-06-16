@@ -202,7 +202,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
     def push_to_remote(self, base_branch, head_branch, commit_message=""):
         """ git push <origin> <branchname> """
 
-        cmd = ['git', 'push', self.pr_remote, head_branch]
+        cmd = ['git', 'push', self.pr_remote, f'{head_branch}:{head_branch}']
         try:
             self.run_cmd(cmd)
         except subprocess.CalledProcessError:
