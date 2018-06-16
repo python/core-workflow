@@ -33,15 +33,16 @@ def cd():
 
 
 def test_get_base_branch():
+    # The format of cherry-pick branches we create are "backport-{SHA}-{base_branch}"
     cherry_pick_branch = 'backport-afc23f4-2.7'
     result = get_base_branch(cherry_pick_branch)
     assert result == '2.7'
 
 
-def test_get_base_branch_without_dash():
-    cherry_pick_branch ='master'
+def test_get_base_branch_which_has_dashes():
+    cherry_pick_branch ='backport-afc23f4-baseprefix-2.7-basesuffix'
     result = get_base_branch(cherry_pick_branch)
-    assert result == 'master'
+    assert result == 'baseprefix-2.7-basesuffix'
 
 
 @mock.patch('subprocess.check_output')
