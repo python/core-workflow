@@ -244,9 +244,21 @@ the right thing.  If NEWS entries were already written to the
 final version directory, you'd have to move those around as
 part of the cherry-picking process.
 
+Changelog
+---------
+
+1.0.6
+~~~~~
+
+- When word wrapping, don't break on long words or hyphens.
+- Use the ``-f`` flag when adding **blurb** files to a ``git``
+  checkin.  This forces them to be added, even when the files
+  might normally be ignored based on a ``.gitignore`` directive.
+- Explicitly support the ``-help`` command-line option.
+- Fix Travis CI integration.
 
 Copyright
 ---------
 
-**blurb** is Copyright 2015-2017 by Larry Hastings.
+**blurb** is Copyright 2015-2018 by Larry Hastings.
 Licensed to the PSF under a contributor agreement.
