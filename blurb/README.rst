@@ -247,7 +247,7 @@ part of the cherry-picking process.
 Changelog
 ---------
 
-1.0.6
+1.0.7
 ~~~~~
 
 - When word wrapping, don't break on long words or hyphens.
