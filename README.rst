@@ -5,6 +5,10 @@ Issue tracker and relevant tools for CPython's workflow
 .. image:: https://travis-ci.org/python/core-workflow.svg?branch=master
     :target: https://travis-ci.org/python/core-workflow
 
+.. image:: https://img.shields.io/badge/zulip-join_chat-brightgreen.svg
+   :alt: Python Zulip chat
+   :target: https://python.zulipchat.com
+
 cherry_picker 🐍 🍒 ⛏
 ----------------------
 
