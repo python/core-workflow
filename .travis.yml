@@ -20,6 +20,10 @@ before_install:
   if: tag IS NOT present OR tag =~ ^cherry\-picker\-v\d+\.\d+\.\d+$
 - &run-if-blurb-or-untagged
   if: tag IS NOT present OR tag =~ ^blurb\-v\d+\.\d+\.\d+$
+- &base-3_7
+  dist: xenial
+  sudo: required
+  python: "3.7"
 - &install-and-test-cherry-picker
   <<: *run-if-cherry-picker-or-untagged
   env:
@@ -43,7 +47,7 @@ before_install:
 - &deploy-base
   stage: Publish dists to PYPI
   <<: *run-if-tagged
-  python: "3.6-dev"
+  python: "3.6"
   install:
   - *cd-to-project
   script:
@@ -75,18 +79,19 @@ jobs:
   include:
   - python: "3.5"
     <<: *install-and-test-blurb
-  - python: "3.6-dev"
+  - python: "3.6"
     <<: *install-and-test-blurb
-  - python: "3.7-dev"
+  - python: "3.7"
+    <<: *base-3_7
     <<: *install-and-test-blurb
-  - python: "nightly"
+  - python: "nightly"  # currently, it's 3.8-dev
     <<: *install-and-test-blurb
 
-  - python: "3.6-dev"
+  - python: "3.6"
     <<: *install-and-test-cherry-picker
-  - python: "3.7-dev"
+  - <<: *base-3_7
     <<: *install-and-test-cherry-picker
-  - python: "nightly"
+  - python: "nightly"  # currently, it's 3.8-dev
     <<: *install-and-test-cherry-picker
 
   - <<: *deploy-base
