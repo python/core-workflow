@@ -111,6 +111,9 @@ for line in template.split('\n'):
     if found and not prefix:
         sections.append(section.strip())
 
+def warn(*a):
+    return builtins.print('[WARNING]', *a, file=sys.stderr)
+
 
 def f(s):
     """
@@ -493,6 +496,10 @@ class Blurbs(list):
 
             if not body:
                 throw("Blurb 'body' text must not be empty!")
+            if "" in body[:-1]:
+                warn("Multiple paragraphs in {}:{}".format(filename, line_number - 2))
+                while "" in body[:-1]:
+                    body.remove("")
             text = textwrap_body(body)
             for naughty_prefix in ("- ", "Issue #", "bpo-"):
                 if text.startswith(naughty_prefix):
