@@ -17,9 +17,9 @@ before_install:
 - &run-if-blurb
   if: tag =~ ^blurb\-v\d+\.\d+\.\d+$
 - &run-if-cherry-picker-or-untagged
-  if: tag IS NOT present or tag =~ ^cherry\-picker\-v\d+\.\d+\.\d+$
+  if: tag IS NOT present OR tag =~ ^cherry\-picker\-v\d+\.\d+\.\d+$
 - &run-if-blurb-or-untagged
-  if: tag IS NOT present or tag =~ ^blurb\-v\d+\.\d+\.\d+$
+  if: tag IS NOT present OR tag =~ ^blurb\-v\d+\.\d+\.\d+$
 - &install-and-test-cherry-picker
   <<: *run-if-cherry-picker-or-untagged
   install:
