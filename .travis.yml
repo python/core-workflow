@@ -22,6 +22,8 @@ before_install:
   if: tag IS NOT present OR tag =~ ^blurb\-v\d+\.\d+\.\d+$
 - &install-and-test-cherry-picker
   <<: *run-if-cherry-picker-or-untagged
+  env:
+    PROJECT: cherry-picker
   install:
   - pushd cherry_picker
   - flit install
@@ -30,6 +32,8 @@ before_install:
   - popd
 - &install-and-test-blurb
   <<: *run-if-blurb-or-untagged
+  env:
+    PROJECT: blurb
   install:
   - pushd blurb
   - flit install
