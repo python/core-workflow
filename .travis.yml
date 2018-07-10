@@ -1,11 +1,6 @@
 version: = 0
 
 language: python
-python:
-- "3.5"
-- "3.6-dev"
-- "3.7-dev"
-- "nightly"
 
 dist: trusty
 sudo: false
@@ -13,12 +8,6 @@ cache: pip
 
 before_install:
 - pip install --upgrade flit
-install:
-- pushd blurb
-- flit install
-- popd
-script:
-- blurb test
 
 .mixtures:
 - &run-if-tagged
@@ -31,11 +20,16 @@ script:
   install:
   - pushd cherry_picker
   - flit install
-  - popd
   script:
-  - pushd cherry_picker
   - pytest cherry_picker/test.py -v
   - popd
+- &install-and-test-blurb
+  install:
+  - pushd blurb
+  - flit install
+  - popd
+  script:
+  - blurb test
 - &deploy-base
   stage: Publish dists to PYPI
   <<: *run-if-tagged
@@ -64,8 +58,18 @@ script:
     on:
       tags: true
       all_branches: true
+
 jobs:
   include:
+  - python: "3.5"
+    <<: *install-and-test-blurb
+  - python: "3.6-dev"
+    <<: *install-and-test-blurb
+  - python: "3.7-dev"
+    <<: *install-and-test-blurb
+  - python: "nightly"
+    <<: *install-and-test-blurb
+
   - python: "3.6-dev"
     <<: *install-and-test-cherry-picker
   - python: "3.7-dev"
