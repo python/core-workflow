@@ -21,6 +21,12 @@ script:
 - blurb test
 
 .mixtures:
+- &run-if-tagged
+  if: tag IS present
+- &run-if-cherry-picker
+  if: tag =~ ^cherry\-picker\-v\d+\.\d+\.\d+$
+- &run-if-blurb
+  if: tag =~ ^blurb\-v\d+\.\d+\.\d+$
 - &install-and-test-cherry-picker
   install:
   - pushd cherry_picker
@@ -32,7 +38,7 @@ script:
   - popd
 - &deploy-base
   stage: Publish dists to PYPI
-  if: tag IS present
+  <<: *run-if-tagged
   python: "3.6-dev"
   script:
   - flit build
@@ -68,14 +74,14 @@ jobs:
     <<: *install-and-test-cherry-picker
 
   - <<: *deploy-base
-    if: tag =~ ^cherry\-picker\-v\d+\.\d+\.\d+$
+    <<: *run-if-cherry-picker
     env:
       TARGET_PKG: cherry-picker
     install:
     - pushd cherry_picker
 
   - <<: *deploy-base
-    if: tag =~ ^blurb\-v\d+\.\d+\.\d+$
+    <<: *run-if-blurb
     env:
       TARGET_PKG: blurb
     install:
