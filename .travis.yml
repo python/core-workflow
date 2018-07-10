@@ -46,6 +46,7 @@ before_install:
   python: "3.6-dev"
   script:
   - flit build
+  before_deploy:
   # Add an empty setup.py stub, because pypi provider always calls it
   - touch setup.py
   deploy:
