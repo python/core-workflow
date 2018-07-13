@@ -74,12 +74,7 @@ class CherryPicker:
 
     @property
     def sorted_branches(self):
-        def version_from_branch(branch):
-            try:
-                return tuple(map(int, re.match(r'^.*(?P<version>\d+(\.\d+)+).*$', branch).groupdict()['version'].split('.')))
-            except AttributeError as attr_err:
-                raise ValueError(f'Branch {branch} seems to not have a version in its name.') from attr_err
-
+        """Return the branches to cherry-pick to, sorted by version."""
         return sorted(
             self.branches,
             reverse=True,
@@ -354,12 +349,15 @@ To abort the cherry-pick and cleanup:
             click.echo(f"Current branch ({cherry_pick_branch}) is not a backport branch.  Will not continue. \U0001F61B")
 
     def check_repo(self):
-        # CPython repo has a commit with
-        # SHA=7f777ed95a19224294949e1b4ce56bbffcb1fe9f
-        cmd = ['git', 'log', '-r', self.config['check_sha']]
+        """
+        Check that the repository is for the project we're configured to operate on.
+
+        This function performs the check by making sure that the sha specified in the config
+        is present in the repository that we're operating on.
+        """
         try:
-            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-        except subprocess.SubprocessError:
+            validate_sha(self.config['check_sha'])
+        except ValueError:
             raise InvalidRepoException()
 
 
@@ -421,9 +419,50 @@ def cherry_pick_cli(dry_run, pr_remote, abort, status, push, config_path,
 def get_base_branch(cherry_pick_branch):
     """
     return '2.7' from 'backport-sha-2.7'
+
+    raises ValueError if the specified branch name is not of a form that
+        cherry_picker would have created
     """
     prefix, sha, base_branch = cherry_pick_branch.split('-', 2)
+
+    if prefix != 'backport':
+        raise ValueError('branch name is not prefixed with "backport-".  Is this a cherry_picker branch?')
+
+    if not re.match('[0-9a-f]{7,40}', sha):
+        raise ValueError(f'branch name has an invalid sha: {sha}')
+
+    # Validate that the sha refers to a valid commit within the repo
+    # Throws a ValueError if the sha is not present in the repo
+    validate_sha(sha)
+
+    # Subject the parsed base_branch to the same tests as when we generated it
+    # This throws a ValueError if the base_branch doesn't meet our requirements
+    version_from_branch(base_branch)
+
     return base_branch
+
+
+def validate_sha(sha):
+    """
+    Validate that a hexdigest sha is a valid commit in the repo
+
+    raises ValueError if the sha does not reference a commit within the repo
+    """
+    cmd = ['git', 'log', '-r', sha]
+    try:
+        subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    except subprocess.SubprocessError:
+        raise ValueError(f'The sha listed in the branch name, {sha}, is not present in the repository')
+
+
+def version_from_branch(branch):
+    """
+    return version information from a git branch name
+    """
+    try:
+        return tuple(map(int, re.match(r'^.*(?P<version>\d+(\.\d+)+).*$', branch).groupdict()['version'].split('.')))
+    except AttributeError as attr_err:
+        raise ValueError(f'Branch {branch} seems to not have a version in its name.') from attr_err
 
 
 def get_current_branch():
