@@ -1108,14 +1108,14 @@ Python News
 git_add_files = []
 def flush_git_add_files():
     if git_add_files:
-        subprocess.run(["git", "add", "-f", *git_add_files]).check_returncode()
+        subprocess.run(["git", "add", "--force", *git_add_files]).check_returncode()
         git_add_files.clear()
 
 git_rm_files = []
 def flush_git_rm_files():
     if git_rm_files:
         try:
-            subprocess.run(["git", "rm", "--quiet", "-f", *git_rm_files]).check_returncode()
+            subprocess.run(["git", "rm", "--quiet", "--force", *git_rm_files]).check_returncode()
         except subprocess.CalledProcessError:
             pass
 
