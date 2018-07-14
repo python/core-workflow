@@ -697,7 +697,7 @@ def chdir_to_repo_root():
     # find the root of the local CPython repo
     # note that we can't ask git, because we might
     # be in an exported directory tree!
-    
+
     # we intentionally start in a (probably nonexistant) subtree
     # the first thing the while loop does is .., basically
     path = os.path.abspath("garglemox")
