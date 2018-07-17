@@ -49,7 +49,7 @@ before_install:
   before_deploy:
   # Add an empty setup.py stub, because pypi provider always calls it
   - touch setup.py
-  deploy:
+  deploy: &deployment-config
     provider: pypi
     # `skip-cleanup: true` is required to preserve binary wheel and sdist,
     # built by during `install` step above.
@@ -59,9 +59,9 @@ before_install:
     # This happenes when other CI (AppVeyor etc.) has already uploaded
     # the very same dist (usually sdist).
     skip-existing: true
-    user: Mariatta  # TODO: consider having a separate "uploader user"
-                    # with reduced priviliges for security reasons
-    password:
+    user: &pypi-user Mariatta  # TODO: consider having a separate "uploader user"
+                               # with reduced priviliges for security reasons
+    password: &pypi-password
       # Encrypt with `travis encrypt -r python/core-workflow --org` while using travis-ci.org;
       # change to `travis encrypt -r python/core-workflow --api-endpoint 'https://api.travis-ci.com/'`
       # upon switch to __free__ travis-ci.com:
@@ -101,3 +101,8 @@ jobs:
       TARGET_PKG: blurb
     install:
     - pushd blurb
+    deploy:
+      <<: *deployment-config
+      user: *pypi-user  # TODO: consider having a separate "uploader user"
+                        # with reduced priviliges for security reasons
+      password: *pypi-password  # FIXME: might need to change user/password pair
