@@ -23,9 +23,9 @@ before_install:
 - &install-and-test-cherry-picker
   <<: *run-if-cherry-picker-or-untagged
   env:
-    PROJECT: cherry-picker
+    TARGET_PKG: cherry_picker
   install:
-  - pushd cherry_picker
+  - &cd-to-project pushd "$TARGET_PKG"
   - flit install
   script:
   - pytest cherry_picker/test.py -v
@@ -33,9 +33,9 @@ before_install:
 - &install-and-test-blurb
   <<: *run-if-blurb-or-untagged
   env:
-    PROJECT: blurb
+    TARGET_PKG: blurb
   install:
-  - pushd blurb
+  - *cd-to-project
   - flit install
   - popd
   script:
@@ -44,6 +44,8 @@ before_install:
   stage: Publish dists to PYPI
   <<: *run-if-tagged
   python: "3.6-dev"
+  install:
+  - *cd-to-project
   script:
   - flit build
   before_deploy:
@@ -91,16 +93,12 @@ jobs:
   - <<: *deploy-base
     <<: *run-if-cherry-picker
     env:
-      TARGET_PKG: cherry-picker
-    install:
-    - pushd cherry_picker
+      TARGET_PKG: cherry_picker
 
   - <<: *deploy-base
     <<: *run-if-blurb
     env:
       TARGET_PKG: blurb
-    install:
-    - pushd blurb
     deploy:
       <<: *deployment-config
       user: *pypi-user  # TODO: consider having a separate "uploader user"
