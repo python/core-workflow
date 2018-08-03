@@ -61,8 +61,7 @@ before_install:
     # This happenes when other CI (AppVeyor etc.) has already uploaded
     # the very same dist (usually sdist).
     skip-existing: true
-    user: &pypi-user core-workflow  # TODO: consider having a separate "uploader user"
-                               # with reduced priviliges for security reasons
+    user: &pypi-user core-workflow
     password: &pypi-password
       # Encrypt with `travis encrypt -r python/core-workflow --org` while using travis-ci.org;
       # change to `travis encrypt -r python/core-workflow --api-endpoint 'https://api.travis-ci.com/'`
