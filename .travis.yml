@@ -61,13 +61,13 @@ before_install:
     # This happenes when other CI (AppVeyor etc.) has already uploaded
     # the very same dist (usually sdist).
     skip-existing: true
-    user: &pypi-user Mariatta  # TODO: consider having a separate "uploader user"
+    user: &pypi-user core-workflow  # TODO: consider having a separate "uploader user"
                                # with reduced priviliges for security reasons
     password: &pypi-password
       # Encrypt with `travis encrypt -r python/core-workflow --org` while using travis-ci.org;
       # change to `travis encrypt -r python/core-workflow --api-endpoint 'https://api.travis-ci.com/'`
       # upon switch to __free__ travis-ci.com:
-      secure: PLACE_YOUR_ENCRYPTED_PASSWORD_HERE
+      secure: "bg1ZOOHlhaT+S3TQy2WpSsWekHaeZSq39kkZj/Ql3nvJ0ES+a+lTjk+gmuSnSX0Sf9V+88TdN5g1frYVcvYWwIQvLEQP2xhqIfq8K+MVe+GbshQGiTD4PC4f7vRcDY+B93X7cQ8HgkGho3c0/BaEaK6MtrS8WK7dIdHCPaea5D8rLF9jXtS2Lt8MYtqRDG1R2BsNN+o87eyr3qD3aJW6cFRPTHPr/x+gmlKuIJcVOwuVd4xyR701xRpE7hK5/bKvQwI2QZhD7wTyJwYqsl3Ce/ZlyS+IINktkFhD2BqH2ya4tdOHeVhA+b44eJEDXUR7gweyO+Ein5W3S3R2lDxHuX3Aq7nJBKHxU39kwcnPPaMRWYKey51d9zbIicmxjj5sLY0vPYmlX1zdbDUK9NqkdRf8aLzyowWFl3DtkXmyoakITOz9boqDIRiivTJQ/mLG8AFKgf0ms/z1yW4/PN+LoomdpmhQj05EfAJdAvdTw+ceteaeBSKc2uDql4Qj5AKUddeaoLQuPbWForfSPosv9DZZmvOXrmncY91HngrdclxFIssMtefQrC2USbQEIedih1cxfsXzwBrX7+f4eHH2MJt/GrOyNB0gaXc4sikYkaBKsIg7UCWC1/F4jmGkyDLlwp31zflZkjPKUJ3vp2SC9R6sHcT04tvxTVIMDCJgkc8="
     on:
       tags: true
       all_branches: true
