@@ -97,6 +97,7 @@ jobs:
 
   - <<: *deploy-base
     <<: *run-if-blurb
+    if: false
     env:
       TARGET_PKG: blurb
     deploy:
