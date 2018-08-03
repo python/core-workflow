@@ -100,8 +100,3 @@ jobs:
     if: false
     env:
       TARGET_PKG: blurb
-    deploy:
-      <<: *deployment-config
-      user: *pypi-user  # TODO: consider having a separate "uploader user"
-                        # with reduced priviliges for security reasons
-      password: *pypi-password  # FIXME: might need to change user/password pair
