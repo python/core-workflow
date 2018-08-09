@@ -342,6 +342,17 @@ Changelog
 1.2.1 (in development)
 -----------------------
 
+- Validate the branch name to operate on with ``--continue`` and fail early if the branch could not
+  have been created by cherry_picker. (`PR #266 <https://github.com/python/core-workflow/pull/266>`_).
+
+- Bugfix: Allow ``--continue`` to support version branches that have dashes in them.  This is
+  a bugfix of the additional branch versioning schemes introduced in 1.2.0.
+  (`PR #265 <https://github.com/python/core-workflow/pull/265>`_).
+
+- Bugfix: Be explicit about the branch name on the remote to push the cherry pick to.  This allows
+  cherry_picker to work correctly when the user has a git push strategy other than the default
+  configured. (`PR #264 <https://github.com/python/core-workflow/pull/264>`_).
+
 1.2.0
 -----
 
