@@ -339,8 +339,8 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.2.1 (in development)
------------------------
+1.2.1
+-----
 
 - Validate the branch name to operate on with ``--continue`` and fail early if the branch could not
   have been created by cherry_picker. (`PR #266 <https://github.com/python/core-workflow/pull/266>`_).
