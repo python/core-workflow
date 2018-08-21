@@ -307,7 +307,7 @@ Install pytest: ``pip install -U pytest``
 Publishing to PyPI
 ==================
 
-- Create a new release branch
+- Create a new release branch.
 
 - Update the version info in ``__init__.py`` and ``readme.rst``, dropping the ``.dev``.
 
