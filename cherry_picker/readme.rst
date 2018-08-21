@@ -307,15 +307,11 @@ Install pytest: ``pip install -U pytest``
 Publishing to PyPI
 ==================
 
-Publish to PyPI using `flit <https://flit.readthedocs.io/en/latest/>`_.
+- Create a new release branch
 
-Install flit (preferably in a virtual environment)::
+- Update the version info in ``__init__.py`` and ``readme.rst``, dropping the `.dev`.
 
-    python3 -m pip install flit
-
-In the directory where ``pyproject.toml`` exists::
-
-    flit publish
+- Tag the branch as ``cherry-picker-vX.Y.Z``.
 
 
 Local installation
