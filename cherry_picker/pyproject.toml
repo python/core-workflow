@@ -10,11 +10,16 @@ maintainer = "Python Core Developers"
 maintainer-email = "core-workflow@python.org"
 home-page = "https://github.com/python/core-workflow/tree/master/cherry_picker"
 requires = ["click~=6.7", "gidgethub", "requests", "toml"]
+dev-requires = ["pytest~=3.0.7", "setuptools-scm"]
 description-file = "readme.rst"
 classifiers = ["Programming Language :: Python :: 3.6", "Intended Audience :: Developers", "License :: OSI Approved :: Apache Software License"]
 requires-python = ">=3.6"
 
 [tool.flit.metadata.requires-extra]
+dev = [
+  "pytest~=3.0.7",
+  "setuptools-scm",
+]
 test = [
   "pytest~=3.0.7",
   "setuptools-scm",
