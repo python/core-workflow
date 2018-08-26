@@ -339,6 +339,9 @@ Changelog
 1.2.2 (in development)
 ----------------------
 
+- Move version data to Git tags
+  (`PR #287 <https://github.com/python/core-workflow/pull/287>`_).
+
 1.2.1
 -----
 
