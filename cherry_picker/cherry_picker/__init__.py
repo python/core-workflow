@@ -1,5 +1,6 @@
 """Backport CPython changes from master to maintenance branches."""
 from pathlib import Path
+import sys
 
 try:
     from setuptools_scm import get_version
@@ -29,6 +30,7 @@ except ImportError:
         import pkg_resources
     except ImportError:
         __version__ = '0.0.0dev0'
+        del sys.modules['cherry_picker']
     else:
         try:
             __version__ = (
@@ -36,3 +38,4 @@ except ImportError:
             )
         except pkg_resources.DistributionNotFound:
             __version__ = '0.0.0dev0'
+            del sys.modules['cherry_picker']
