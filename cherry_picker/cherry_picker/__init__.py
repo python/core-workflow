@@ -55,11 +55,11 @@ def __getattr__(name):
 
 if sys.version_info < (3, 7):
     class ModuleWrapper:
-	def __init__(self, wrapped):
-	    self.wrapped = wrapped
+        def __init__(self, wrapped):
+            self.wrapped = wrapped
 
-	def __getattr__(self, name):
-	    global __getattr__
-	    return __getattr__(name)
+        def __getattr__(self, name):
+            global __getattr__
+            return __getattr__(name)
 
     _globals = sys.modules[__name__] = ModuleWrapper(sys.modules[__name__])
