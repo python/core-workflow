@@ -307,11 +307,12 @@ Install pytest: ``pip install -U pytest``
 Publishing to PyPI
 ==================
 
-- Create a new release branch.
+- Make sure that changelog entries are in ``master``
+  (or the target commit for release).
 
-- Update the version info in ``__init__.py`` and ``readme.rst``, dropping the ``.dev``.
-
-- Tag the branch as ``cherry-picker-vX.Y.Z``.
+- Tag the target commit (normally the ``master``'s ``HEAD``)
+  as ``cherry-picker-vX.Y.Z`` (use `semver <https://semver.org>`_
+  as a guide for bumping).
 
 
 Local installation
