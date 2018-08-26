@@ -30,7 +30,7 @@ before_install:
     TARGET_PKG: cherry_picker
   install:
   - &cd-to-project pushd "$TARGET_PKG"
-  - flit install
+  - &flit-install flit install --deps=develop
   script:
   - pytest cherry_picker/test.py -v
   - popd
@@ -40,7 +40,7 @@ before_install:
     TARGET_PKG: blurb
   install:
   - *cd-to-project
-  - flit install --deps=develop
+  - *flit-install
   - popd
   script:
   - blurb test
