@@ -44,9 +44,10 @@ counter = 0
 def __getattr__(name):
     global counter
     if name == '__version__':
+        version = get_dist_version()
         counter += 1
         if counter > 1:
-            globals()['__version__'] = get_dist_version()
+            globals()['__version__'] = version
             del globals()['__getattr__']
             del globals()['counter']
         return version
