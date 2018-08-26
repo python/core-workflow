@@ -7,7 +7,7 @@ sudo: false
 cache: pip
 
 before_install:
-- pip install --upgrade flit
+- pip install --upgrade flit pip setuptools wheel
 
 .mixtures:
 - &run-if-tagged
