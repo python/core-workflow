@@ -28,11 +28,11 @@ except ImportError:
     try:
         import pkg_resources
     except ImportError:
-        __version__ = '0.0.0dev0'
+        __version__ = '0.0.0'
     else:
         try:
             __version__ = (
                 pkg_resources.get_distribution('cherry-picker').version
             )
         except pkg_resources.DistributionNotFound:
-            __version__ = '0.0.0dev0'
+            __version__ = '0.0.0'
