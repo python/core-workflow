@@ -33,7 +33,7 @@ def get_dist_version():
             return '0.0.0dev0'
         else:
             try:
-                __version__ = (
+                return (
                     pkg_resources.get_distribution('cherry-picker').version
                 )
             except pkg_resources.DistributionNotFound:
