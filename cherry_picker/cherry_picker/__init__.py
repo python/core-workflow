@@ -30,6 +30,9 @@ except ImportError:
     except ImportError:
         __version__ = 'unknown'
     else:
-        __version__ = (
-            pkg_resources.get_distribution('cherry-picker').version
-        )
+        try:
+            __version__ = (
+                pkg_resources.get_distribution('cherry-picker').version
+            )
+        except pkg_resources.DistributionNotFound:
+            __version__ = 'unknown'
