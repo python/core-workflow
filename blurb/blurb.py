@@ -723,7 +723,7 @@ def chdir_to_repo_root():
     # find the root of the local CPython repo
     # note that we can't ask git, because we might
     # be in an exported directory tree!
-    
+
     # we intentionally start in a (probably nonexistant) subtree
     # the first thing the while loop does is .., basically
     path = os.path.abspath("garglemox")
@@ -1135,14 +1135,14 @@ Python News
 git_add_files = []
 def flush_git_add_files():
     if git_add_files:
-        subprocess.run(["git", "add", "-f", *git_add_files], stdout=subprocess.PIPE, stderr=subprocess.PIPE).check_returncode()
+        subprocess.run(["git", "add", "--force", *git_add_files]).check_returncode()
         git_add_files.clear()
 
 git_rm_files = []
 def flush_git_rm_files():
     if git_rm_files:
         try:
-            subprocess.run(["git", "rm", "-f", *git_rm_files], stdout=subprocess.PIPE, stderr=subprocess.PIPE).check_returncode()
+            subprocess.run(["git", "rm", "--quiet", "--force", *git_rm_files]).check_returncode()
         except subprocess.CalledProcessError:
             pass
 
