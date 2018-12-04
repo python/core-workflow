@@ -181,7 +181,7 @@ To abort the cherry-pick and cleanup:
 (cherry picked from commit {self.commit_sha1})
 
 
-Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
+Co-Authored-By: {get_author_info_from_short_sha(self.commit_sha1)}"""
         if self.dry_run:
             click.echo(f"  dry-run: git commit --amend -m '{updated_commit_message}'")
         else:
@@ -326,7 +326,7 @@ To abort the cherry-pick and cleanup:
             short_sha = cherry_pick_branch[cherry_pick_branch.index('-')+1:cherry_pick_branch.index(base)-1]
             full_sha = get_full_sha_from_short(short_sha)
             commit_message = self.get_commit_message(short_sha)
-            co_author_info = f"Co-authored-by: {get_author_info_from_short_sha(short_sha)}"
+            co_author_info = f"Co-Authored-By: {get_author_info_from_short_sha(short_sha)}"
             updated_commit_message = f"""[{base}] {commit_message}.
 (cherry picked from commit {full_sha})
 
