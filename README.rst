@@ -49,6 +49,8 @@ Other core workflow tools
 `python/bedevere`_                      A bot to help identify  `GitHub <https://github.com/                    `Brett Cannon`_
                                         missing information for python/bedevere/issues>`__
                                         CPython pull requests.
+`python/blurb_it`_                      ``blurb add`` on the    `GitHub <https://github.com/                    `Mariatta`_
+                                        web.                    python/blurb_it/issues>`__
 `python/miss-islington`_                A bot for backporting   `GitHub <https://github.com/                    `Mariatta`_
                                         CPython pull requests.  python/miss-islington/issues>`__
 `python/the-knights-who-say-ni`_        CLA enforcement bot for `GitHub <https://github.com/                    `Brett Cannon`_
@@ -65,6 +67,7 @@ Other core workflow tools
 ======================================= ======================= =============================================== ================
 
 .. _`python/bedevere`: https://github.com/python/bedevere
+.. _`python/blurb_it`: https://github.com/python/blurb_it
 .. _`python/miss-islington`: https://github.com/python/miss-islington
 .. _`python/the-knights-who-say-ni`: https://github.com/python/the-knights-who-say-ni
 .. _`berkerpeksag/cpython-emailer-webhook`: https://github.com/berkerpeksag/cpython-emailer-webhook
