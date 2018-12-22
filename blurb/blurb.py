@@ -483,6 +483,8 @@ class Blurbs(list):
         line_number = None
 
         def throw(s):
+            nonlocal filename
+            nonlocal line_number
             raise BlurbError(f("Error in {filename}:{line_number}:\n{s}"))
 
         def finish_entry():
