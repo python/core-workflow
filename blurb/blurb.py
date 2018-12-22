@@ -111,9 +111,6 @@ for line in template.split('\n'):
     if found and not prefix:
         sections.append(section.strip())
 
-def warn(*a):
-    return builtins.print('[WARNING]', *a, file=sys.stderr)
-
 
 def f(s):
     """
@@ -365,6 +362,9 @@ def printable_version(version):
 class BlurbError(RuntimeError):
     pass
 
+class MultipleParagraphError(BlurbError):
+    pass
+
 """
 
 The format of a blurb file:
@@ -445,6 +445,9 @@ blurb in a blurb file.
 """
 
 class Blurbs(list):
+    def __init__(self, allow_multiple_paragraphs=False, **kwargs):
+        self.allow_multiple_paragraphs = allow_multiple_paragraphs
+        super().__init__(**kwargs)
 
     def parse(self, text, *, metadata=None, filename="input"):
         """
@@ -470,10 +473,12 @@ class Blurbs(list):
 
             if not body:
                 throw("Blurb 'body' text must not be empty!")
-            if "" in body[:-1]:
-                warn("Multiple paragraphs in {}:{}".format(filename, line_number - 2))
-                while "" in body[:-1]:
-                    body.remove("")
+            if "" in body[:-1] and not self.allow_multiple_paragraphs:
+                raise MultipleParagraphError(
+                    f("Error in {filename}:{line_number}:\n"
+                      "You have multiple paragraphs! "
+                      "News blurbs should only be a single paragraph."))
+
             text = textwrap_body(body)
             for naughty_prefix in ("- ", "Issue #", "bpo-"):
                 if text.startswith(naughty_prefix):
@@ -925,28 +930,46 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
         if not shutil.which(args[0]):
             sys.exit(f("Invalid GIT_EDITOR / EDITOR value: {editor}"))
     args.append(tmp_path)
-
+    skip_next_editor = False
+    allow_multiple_paragraphs = False
     while True:
-        subprocess.run(args)
+        if not skip_next_editor:
+            subprocess.run(args)
 
         failure = None
-        blurb = Blurbs()
+        recoverable_failure = None
+        blurb = Blurbs(allow_multiple_paragraphs)
         try:
             blurb.load(tmp_path)
+        except MultipleParagraphError as e:
+            recoverable_failure = str(e)
         except BlurbError as e:
             failure = str(e)
 
-        if not failure:
+        if not failure and not recoverable_failure:
             assert len(blurb) # if parse_blurb succeeds, we should always have a body
             if len(blurb) > 1:
                 failure = "Too many entries!  Don't specify '..' on a line by itself."
 
-        if failure:
+        if failure or recoverable_failure:
             print()
-            print(f("Error: {failure}"))
+            if failure:
+                print(f("Error: {failure}"))
+            if recoverable_failure:
+                print(f("Error: {recoverable_failure}"))
             print()
             try:
-                prompt("Hit return to retry (or Ctrl-C to abort)")
+                if failure:
+                    prompt("Hit return to retry (or Ctrl-C to abort)")
+                else:
+                    response = prompt(
+                        "Are you sure? "
+                        "Type 'yes' to use this file, anything else to re-edit "
+                        "(or Ctrl-C to abort).")
+                    if response == 'yes':
+                        allow_multiple_paragraphs = True
+                        skip_next_editor = True
+                        continue
             except KeyboardInterrupt:
                 print()
                 return
