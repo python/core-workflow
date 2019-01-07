@@ -629,7 +629,7 @@ def load_config(path=None):
         if ':' not in path:
             path = f'{head_sha}:{path}'
 
-            revision, _, path = path.partition(':')
+            revision, _col, _path = path.partition(':')
             if not revision:
                 revision = head_sha
 
