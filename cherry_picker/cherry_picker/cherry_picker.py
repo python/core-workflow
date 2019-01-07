@@ -15,14 +15,6 @@ from gidgethub import sansio
 
 from . import __version__
 
-
-chosen_config_path = None
-"""The config reference used in the current runtime.
-
-It starts with a Git revision specifier, followed by a colon
-and a path relative to the repo root.
-"""
-
 CREATE_PR_URL_TEMPLATE = ("https://api.github.com/repos/"
                           "{config[team]}/{config[repo]}/pulls")
 DEFAULT_CONFIG = collections.ChainMap({
@@ -58,7 +50,15 @@ class CherryPicker:
                  *, dry_run=False, push=True,
                  prefix_commit=True,
                  config=DEFAULT_CONFIG,
+                 chosen_config_path=None,
                  ):
+
+        self.chosen_config_path = chosen_config_path
+        """The config reference used in the current runtime.
+
+        It starts with a Git revision specifier, followed by a colon
+        and a path relative to the repo root.
+        """
 
         self.config = config
         self.check_repo()  # may raise InvalidRepoException
@@ -79,6 +79,12 @@ class CherryPicker:
         self.dry_run = dry_run
         self.push = push
         self.prefix_commit = prefix_commit
+
+    def set_paused_state():
+        """Save paused progress state into Git config."""
+        if self.chosen_config_path is not None:
+            save_cfg_vals_to_git_cfg(config_path=self.chosen_config_path)
+        set_state('BACKPORT_PAUSED')
 
     @property
     def upstream(self):
@@ -475,13 +481,13 @@ def cherry_pick_cli(ctx,
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
 
-    global chosen_config_path
     chosen_config_path, config = load_config(config_path)
 
     try:
         cherry_picker = CherryPicker(pr_remote, commit_sha1, branches,
                                      dry_run=dry_run,
-                                     push=push, config=config)
+                                     push=push, config=config,
+                                     chosen_config_path=chosen_config_path)
     except InvalidRepoException:
         click.echo(f"You're not inside a {config['repo']} repo right now! \U0001F645")
         sys.exit(-1)
@@ -647,14 +653,6 @@ def get_sha1_from(commitish):
     """Turn 'commitish' into its sha1 hash."""
     cmd = ['git', 'rev-parse', commitish]
     return subprocess.check_output(cmd).strip().decode('utf-8')
-
-
-def set_paused_state():
-    """Save paused progress state into Git config."""
-    global chosen_config_path
-    if chosen_config_path is not None:
-        save_cfg_vals_to_git_cfg(config_path=chosen_config_path)
-    set_state('BACKPORT_PAUSED')
 
 
 def reset_stored_config_ref():
