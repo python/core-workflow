@@ -3,6 +3,7 @@
 
 import click
 import collections
+import enum
 import os
 import subprocess
 import webbrowser
@@ -40,9 +41,9 @@ class InvalidRepoException(Exception):
 
 class CherryPicker:
 
-    ALLOWED_STATES = (
-        'BACKPORT_PAUSED',
-        'UNSET',
+    ALLOWED_STATES = enum.Enum(
+        'Allowed states',
+        'BACKPORT_PAUSED UNSET',
     )
     """The list of states expected at the start of the app."""
 
@@ -435,12 +436,13 @@ To abort the cherry-pick and cleanup:
                           cherry_picker would have stored in the config.
         """
         state = get_state()
-        if state not in self.ALLOWED_STATES:
+        if state not in self.ALLOWED_STATES.__members__:
             raise ValueError(
                 f'Run state cherry-picker.state={state} in Git config '
                 'is not known.\nPerhaps it has been set by a newer '
                 'version of cherry-picker. Try upgrading.\n'
-                f'Valid states are: {", ".join(self.ALLOWED_STATES)}. '
+                'Valid states are: '
+                f'{", ".join(self.ALLOWED_STATES.__members__.keys())}. '
                 'If this looks suspicious, raise an issue at '
                 'https://github.com/python/core-workflow/issues/new.\n'
                 'As the last resort you can reset the runtime state '
