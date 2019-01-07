@@ -705,6 +705,9 @@ def load_val_from_git_cfg(cfg_key_suffix):
 
 def from_git_rev_read(path):
     """Retrieve given file path contents of certain Git revision."""
+    if ':' not in path:
+        raise ValueError('Path identifier must start with a revision hash.')
+
     cmd = 'git', 'show', '-t', path
     return subprocess.check_output(cmd).rstrip().decode('utf-8')
 
