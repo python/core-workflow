@@ -10,7 +10,7 @@ from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, get_author_info_from_short_sha, \
     CherryPicker, InvalidRepoException, \
     normalize_commit_message, DEFAULT_CONFIG, \
-    find_config, load_config
+    get_sha1_from, find_config, load_config, validate_sha
 
 
 @pytest.fixture
@@ -116,16 +116,22 @@ def test_get_cherry_pick_branch(os_path_exists, config):
     assert cp.get_cherry_pick_branch("3.6") == "backport-22a594a-3.6"
 
 
-@mock.patch('os.path.exists')
-@mock.patch('subprocess.check_output')
-def test_get_pr_url(subprocess_check_output, os_path_exists, config):
-    os_path_exists.return_value = True
-    subprocess_check_output.return_value = b'https://github.com/mock_user/cpython.git'
+def test_get_pr_url(config):
     branches = ["3.6"]
     cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
                       branches, config=config)
-    assert cp.get_pr_url("3.6", cp.get_cherry_pick_branch("3.6")) \
-           == "https://github.com/python/cpython/compare/3.6...mock_user:backport-22a594a-3.6?expand=1"
+    backport_target_branch = cp.get_cherry_pick_branch("3.6")
+    expected_pr_url = (
+        'https://github.com/python/cpython/compare/'
+        '3.6...mock_user:backport-22a594a-3.6?expand=1'
+    )
+    with mock.patch(
+            'subprocess.check_output',
+            return_value=b'https://github.com/mock_user/cpython.git',
+    ):
+        actual_pr_url = cp.get_pr_url("3.6", backport_target_branch)
+
+    assert actual_pr_url == expected_pr_url
 
 
 @pytest.mark.parametrize('url', [
@@ -137,42 +143,44 @@ def test_get_pr_url(subprocess_check_output, os_path_exists, config):
     b'https://github.com/mock_user/cpython',
     ])
 def test_username(url, config):
-    with mock.patch('subprocess.check_output', return_value=url):
-        branches = ["3.6"]
-        cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                          branches, config=config)
-        assert cp.username == 'mock_user'
-
-
-@mock.patch('os.path.exists')
-@mock.patch('subprocess.check_output')
-def test_get_updated_commit_message(subprocess_check_output, os_path_exists,
-                                    config):
-    os_path_exists.return_value = True
-    subprocess_check_output.return_value = b'bpo-123: Fix Spam Module (#113)'
     branches = ["3.6"]
     cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
                       branches, config=config)
-    assert cp.get_commit_message('22a594a0047d7706537ff2ac676cdc0f1dcb329c') \
-           == 'bpo-123: Fix Spam Module (GH-113)'
+    with mock.patch('subprocess.check_output', return_value=url):
+        assert cp.username == 'mock_user'
 
 
-@mock.patch('os.path.exists')
-@mock.patch('subprocess.check_output')
-def test_get_updated_commit_message_without_links_replacement(
-        subprocess_check_output, os_path_exists, config):
-    os_path_exists.return_value = True
-    subprocess_check_output.return_value = b'bpo-123: Fix Spam Module (#113)'
+def test_get_updated_commit_message(config):
+    branches = ["3.6"]
+    cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
+                      branches, config=config)
+    with mock.patch(
+            'subprocess.check_output',
+            return_value=b'bpo-123: Fix Spam Module (#113)',
+    ):
+        actual_commit_message = (
+            cp.get_commit_message('22a594a0047d7706537ff2ac676cdc0f1dcb329c')
+        )
+    assert actual_commit_message == 'bpo-123: Fix Spam Module (GH-113)'
+
+
+def test_get_updated_commit_message_without_links_replacement(config):
     config['fix_commit_msg'] = False
     branches = ["3.6"]
     cp = CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
                       branches, config=config)
-    assert cp.get_commit_message('22a594a0047d7706537ff2ac676cdc0f1dcb329c') \
-           == 'bpo-123: Fix Spam Module (#113)'
+    with mock.patch(
+            'subprocess.check_output',
+            return_value=b'bpo-123: Fix Spam Module (#113)',
+    ):
+        actual_commit_message = (
+            cp.get_commit_message('22a594a0047d7706537ff2ac676cdc0f1dcb329c')
+        )
+    assert actual_commit_message == 'bpo-123: Fix Spam Module (#113)'
 
 
 @mock.patch('subprocess.check_output')
-def test_is_cpython_repo(subprocess_check_output, config):
+def test_is_cpython_repo(subprocess_check_output):
     subprocess_check_output.return_value = """commit 7f777ed95a19224294949e1b4ce56bbffcb1fe9f
 Author: Guido van Rossum <guido@python.org>
 Date:   Thu Aug 9 14:25:15 1990 +0000
@@ -181,8 +189,7 @@ Date:   Thu Aug 9 14:25:15 1990 +0000
 
 """
     # should not raise an exception
-    CherryPicker('origin', '22a594a0047d7706537ff2ac676cdc0f1dcb329c',
-                 ["3.6"], config=config)
+    validate_sha('22a594a0047d7706537ff2ac676cdc0f1dcb329c')
 
 
 def test_is_not_cpython_repo():
@@ -195,48 +202,72 @@ def test_is_not_cpython_repo():
 def test_find_config(tmpdir, cd):
     cd(tmpdir)
     subprocess.run('git init .'.split(), check=True)
-    cfg = tmpdir.join('.cherry_picker.toml')
+    relative_config_path = '.cherry_picker.toml'
+    cfg = tmpdir.join(relative_config_path)
     cfg.write('param = 1')
-    assert str(find_config()) == str(cfg)
+    subprocess.run('git add .'.split(), check=True)
+    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    scm_revision = get_sha1_from('HEAD')
+    assert find_config(scm_revision) == scm_revision + ':' + relative_config_path
 
 
 def test_find_config_not_found(tmpdir, cd):
     cd(tmpdir)
     subprocess.run('git init .'.split(), check=True)
-    assert find_config() is None
+    subprocess.run(('git', 'commit', '-m', 'Initial commit', '--allow-empty'), check=True)
+    scm_revision = get_sha1_from('HEAD')
+    assert find_config(scm_revision) is None
 
 
 def test_load_full_config(tmpdir, cd):
     cd(tmpdir)
     subprocess.run('git init .'.split(), check=True)
-    cfg = tmpdir.join('.cherry_picker.toml')
+    relative_config_path = '.cherry_picker.toml'
+    cfg = tmpdir.join(relative_config_path)
     cfg.write('''\
     team = "python"
     repo = "core-workfolow"
     check_sha = "5f007046b5d4766f971272a0cc99f8461215c1ec"
     default_branch = "devel"
     ''')
+    subprocess.run('git add .'.split(), check=True)
+    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    scm_revision = get_sha1_from('HEAD')
     cfg = load_config(None)
-    assert cfg == {'check_sha': '5f007046b5d4766f971272a0cc99f8461215c1ec',
-                   'repo': 'core-workfolow',
-                   'team': 'python',
-                   'fix_commit_msg': True,
-                   'default_branch': 'devel',
-                   }
+    assert cfg == (
+        scm_revision + ':' + relative_config_path,
+        {
+            'check_sha': '5f007046b5d4766f971272a0cc99f8461215c1ec',
+            'repo': 'core-workfolow',
+            'team': 'python',
+            'fix_commit_msg': True,
+            'default_branch': 'devel',
+        },
+    )
 
 
 def test_load_partial_config(tmpdir, cd):
-    cfg = tmpdir.join('.cherry_picker.toml')
+    cd(tmpdir)
+    subprocess.run('git init .'.split(), check=True)
+    relative_config_path = '.cherry_picker.toml'
+    cfg = tmpdir.join(relative_config_path)
     cfg.write('''\
     repo = "core-workfolow"
     ''')
-    cfg = load_config(pathlib.Path(str(cfg)))
-    assert cfg == {'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
-                   'repo': 'core-workfolow',
-                   'team': 'python',
-                   'fix_commit_msg': True,
-                   'default_branch': 'master',
-                   }
+    subprocess.run('git add .'.split(), check=True)
+    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    scm_revision = get_sha1_from('HEAD')
+    cfg = load_config(relative_config_path)
+    assert cfg == (
+        scm_revision + ':' + relative_config_path,
+        {
+            'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
+            'repo': 'core-workfolow',
+            'team': 'python',
+            'fix_commit_msg': True,
+            'default_branch': 'master',
+        },
+    )
 
 
 def test_normalize_long_commit_message():
