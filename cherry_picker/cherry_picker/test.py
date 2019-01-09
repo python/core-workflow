@@ -252,6 +252,11 @@ def test_find_config_not_found(tmpdir, cd):
     assert find_config(scm_revision) is None
 
 
+def test_find_config_not_git(tmpdir, cd):
+    cd(tmpdir)
+    assert find_config(None) is None
+
+
 def test_load_full_config(tmpdir, cd):
     cd(tmpdir)
     subprocess.run('git init .'.split(), check=True)
