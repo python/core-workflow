@@ -327,7 +327,7 @@ Co-authored-by: {get_author_info_from_short_sha(self.commit_sha1)}"""
                 click.echo(self.get_exit_message(maint_branch))
             except CherryPickException:
                 click.echo(self.get_exit_message(maint_branch))
-                set_paused_state()
+                self.set_paused_state()
                 raise
             else:
                 if self.push:
@@ -347,7 +347,7 @@ To continue and push the changes:
 To abort the cherry-pick and cleanup:
     $ cherry_picker --abort
 """)
-                    set_paused_state()
+                    self.set_paused_state()
             set_state('BACKPORT_LOOP_END')
         set_state('BACKPORT_COMPLETE')
 
