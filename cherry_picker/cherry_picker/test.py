@@ -12,7 +12,8 @@ from .cherry_picker import get_base_branch, get_current_branch, \
     normalize_commit_message, DEFAULT_CONFIG, \
     get_sha1_from, find_config, load_config, validate_sha, \
     from_git_rev_read, \
-    reset_state, set_state, get_state
+    reset_state, set_state, get_state, \
+    load_val_from_git_cfg, reset_stored_config_ref
 
 
 @pytest.fixture
@@ -383,3 +384,36 @@ def test_states(tmp_git_repo_dir):
     # Wipe it again
     reset_state()
     assert get_state() == 'UNSET'
+
+
+def test_paused_flow(tmp_git_repo_dir, git_add, git_commit):
+    assert load_val_from_git_cfg('config_path') is None
+    initial_scm_revision = get_sha1_from('HEAD')
+
+    relative_file_path = 'some.toml'
+    tmp_git_repo_dir.join(relative_file_path).write(f'''\
+    check_sha = "{initial_scm_revision}"
+    repo = "core-workfolow"
+    ''')
+    git_add(relative_file_path)
+    git_commit('Add a config')
+    config_scm_revision = get_sha1_from('HEAD')
+
+    config_path_rev = config_scm_revision + ':' + relative_file_path
+    chosen_config_path, config = load_config(config_path_rev)
+
+    cherry_picker = CherryPicker(
+        'origin', config_scm_revision, [], config=config,
+        chosen_config_path=chosen_config_path,
+    )
+    assert get_state() == 'UNSET'
+
+    cherry_picker.set_paused_state()
+    assert load_val_from_git_cfg('config_path') == config_path_rev
+    assert get_state() == 'BACKPORT_PAUSED'
+
+    chosen_config_path, config = load_config(None)
+    assert chosen_config_path == config_path_rev
+
+    reset_stored_config_ref()
+    assert load_val_from_git_cfg('config_path') is None
