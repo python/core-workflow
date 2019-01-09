@@ -452,3 +452,34 @@ def test_paused_flow(tmp_git_repo_dir, git_add, git_commit):
 
     reset_stored_config_ref()
     assert load_val_from_git_cfg('config_path') is None
+
+
+@pytest.mark.parametrize(
+    'method_name,start_state,end_state',
+    (
+        ('fetch_upstream', 'FETCHING_UPSTREAM', 'FETCHED_UPSTREAM'),
+        (
+            'checkout_default_branch',
+            'CHECKING_OUT_DEFAULT_BRANCH', 'CHECKED_OUT_DEFAULT_BRANCH',
+        ),
+    ),
+)
+def test_start_end_states(
+    method_name, start_state, end_state,
+    tmp_git_repo_dir, git_add, git_commit,
+):
+    assert get_state() == 'UNSET'
+
+    with mock.patch(
+            'cherry_picker.cherry_picker.validate_sha',
+            return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+    assert get_state() == 'UNSET'
+
+    def _fetch(cmd):
+        assert get_state() == start_state
+
+    with mock.patch.object(cherry_picker, 'run_cmd', _fetch):
+        getattr(cherry_picker, method_name)()
+    assert get_state() == end_state
