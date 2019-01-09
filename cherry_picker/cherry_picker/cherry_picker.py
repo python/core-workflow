@@ -81,7 +81,7 @@ class CherryPicker:
         self.push = push
         self.prefix_commit = prefix_commit
 
-    def set_paused_state():
+    def set_paused_state(self):
         """Save paused progress state into Git config."""
         if self.chosen_config_path is not None:
             save_cfg_vals_to_git_cfg(config_path=self.chosen_config_path)
