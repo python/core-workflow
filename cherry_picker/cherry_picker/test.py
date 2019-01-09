@@ -50,6 +50,22 @@ def git_add():
 
 
 @pytest.fixture
+def git_checkout():
+    git_checkout_cmd = 'git', 'checkout'
+    return lambda *extra_args: (
+        subprocess.run(git_checkout_cmd + extra_args, check=True)
+    )
+
+
+@pytest.fixture
+def git_branch():
+    git_branch_cmd = 'git', 'branch'
+    return lambda *extra_args: (
+        subprocess.run(git_branch_cmd + extra_args, check=True)
+    )
+
+
+@pytest.fixture
 def git_commit():
     git_commit_cmd = 'git', 'commit', '-m'
     return lambda msg, *extra_args: (
@@ -483,3 +499,34 @@ def test_start_end_states(
     with mock.patch.object(cherry_picker, 'run_cmd', _fetch):
         getattr(cherry_picker, method_name)()
     assert get_state() == end_state
+
+
+def test_cleanup_branch(
+    tmp_git_repo_dir, git_checkout,
+):
+    assert get_state() == 'UNSET'
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+    assert get_state() == 'UNSET'
+
+    git_checkout('-b', 'some_branch')
+    cherry_picker.cleanup_branch('some_branch')
+    assert get_state() == 'REMOVED_BACKPORT_BRANCH'
+
+
+def test_cleanup_branch_fail(tmp_git_repo_dir):
+    assert get_state() == 'UNSET'
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+    assert get_state() == 'UNSET'
+
+    cherry_picker.cleanup_branch('some_branch')
+    assert get_state() == 'REMOVING_BACKPORT_BRANCH_FAILED'
