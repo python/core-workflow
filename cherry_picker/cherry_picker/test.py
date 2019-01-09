@@ -10,7 +10,8 @@ from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, get_author_info_from_short_sha, \
     CherryPicker, InvalidRepoException, \
     normalize_commit_message, DEFAULT_CONFIG, \
-    get_sha1_from, find_config, load_config, validate_sha
+    get_sha1_from, find_config, load_config, validate_sha, \
+    from_git_rev_read
 
 
 @pytest.fixture
@@ -30,6 +31,36 @@ def cd():
 
     # restore CWD back
     os.chdir(cwd)
+
+
+@pytest.fixture
+def git_init():
+    git_init_cmd = 'git', 'init', '.'
+    return lambda: subprocess.run(git_init_cmd, check=True)
+
+
+@pytest.fixture
+def git_add():
+    git_add_cmd = 'git', 'add'
+    return lambda *extra_args: (
+        subprocess.run(git_add_cmd + extra_args, check=True)
+    )
+
+
+@pytest.fixture
+def git_commit():
+    git_commit_cmd = 'git', 'commit', '-m'
+    return lambda msg, *extra_args: (
+        subprocess.run(git_commit_cmd + (msg, ) + extra_args, check=True)
+    )
+
+
+@pytest.fixture
+def tmp_git_repo_dir(tmpdir, cd, git_init, git_commit):
+    cd(tmpdir)
+    git_init()
+    git_commit('Initial commit', '--allow-empty')
+    yield tmpdir
 
 
 @mock.patch('subprocess.check_output')
@@ -304,3 +335,35 @@ Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
 
 
 Co-authored-by: Elmar Ritsch <35851+elritsch@users.noreply.github.com>"""
+
+
+@pytest.mark.parametrize(
+    'input_path',
+    (
+        '/some/path/without/revision',
+        'HEAD:some/non-existent/path',
+    ),
+)
+def test_from_git_rev_read_negative(
+    input_path, tmp_git_repo_dir,
+):
+    with pytest.raises(ValueError):
+        from_git_rev_read(input_path)
+
+
+def test_from_git_rev_read_uncommitted(tmp_git_repo_dir, git_add, git_commit):
+    some_text = 'blah blah 🤖'
+    relative_file_path = '.some.file'
+    tmp_git_repo_dir.join(relative_file_path).write(some_text)
+    git_add('.')
+    with pytest.raises(ValueError):
+        from_git_rev_read('HEAD:' + relative_file_path) == some_text
+
+
+def test_from_git_rev_read(tmp_git_repo_dir, git_add, git_commit):
+    some_text = 'blah blah 🤖'
+    relative_file_path = '.some.file'
+    tmp_git_repo_dir.join(relative_file_path).write(some_text)
+    git_add('.')
+    git_commit('Add some file')
+    assert from_git_rev_read('HEAD:' + relative_file_path) == some_text
