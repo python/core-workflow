@@ -303,6 +303,36 @@ def test_load_partial_config(tmpdir, cd):
     )
 
 
+def test_load_config_no_head_sha(tmp_git_repo_dir, git_add, git_commit):
+    relative_config_path = '.cherry_picker.toml'
+    tmp_git_repo_dir.join(relative_config_path).write('''\
+    team = "python"
+    repo = "core-workfolow"
+    check_sha = "5f007046b5d4766f971272a0cc99f8461215c1ec"
+    default_branch = "devel"
+    ''')
+    git_add(relative_config_path)
+    git_commit(f'Add {relative_config_path}')
+    scm_revision = get_sha1_from('HEAD')
+
+    with mock.patch(
+            'cherry_picker.cherry_picker.get_sha1_from',
+            return_value='',
+    ):
+        cfg = load_config(relative_config_path)
+
+    assert cfg == (
+        ':' + relative_config_path,
+        {
+            'check_sha': '5f007046b5d4766f971272a0cc99f8461215c1ec',
+            'repo': 'core-workfolow',
+            'team': 'python',
+            'fix_commit_msg': True,
+            'default_branch': 'devel',
+        },
+    )
+
+
 def test_normalize_long_commit_message():
     commit_message = """[3.6] Fix broken `Show Source` links on documentation pages (GH-3113)
 
