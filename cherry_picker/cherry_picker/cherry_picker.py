@@ -698,7 +698,9 @@ def load_val_from_git_cfg(cfg_key_suffix):
     cfg_key = f'cherry-picker.{cfg_key_suffix.replace("_", "-")}'
     cmd = 'git', 'config', '--local', '--get', cfg_key
     try:
-        return subprocess.check_output(cmd, stderr=subprocess.DEVNULL).strip().decode('utf-8')
+        return subprocess.check_output(
+            cmd, stderr=subprocess.DEVNULL,
+        ).strip().decode('utf-8')
     except subprocess.CalledProcessError:
         return None
 
