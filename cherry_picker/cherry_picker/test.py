@@ -466,7 +466,7 @@ def test_paused_flow(tmp_git_repo_dir, git_add, git_commit):
 )
 def test_start_end_states(
     method_name, start_state, end_state,
-    tmp_git_repo_dir, git_add, git_commit,
+    tmp_git_repo_dir,
 ):
     assert get_state() == 'UNSET'
 
