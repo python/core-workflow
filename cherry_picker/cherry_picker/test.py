@@ -11,7 +11,8 @@ from .cherry_picker import get_base_branch, get_current_branch, \
     CherryPicker, InvalidRepoException, \
     normalize_commit_message, DEFAULT_CONFIG, \
     get_sha1_from, find_config, load_config, validate_sha, \
-    from_git_rev_read
+    from_git_rev_read, \
+    reset_state, set_state, get_state
 
 
 @pytest.fixture
@@ -367,3 +368,18 @@ def test_from_git_rev_read(tmp_git_repo_dir, git_add, git_commit):
     git_add('.')
     git_commit('Add some file')
     assert from_git_rev_read('HEAD:' + relative_file_path) == some_text
+
+
+def test_states(tmp_git_repo_dir):
+    state_val = 'somerandomwords'
+
+    # First, verify that there's nothing there initially
+    assert get_state() == 'UNSET'
+
+    # Now, set some val
+    set_state(state_val)
+    assert get_state() == state_val
+
+    # Wipe it again
+    reset_state()
+    assert get_state() == 'UNSET'
