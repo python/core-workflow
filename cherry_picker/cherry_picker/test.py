@@ -8,7 +8,7 @@ import pytest
 
 from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, get_author_info_from_short_sha, \
-    CherryPicker, InvalidRepoException, \
+    CherryPicker, InvalidRepoException, CherryPickException, \
     normalize_commit_message, DEFAULT_CONFIG, \
     get_sha1_from, find_config, load_config, validate_sha, \
     from_git_rev_read, \
@@ -530,3 +530,16 @@ def test_cleanup_branch_fail(tmp_git_repo_dir):
 
     cherry_picker.cleanup_branch('some_branch')
     assert get_state() == 'REMOVING_BACKPORT_BRANCH_FAILED'
+
+
+def test_cherry_pick_fail(
+    tmp_git_repo_dir,
+):
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    with pytest.raises(CherryPickException, message='Error cherry-pick xxx.'):
+        cherry_picker.cherry_pick()
