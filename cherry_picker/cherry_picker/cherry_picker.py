@@ -381,11 +381,11 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               help=("Path to config file, .cherry_picker.toml "
                     "from project root by default"),
               default=None)
-@click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
-                default = "")
-@click.argument('branches', help='The branches to backport to', nargs=-1)
+@click.argument('commit_sha1', nargs=1, default="")
+@click.argument('branches', nargs=-1)
 def cherry_pick_cli(dry_run, pr_remote, abort, status, push, config_path,
                     commit_sha1, branches):
+    """cherry-pick COMMIT_SHA1 into target BRANCHES."""
 
     click.echo("\U0001F40D \U0001F352 \u26CF")
 
