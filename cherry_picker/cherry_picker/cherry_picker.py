@@ -383,7 +383,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
               default=None)
 @click.argument('commit_sha1', 'The commit sha1 to be cherry-picked', nargs=1,
                 default = "")
-@click.argument('branches', 'The branches to backport to', nargs=-1)
+@click.argument('branches', help='The branches to backport to', nargs=-1)
 def cherry_pick_cli(dry_run, pr_remote, abort, status, push, config_path,
                     commit_sha1, branches):
 
