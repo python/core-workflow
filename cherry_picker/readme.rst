@@ -335,8 +335,10 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.2.2 (in development)
-----------------------
+1.2.2
+-----
+
+- Relaxed click dependency (`PR #302 <https://github.com/python/core-workflow/pull/302>`_).
 
 1.2.1
 -----
