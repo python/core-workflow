@@ -532,6 +532,39 @@ def test_cleanup_branch_fail(tmp_git_repo_dir):
     assert get_state() == 'REMOVING_BACKPORT_BRANCH_FAILED'
 
 
+def test_cherry_pick(
+    tmp_git_repo_dir, git_add, git_branch, git_commit, git_checkout,
+):
+    cherry_pick_target_branches = '3.8',
+    pr_remote = 'origin'
+    test_file = 'some.file'
+    tmp_git_repo_dir.join(test_file).write('some contents')
+    git_branch(cherry_pick_target_branches[0])
+    git_branch(
+        f'{pr_remote}/{cherry_pick_target_branches[0]}',
+        cherry_pick_target_branches[0],
+    )
+    git_add(test_file)
+    git_commit('Add a test file')
+    scm_revision = get_sha1_from('HEAD')
+
+    git_checkout(  # simulate backport method logic
+        cherry_pick_target_branches[0],
+    )
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker(
+            pr_remote,
+            scm_revision,
+            cherry_pick_target_branches,
+        )
+
+    cherry_picker.cherry_pick()
+
+
 def test_cherry_pick_fail(
     tmp_git_repo_dir,
 ):
