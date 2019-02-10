@@ -75,6 +75,14 @@ def git_commit():
 
 
 @pytest.fixture
+def git_cherry_pick():
+    git_cherry_pick_cmd = 'git', 'cherry-pick'
+    return lambda *extra_args: (
+        subprocess.run(git_cherry_pick_cmd + extra_args, check=True)
+    )
+
+
+@pytest.fixture
 def tmp_git_repo_dir(tmpdir, cd, git_init, git_commit):
     cd(tmpdir)
     git_init()
@@ -910,3 +918,86 @@ def test_continue_cherry_pick_invalid_branch(tmp_git_repo_dir):
         cherry_picker.continue_cherry_pick()
 
     assert get_state() == 'CONTINUATION_FAILED'
+
+
+def test_abort_cherry_pick_invalid_state(tmp_git_repo_dir):
+    assert get_state() == 'UNSET'
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    assert get_state() == 'UNSET'
+
+    with pytest.raises(
+        ValueError,
+        match=r'^One can only abort a paused process.$',
+    ):
+        cherry_picker.abort_cherry_pick()
+
+
+def test_abort_cherry_pick_fail(tmp_git_repo_dir):
+    set_state('BACKPORT_PAUSED')
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    with mock.patch('cherry_picker.cherry_picker.wipe_cfg_vals_from_git_cfg'):
+        cherry_picker.abort_cherry_pick()
+
+    assert get_state() == 'ABORTING_FAILED'
+
+
+def test_abort_cherry_pick_success(
+    tmp_git_repo_dir,
+    git_branch, git_add,
+    git_commit, git_checkout,
+    git_cherry_pick,
+):
+    cherry_pick_target_branches = '3.8',
+    pr_remote = 'origin'
+    test_file = 'some.file'
+    git_branch(
+        f'backport-xxx-{cherry_pick_target_branches[0]}',
+    )
+
+    tmp_git_repo_dir.join(test_file).write('some contents')
+    git_add(test_file)
+    git_commit('Add a test file')
+    scm_revision = get_sha1_from('HEAD')
+
+    git_checkout(
+        f'backport-xxx-{cherry_pick_target_branches[0]}',
+    )
+    tmp_git_repo_dir.join(test_file).write('some other contents')
+    git_add(test_file)
+    git_commit('Add a test file again')
+
+    try:
+        git_cherry_pick(  # simulate a conflict with pause
+            scm_revision,
+        )
+    except subprocess.CalledProcessError:
+        pass
+
+    set_state('BACKPORT_PAUSED')
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker(
+            pr_remote,
+            scm_revision,
+            cherry_pick_target_branches,
+        )
+
+    with mock.patch('cherry_picker.cherry_picker.wipe_cfg_vals_from_git_cfg'):
+        cherry_picker.abort_cherry_pick()
+
+    assert get_state() == 'REMOVED_BACKPORT_BRANCH'
