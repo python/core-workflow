@@ -872,3 +872,38 @@ def test_backport_pause_and_continue(
         cherry_picker.continue_cherry_pick()
 
     assert get_state() == 'UNSET'  # success
+
+
+def test_continue_cherry_pick_invalid_state(tmp_git_repo_dir):
+    assert get_state() == 'UNSET'
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    assert get_state() == 'UNSET'
+
+    with pytest.raises(
+        ValueError,
+        match='^One can only continue a paused process.$',
+    ):
+        cherry_picker.continue_cherry_pick()
+
+    assert get_state() == 'UNSET'  # success
+
+
+def test_continue_cherry_pick_invalid_branch(tmp_git_repo_dir):
+    set_state('BACKPORT_PAUSED')
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    with mock.patch('cherry_picker.cherry_picker.wipe_cfg_vals_from_git_cfg'):
+        cherry_picker.continue_cherry_pick()
+
+    assert get_state() == 'CONTINUATION_FAILED'
