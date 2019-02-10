@@ -607,3 +607,47 @@ def test_get_state_and_verify_fail(
             ), \
             pytest.raises(ValueError, match=expected_msg_regexp):
         cherry_picker = CherryPicker('origin', 'xxx', [])
+
+
+def test_push_to_remote_fail(tmp_git_repo_dir):
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    cherry_picker.push_to_remote('master', 'backport-branch-test')
+    assert get_state() == 'PUSHING_TO_REMOTE_FAILED'
+
+
+def test_push_to_remote_interactive(tmp_git_repo_dir):
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    with \
+            mock.patch.object(cherry_picker, 'run_cmd'), \
+            mock.patch.object(cherry_picker, 'open_pr'), \
+            mock.patch.object(
+                cherry_picker, 'get_pr_url',
+                return_value='https://pr_url',
+            ):
+        cherry_picker.push_to_remote('master', 'backport-branch-test')
+    assert get_state() == 'PR_OPENING'
+
+
+def test_push_to_remote_botflow(tmp_git_repo_dir, monkeypatch):
+    monkeypatch.setenv('GH_AUTH', 'True')
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    with \
+            mock.patch.object(cherry_picker, 'run_cmd'), \
+            mock.patch.object(cherry_picker, 'create_gh_pr'):
+        cherry_picker.push_to_remote('master', 'backport-branch-test')
+    assert get_state() == 'PR_CREATING'
