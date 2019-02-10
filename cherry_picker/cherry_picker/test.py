@@ -14,7 +14,8 @@ from .cherry_picker import get_base_branch, get_current_branch, \
     get_sha1_from, find_config, load_config, validate_sha, \
     from_git_rev_read, \
     reset_state, set_state, get_state, \
-    load_val_from_git_cfg, reset_stored_config_ref
+    load_val_from_git_cfg, reset_stored_config_ref, \
+    WORKFLOW_STATES
 
 
 @pytest.fixture
@@ -432,18 +433,20 @@ def test_from_git_rev_read(tmp_git_repo_dir, git_add, git_commit):
 
 
 def test_states(tmp_git_repo_dir):
-    state_val = 'somerandomwords'
+    class state_val:
+        name = 'somerandomwords'
 
     # First, verify that there's nothing there initially
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     # Now, set some val
     set_state(state_val)
-    assert get_state() == state_val
+    with pytest.raises(KeyError, match=state_val.name):
+        get_state()
 
     # Wipe it again
     reset_state()
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
 
 def test_paused_flow(tmp_git_repo_dir, git_add, git_commit):
@@ -466,11 +469,11 @@ def test_paused_flow(tmp_git_repo_dir, git_add, git_commit):
         'origin', config_scm_revision, [], config=config,
         chosen_config_path=chosen_config_path,
     )
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     cherry_picker.set_paused_state()
     assert load_val_from_git_cfg('config_path') == config_path_rev
-    assert get_state() == 'BACKPORT_PAUSED'
+    assert get_state() == WORKFLOW_STATES.BACKPORT_PAUSED
 
     chosen_config_path, config = load_config(None)
     assert chosen_config_path == config_path_rev
@@ -482,10 +485,15 @@ def test_paused_flow(tmp_git_repo_dir, git_add, git_commit):
 @pytest.mark.parametrize(
     'method_name,start_state,end_state',
     (
-        ('fetch_upstream', 'FETCHING_UPSTREAM', 'FETCHED_UPSTREAM'),
+        (
+            'fetch_upstream',
+            WORKFLOW_STATES.FETCHING_UPSTREAM,
+            WORKFLOW_STATES.FETCHED_UPSTREAM,
+        ),
         (
             'checkout_default_branch',
-            'CHECKING_OUT_DEFAULT_BRANCH', 'CHECKED_OUT_DEFAULT_BRANCH',
+            WORKFLOW_STATES.CHECKING_OUT_DEFAULT_BRANCH,
+            WORKFLOW_STATES.CHECKED_OUT_DEFAULT_BRANCH,
         ),
     ),
 )
@@ -493,14 +501,14 @@ def test_start_end_states(
     method_name, start_state, end_state,
     tmp_git_repo_dir,
 ):
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     with mock.patch(
             'cherry_picker.cherry_picker.validate_sha',
             return_value=True,
     ):
         cherry_picker = CherryPicker('origin', 'xxx', [])
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     def _fetch(cmd):
         assert get_state() == start_state
@@ -513,32 +521,32 @@ def test_start_end_states(
 def test_cleanup_branch(
     tmp_git_repo_dir, git_checkout,
 ):
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     with mock.patch(
         'cherry_picker.cherry_picker.validate_sha',
         return_value=True,
     ):
         cherry_picker = CherryPicker('origin', 'xxx', [])
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     git_checkout('-b', 'some_branch')
     cherry_picker.cleanup_branch('some_branch')
-    assert get_state() == 'REMOVED_BACKPORT_BRANCH'
+    assert get_state() == WORKFLOW_STATES.REMOVED_BACKPORT_BRANCH
 
 
 def test_cleanup_branch_fail(tmp_git_repo_dir):
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     with mock.patch(
         'cherry_picker.cherry_picker.validate_sha',
         return_value=True,
     ):
         cherry_picker = CherryPicker('origin', 'xxx', [])
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     cherry_picker.cleanup_branch('some_branch')
-    assert get_state() == 'REMOVING_BACKPORT_BRANCH_FAILED'
+    assert get_state() == WORKFLOW_STATES.REMOVING_BACKPORT_BRANCH_FAILED
 
 
 def test_cherry_pick(
@@ -590,11 +598,12 @@ def test_cherry_pick_fail(
 def test_get_state_and_verify_fail(
     tmp_git_repo_dir,
 ):
-    tested_state = 'invalid_state'
+    class tested_state:
+        name = 'invalid_state'
     set_state(tested_state)
 
     expected_msg_regexp = (
-        fr'^Run state cherry-picker.state={tested_state} in Git config '
+        fr'^Run state cherry-picker.state={tested_state.name} in Git config '
         r'is not known.'
         '\n'
         r'Perhaps it has been set by a newer '
@@ -626,7 +635,7 @@ def test_push_to_remote_fail(tmp_git_repo_dir):
         cherry_picker = CherryPicker('origin', 'xxx', [])
 
     cherry_picker.push_to_remote('master', 'backport-branch-test')
-    assert get_state() == 'PUSHING_TO_REMOTE_FAILED'
+    assert get_state() == WORKFLOW_STATES.PUSHING_TO_REMOTE_FAILED
 
 
 def test_push_to_remote_interactive(tmp_git_repo_dir):
@@ -644,7 +653,7 @@ def test_push_to_remote_interactive(tmp_git_repo_dir):
                 return_value='https://pr_url',
             ):
         cherry_picker.push_to_remote('master', 'backport-branch-test')
-    assert get_state() == 'PR_OPENING'
+    assert get_state() == WORKFLOW_STATES.PR_OPENING
 
 
 def test_push_to_remote_botflow(tmp_git_repo_dir, monkeypatch):
@@ -659,7 +668,7 @@ def test_push_to_remote_botflow(tmp_git_repo_dir, monkeypatch):
             mock.patch.object(cherry_picker, 'run_cmd'), \
             mock.patch.object(cherry_picker, 'create_gh_pr'):
         cherry_picker.push_to_remote('master', 'backport-branch-test')
-    assert get_state() == 'PR_CREATING'
+    assert get_state() == WORKFLOW_STATES.PR_CREATING
 
 
 def test_backport_no_branch(tmp_git_repo_dir, monkeypatch):
@@ -718,7 +727,7 @@ def test_backport_cherry_pick_fail(
             ):
         cherry_picker.backport()
 
-    assert get_state() == 'BACKPORT_PAUSED'
+    assert get_state() == WORKFLOW_STATES.BACKPORT_PAUSED
 
 
 def test_backport_cherry_pick_crash_ignored(
@@ -769,7 +778,7 @@ def test_backport_cherry_pick_crash_ignored(
             ):
         cherry_picker.backport()
 
-    assert get_state() == 'BACKPORT_COMPLETE'
+    assert get_state() == WORKFLOW_STATES.BACKPORT_COMPLETE
 
 
 def test_backport_success(
@@ -812,7 +821,7 @@ def test_backport_success(
             mock.patch.object(cherry_picker, 'amend_commit_message', return_value='commit message'):
         cherry_picker.backport()
 
-    assert get_state() == 'BACKPORT_COMPLETE'
+    assert get_state() == WORKFLOW_STATES.BACKPORT_COMPLETE
 
 
 def test_backport_pause_and_continue(
@@ -854,7 +863,7 @@ def test_backport_pause_and_continue(
             mock.patch.object(cherry_picker, 'amend_commit_message', return_value='commit message'):
         cherry_picker.backport()
 
-    assert get_state() == 'BACKPORT_PAUSED'
+    assert get_state() == WORKFLOW_STATES.BACKPORT_PAUSED
 
     cherry_picker.initial_state = get_state()
     with \
@@ -882,11 +891,11 @@ def test_backport_pause_and_continue(
             mock.patch.object(cherry_picker, 'fetch_upstream'):
         cherry_picker.continue_cherry_pick()
 
-    assert get_state() == 'BACKPORTING_CONTINUATION_SUCCEED'
+    assert get_state() == WORKFLOW_STATES.BACKPORTING_CONTINUATION_SUCCEED
 
 
 def test_continue_cherry_pick_invalid_state(tmp_git_repo_dir):
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     with mock.patch(
         'cherry_picker.cherry_picker.validate_sha',
@@ -894,7 +903,7 @@ def test_continue_cherry_pick_invalid_state(tmp_git_repo_dir):
     ):
         cherry_picker = CherryPicker('origin', 'xxx', [])
 
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     with pytest.raises(
         ValueError,
@@ -902,11 +911,11 @@ def test_continue_cherry_pick_invalid_state(tmp_git_repo_dir):
     ):
         cherry_picker.continue_cherry_pick()
 
-    assert get_state() == 'UNSET'  # success
+    assert get_state() == WORKFLOW_STATES.UNSET  # success
 
 
 def test_continue_cherry_pick_invalid_branch(tmp_git_repo_dir):
-    set_state('BACKPORT_PAUSED')
+    set_state(WORKFLOW_STATES.BACKPORT_PAUSED)
 
     with mock.patch(
         'cherry_picker.cherry_picker.validate_sha',
@@ -917,11 +926,11 @@ def test_continue_cherry_pick_invalid_branch(tmp_git_repo_dir):
     with mock.patch('cherry_picker.cherry_picker.wipe_cfg_vals_from_git_cfg'):
         cherry_picker.continue_cherry_pick()
 
-    assert get_state() == 'CONTINUATION_FAILED'
+    assert get_state() == WORKFLOW_STATES.CONTINUATION_FAILED
 
 
 def test_abort_cherry_pick_invalid_state(tmp_git_repo_dir):
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     with mock.patch(
         'cherry_picker.cherry_picker.validate_sha',
@@ -929,7 +938,7 @@ def test_abort_cherry_pick_invalid_state(tmp_git_repo_dir):
     ):
         cherry_picker = CherryPicker('origin', 'xxx', [])
 
-    assert get_state() == 'UNSET'
+    assert get_state() == WORKFLOW_STATES.UNSET
 
     with pytest.raises(
         ValueError,
@@ -939,7 +948,7 @@ def test_abort_cherry_pick_invalid_state(tmp_git_repo_dir):
 
 
 def test_abort_cherry_pick_fail(tmp_git_repo_dir):
-    set_state('BACKPORT_PAUSED')
+    set_state(WORKFLOW_STATES.BACKPORT_PAUSED)
 
     with mock.patch(
         'cherry_picker.cherry_picker.validate_sha',
@@ -950,7 +959,7 @@ def test_abort_cherry_pick_fail(tmp_git_repo_dir):
     with mock.patch('cherry_picker.cherry_picker.wipe_cfg_vals_from_git_cfg'):
         cherry_picker.abort_cherry_pick()
 
-    assert get_state() == 'ABORTING_FAILED'
+    assert get_state() == WORKFLOW_STATES.ABORTING_FAILED
 
 
 def test_abort_cherry_pick_success(
@@ -985,7 +994,7 @@ def test_abort_cherry_pick_success(
     except subprocess.CalledProcessError:
         pass
 
-    set_state('BACKPORT_PAUSED')
+    set_state(WORKFLOW_STATES.BACKPORT_PAUSED)
 
     with mock.patch(
         'cherry_picker.cherry_picker.validate_sha',
@@ -1000,4 +1009,4 @@ def test_abort_cherry_pick_success(
     with mock.patch('cherry_picker.cherry_picker.wipe_cfg_vals_from_git_cfg'):
         cherry_picker.abort_cherry_pick()
 
-    assert get_state() == 'REMOVED_BACKPORT_BRANCH'
+    assert get_state() == WORKFLOW_STATES.REMOVED_BACKPORT_BRANCH
