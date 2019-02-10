@@ -851,6 +851,9 @@ def test_backport_pause_and_continue(
     cherry_picker.initial_state = get_state()
     with \
             mock.patch(
+                'cherry_picker.cherry_picker.wipe_cfg_vals_from_git_cfg',
+            ), \
+            mock.patch(
                 'cherry_picker.cherry_picker.get_full_sha_from_short',
                 return_value='xxxxxxyyyyyy',
             ), \
@@ -871,7 +874,7 @@ def test_backport_pause_and_continue(
             mock.patch.object(cherry_picker, 'fetch_upstream'):
         cherry_picker.continue_cherry_pick()
 
-    assert get_state() == 'UNSET'  # success
+    assert get_state() == 'BACKPORTING_CONTINUATION_SUCCEED'
 
 
 def test_continue_cherry_pick_invalid_state(tmp_git_repo_dir):
