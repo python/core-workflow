@@ -348,6 +348,7 @@ To abort the cherry-pick and cleanup:
     $ cherry_picker --abort
 """)
                     self.set_paused_state()
+                    return  # to preserve the correct state
             set_state('BACKPORT_LOOP_END')
         set_state('BACKPORT_COMPLETE')
 
