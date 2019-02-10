@@ -5,6 +5,7 @@ from collections import ChainMap
 from unittest import mock
 
 import pytest
+import click
 
 from .cherry_picker import get_base_branch, get_current_branch, \
     get_full_sha_from_short, get_author_info_from_short_sha, \
@@ -651,3 +652,17 @@ def test_push_to_remote_botflow(tmp_git_repo_dir, monkeypatch):
             mock.patch.object(cherry_picker, 'create_gh_pr'):
         cherry_picker.push_to_remote('master', 'backport-branch-test')
     assert get_state() == 'PR_CREATING'
+
+
+def test_backport_no_branch(tmp_git_repo_dir, monkeypatch):
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
+
+    with pytest.raises(
+        click.UsageError,
+        message='At least one branch must be specified.',
+    ):
+        cherry_picker.backport()
