@@ -813,8 +813,6 @@ def test_backport_success(
             cherry_pick_target_branches,
         )
 
-            #, \
-            #mock.patch.object(cherry_picker, 'cherry_pick', side_effect=CherryPickException):
     with \
             mock.patch.object(cherry_picker, 'checkout_branch'), \
             mock.patch.object(cherry_picker, 'fetch_upstream'), \
