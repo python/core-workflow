@@ -660,7 +660,10 @@ def get_sha1_from(commitish):
 
 def reset_stored_config_ref():
     """Remove the config path option from Git config."""
-    wipe_cfg_vals_from_git_cfg('config_path')
+    try:
+        wipe_cfg_vals_from_git_cfg('config_path')
+    except subprocess.CalledProcessError:
+        """Config file pointer is not stored in Git config."""
 
 
 def reset_state():
