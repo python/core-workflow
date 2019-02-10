@@ -576,3 +576,34 @@ def test_cherry_pick_fail(
 
     with pytest.raises(CherryPickException, message='Error cherry-pick xxx.'):
         cherry_picker.cherry_pick()
+
+
+def test_get_state_and_verify_fail(
+    tmp_git_repo_dir,
+):
+    tested_state = 'invalid_state'
+    set_state(tested_state)
+
+    expected_msg_regexp = (
+        fr'^Run state cherry-picker.state={tested_state} in Git config '
+        r'is not known.'
+        '\n'
+        r'Perhaps it has been set by a newer '
+        r'version of cherry-picker\. Try upgrading\.'
+        '\n'
+        r'Valid states are: '
+        r'[\w_\s]+(, [\w_\s]+)*\. '
+        r'If this looks suspicious, raise an issue at '
+        r'https://github.com/python/core-workflow/issues/new\.'
+        '\n'
+        r'As the last resort you can reset the runtime state '
+        r'stored in Git config using the following command: '
+        r'`git config --local --remove-section cherry-picker`'
+    )
+    with \
+            mock.patch(
+                'cherry_picker.cherry_picker.validate_sha',
+                return_value=True,
+            ), \
+            pytest.raises(ValueError, match=expected_msg_regexp):
+        cherry_picker = CherryPicker('origin', 'xxx', [])
