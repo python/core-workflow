@@ -890,7 +890,7 @@ def test_continue_cherry_pick_invalid_state(tmp_git_repo_dir):
 
     with pytest.raises(
         ValueError,
-        match='^One can only continue a paused process.$',
+        match=r'^One can only continue a paused process.$',
     ):
         cherry_picker.continue_cherry_pick()
 
