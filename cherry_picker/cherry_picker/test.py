@@ -591,7 +591,7 @@ def test_cherry_pick_fail(
     ):
         cherry_picker = CherryPicker('origin', 'xxx', [])
 
-    with pytest.raises(CherryPickException, message='Error cherry-pick xxx.'):
+    with pytest.raises(CherryPickException, match='^Error cherry-pick xxx.$'):
         cherry_picker.cherry_pick()
 
 
@@ -680,7 +680,7 @@ def test_backport_no_branch(tmp_git_repo_dir, monkeypatch):
 
     with pytest.raises(
         click.UsageError,
-        message='At least one branch must be specified.',
+        match='^At least one branch must be specified.$',
     ):
         cherry_picker.backport()
 
