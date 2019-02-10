@@ -666,3 +666,209 @@ def test_backport_no_branch(tmp_git_repo_dir, monkeypatch):
         message='At least one branch must be specified.',
     ):
         cherry_picker.backport()
+
+
+def test_backport_cherry_pick_fail(
+    tmp_git_repo_dir,
+    git_branch, git_add,
+    git_commit, git_checkout,
+):
+    cherry_pick_target_branches = '3.8',
+    pr_remote = 'origin'
+    test_file = 'some.file'
+    tmp_git_repo_dir.join(test_file).write('some contents')
+    git_branch(cherry_pick_target_branches[0])
+    git_branch(
+        f'{pr_remote}/{cherry_pick_target_branches[0]}',
+        cherry_pick_target_branches[0],
+    )
+    git_add(test_file)
+    git_commit('Add a test file')
+    scm_revision = get_sha1_from('HEAD')
+
+    git_checkout(  # simulate backport method logic
+        cherry_pick_target_branches[0],
+    )
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker(
+            pr_remote,
+            scm_revision,
+            cherry_pick_target_branches,
+        )
+
+    with \
+            pytest.raises(CherryPickException), \
+            mock.patch.object(cherry_picker, 'checkout_branch'), \
+            mock.patch.object(cherry_picker, 'fetch_upstream'), \
+            mock.patch.object(
+                cherry_picker, 'cherry_pick',
+                side_effect=CherryPickException,
+            ):
+        cherry_picker.backport()
+
+    assert get_state() == 'BACKPORT_PAUSED'
+
+
+def test_backport_cherry_pick_crash_ignored(
+    tmp_git_repo_dir,
+    git_branch, git_add,
+    git_commit, git_checkout,
+):
+    cherry_pick_target_branches = '3.8',
+    pr_remote = 'origin'
+    test_file = 'some.file'
+    tmp_git_repo_dir.join(test_file).write('some contents')
+    git_branch(cherry_pick_target_branches[0])
+    git_branch(
+        f'{pr_remote}/{cherry_pick_target_branches[0]}',
+        cherry_pick_target_branches[0],
+    )
+    git_add(test_file)
+    git_commit('Add a test file')
+    scm_revision = get_sha1_from('HEAD')
+
+    git_checkout(  # simulate backport method logic
+        cherry_pick_target_branches[0],
+    )
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker(
+            pr_remote,
+            scm_revision,
+            cherry_pick_target_branches,
+        )
+
+    with \
+            mock.patch.object(cherry_picker, 'checkout_branch'), \
+            mock.patch.object(cherry_picker, 'fetch_upstream'), \
+            mock.patch.object(cherry_picker, 'cherry_pick'), \
+            mock.patch.object(
+                cherry_picker, 'amend_commit_message',
+                side_effect=subprocess.CalledProcessError(
+                    1,
+                    (
+                        'git', 'commit', '-am',
+                        'new commit message',
+                    ),
+                )
+            ):
+        cherry_picker.backport()
+
+    assert get_state() == 'BACKPORT_COMPLETE'
+
+
+def test_backport_success(
+    tmp_git_repo_dir,
+    git_branch, git_add,
+    git_commit, git_checkout,
+):
+    cherry_pick_target_branches = '3.8',
+    pr_remote = 'origin'
+    test_file = 'some.file'
+    tmp_git_repo_dir.join(test_file).write('some contents')
+    git_branch(cherry_pick_target_branches[0])
+    git_branch(
+        f'{pr_remote}/{cherry_pick_target_branches[0]}',
+        cherry_pick_target_branches[0],
+    )
+    git_add(test_file)
+    git_commit('Add a test file')
+    scm_revision = get_sha1_from('HEAD')
+
+    git_checkout(  # simulate backport method logic
+        cherry_pick_target_branches[0],
+    )
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker(
+            pr_remote,
+            scm_revision,
+            cherry_pick_target_branches,
+        )
+
+            #, \
+            #mock.patch.object(cherry_picker, 'cherry_pick', side_effect=CherryPickException):
+    with \
+            mock.patch.object(cherry_picker, 'checkout_branch'), \
+            mock.patch.object(cherry_picker, 'fetch_upstream'), \
+            mock.patch.object(cherry_picker, 'amend_commit_message', return_value='commit message'):
+        cherry_picker.backport()
+
+    assert get_state() == 'BACKPORT_COMPLETE'
+
+
+def test_backport_pause_and_continue(
+    tmp_git_repo_dir,
+    git_branch, git_add,
+    git_commit, git_checkout,
+):
+    cherry_pick_target_branches = '3.8',
+    pr_remote = 'origin'
+    test_file = 'some.file'
+    tmp_git_repo_dir.join(test_file).write('some contents')
+    git_branch(cherry_pick_target_branches[0])
+    git_branch(
+        f'{pr_remote}/{cherry_pick_target_branches[0]}',
+        cherry_pick_target_branches[0],
+    )
+    git_add(test_file)
+    git_commit('Add a test file')
+    scm_revision = get_sha1_from('HEAD')
+
+    git_checkout(  # simulate backport method logic
+        cherry_pick_target_branches[0],
+    )
+
+    with mock.patch(
+        'cherry_picker.cherry_picker.validate_sha',
+        return_value=True,
+    ):
+        cherry_picker = CherryPicker(
+            pr_remote,
+            scm_revision,
+            cherry_pick_target_branches,
+            push=False,
+        )
+
+    with \
+            mock.patch.object(cherry_picker, 'checkout_branch'), \
+            mock.patch.object(cherry_picker, 'fetch_upstream'), \
+            mock.patch.object(cherry_picker, 'amend_commit_message', return_value='commit message'):
+        cherry_picker.backport()
+
+    assert get_state() == 'BACKPORT_PAUSED'
+
+    cherry_picker.initial_state = get_state()
+    with \
+            mock.patch(
+                'cherry_picker.cherry_picker.get_full_sha_from_short',
+                return_value='xxxxxxyyyyyy',
+            ), \
+            mock.patch(
+                'cherry_picker.cherry_picker.get_base_branch',
+                return_value='3.8',
+            ), \
+            mock.patch(
+                'cherry_picker.cherry_picker.get_current_branch',
+                return_value='backport-xxx-3.8',
+            ), \
+            mock.patch(
+                'cherry_picker.cherry_picker.get_author_info_from_short_sha',
+                return_value='Author Name <author@name.email>',
+            ), \
+            mock.patch.object(cherry_picker, 'get_commit_message', return_value='commit message'), \
+            mock.patch.object(cherry_picker, 'checkout_branch'), \
+            mock.patch.object(cherry_picker, 'fetch_upstream'):
+        cherry_picker.continue_cherry_pick()
+
+    assert get_state() == 'UNSET'  # success
