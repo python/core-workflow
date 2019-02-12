@@ -323,7 +323,7 @@ def test_load_partial_config(tmpdir, cd):
     scm_revision = get_sha1_from('HEAD')
     cfg = load_config(relative_config_path)
     assert cfg == (
-        scm_revision + ':' + relative_config_path,
+        f'{scm_revision}:{relative_config_path}',
         {
             'check_sha': '7f777ed95a19224294949e1b4ce56bbffcb1fe9f',
             'repo': 'core-workfolow',
