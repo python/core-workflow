@@ -913,9 +913,7 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     os.close(handle)
     atexit.register(lambda : os.unlink(tmp_path))
 
-    # see of the branch name indicated BPO number
-    # makes the 'editor strips trailing whitespace from template lines'
-    # hack obsolete, too.
+    # See if the branch name incidates the BPO number
     branch_bpo, branch_suffix = get_bpo_git_branch()
 
     with open(tmp_path, "wt", encoding="utf-8") as f:
@@ -967,14 +965,13 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     git_add_files.append(path)
     flush_git_add_files()
 
-    # For convenience, write a preformatted commit template. Enable template
-    # with ``git config commit.template .git/blurb``.
+    # For convenience, write a preformatted commit template. You can tell git to
+    # use this template with "git config.template .git/blurb".
     msgfile = os.path.join(root, '.git', 'blurb')
     if os.path.isdir(os.path.dirname(msgfile)):
         metadata, text = blurb[0]
-        title = branch_suffix.replace('-', ' ').replace('_', ' ')
         with open(msgfile, 'wt', encoding="utf-8") as f:
-            f.write(f"bpo-{metadata['bpo']}: {title}\n")
+            f.write(f"bpo-{metadata['bpo']}: {branch_suffix}\n")
             f.write("\n")
             f.write(text)
 
@@ -1175,10 +1172,9 @@ def get_bpo_git_branch():
         return '', ''
     branch = p.stdout.decode('utf-8').strip()
     mo = re.match("^bpo[-_]?(\d+)[-_]?(.*)", branch)
-    if mo is not None:
-        return mo.group(1), mo.group(2)
-    else:
+    if mo is None:
         return '', branch
+    return mo.group(1), mo.group(2)
 
 
 # @subcommand
