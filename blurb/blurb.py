@@ -971,7 +971,7 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     if os.path.isdir(os.path.dirname(msgfile)):
         metadata, text = blurb[0]
         with open(msgfile, 'wt', encoding="utf-8") as f:
-            f.write(f"bpo-{metadata['bpo']}: {branch_suffix}\n")
+            f.write("bpo-{}: {}\n".format(metadata['bpo'], branch_suffix))
             f.write("\n")
             f.write(text)
 
