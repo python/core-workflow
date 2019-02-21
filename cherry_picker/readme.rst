@@ -338,6 +338,10 @@ Changelog
 1.2.3 (in development)
 ----------------------
 
+- Implement state machine and storing reference to the config
+  used at the beginning of the backport process using commit sha
+  and a repo-local Git config.
+  (`PR #295 <https://github.com/python/core-workflow/pull/295>`_).
 
 1.2.2
 -----
