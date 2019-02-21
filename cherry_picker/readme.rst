@@ -335,8 +335,8 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.2.3 (in development)
-----------------------
+1.3.0
+-----
 
 - Implement state machine and storing reference to the config
   used at the beginning of the backport process using commit sha
