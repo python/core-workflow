@@ -7,7 +7,8 @@ sudo: false
 cache: pip
 
 before_install:
-- pip install --upgrade flit
+- &install-flit
+  pip install --upgrade flit
 
 .mixtures:
 - &run-if-tagged
@@ -98,6 +99,16 @@ jobs:
     <<: *run-if-cherry-picker
     env:
       TARGET_PKG: cherry_picker
+
+  - os: windows
+    language: sh
+    python: 3.7
+    before_install:
+      - choco install python --version 3.7
+      - export PATH="/c/Python37:/c/Python37/Scripts:$PATH"
+      - python -m pip install --upgrade pip wheel
+      - *install-flit
+    <<: *install-and-test-cherry-picker
 
   - <<: *deploy-base
     <<: *run-if-blurb
