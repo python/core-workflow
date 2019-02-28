@@ -1,6 +1,6 @@
 blurb version 1.0.8
 Part of the blurb package.
-Copyright 2015-2018 by Larry Hastings
+Copyright 2015-2019 by Larry Hastings
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
