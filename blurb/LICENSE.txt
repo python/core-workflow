@@ -1,4 +1,4 @@
-blurb version 1.0
+blurb version 1.0.8
 Part of the blurb package.
 Copyright 2015-2018 by Larry Hastings
 
