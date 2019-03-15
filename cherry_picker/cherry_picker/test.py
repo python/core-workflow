@@ -287,19 +287,16 @@ def test_find_config_not_git(tmpdir, cd):
     assert find_config(None) is None
 
 
-def test_load_full_config(tmpdir, cd):
-    cd(tmpdir)
-    subprocess.run('git init .'.split(), check=True)
+def test_load_full_config(tmp_git_repo_dir, git_add, git_commit):
     relative_config_path = '.cherry_picker.toml'
-    cfg = tmpdir.join(relative_config_path)
-    cfg.write('''\
+    tmp_git_repo_dir.join(relative_config_path).write('''\
     team = "python"
     repo = "core-workfolow"
     check_sha = "5f007046b5d4766f971272a0cc99f8461215c1ec"
     default_branch = "devel"
     ''')
-    subprocess.run('git add .'.split(), check=True)
-    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    git_add(relative_config_path)
+    git_commit('Add config')
     scm_revision = get_sha1_from('HEAD')
     cfg = load_config(None)
     assert cfg == (
@@ -314,16 +311,13 @@ def test_load_full_config(tmpdir, cd):
     )
 
 
-def test_load_partial_config(tmpdir, cd):
-    cd(tmpdir)
-    subprocess.run('git init .'.split(), check=True)
+def test_load_partial_config(tmp_git_repo_dir, git_add, git_commit):
     relative_config_path = '.cherry_picker.toml'
-    cfg = tmpdir.join(relative_config_path)
-    cfg.write('''\
+    tmp_git_repo_dir.join(relative_config_path).write('''\
     repo = "core-workfolow"
     ''')
-    subprocess.run('git add .'.split(), check=True)
-    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    git_add(relative_config_path)
+    git_commit('Add config')
     scm_revision = get_sha1_from('HEAD')
     cfg = load_config(relative_config_path)
     assert cfg == (
