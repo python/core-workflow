@@ -268,22 +268,16 @@ def test_is_not_cpython_repo():
                      ["3.6"])
 
 
-def test_find_config(tmpdir, cd):
-    cd(tmpdir)
-    subprocess.run('git init .'.split(), check=True)
+def test_find_config(tmp_git_repo_dir, git_add, git_commit):
     relative_config_path = '.cherry_picker.toml'
-    cfg = tmpdir.join(relative_config_path)
-    cfg.write('param = 1')
-    subprocess.run('git add .'.split(), check=True)
-    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    tmp_git_repo_dir.join(relative_config_path).write('param = 1')
+    git_add(relative_config_path)
+    git_commit('Add config')
     scm_revision = get_sha1_from('HEAD')
-    assert find_config(scm_revision) == scm_revision + ':' + relative_config_path
+    assert find_config(scm_revision) == f'{scm_revision}:{relative_config_path}'
 
 
-def test_find_config_not_found(tmpdir, cd):
-    cd(tmpdir)
-    subprocess.run('git init .'.split(), check=True)
-    subprocess.run(('git', 'commit', '-m', 'Initial commit', '--allow-empty'), check=True)
+def test_find_config_not_found(tmp_git_repo_dir):
     scm_revision = get_sha1_from('HEAD')
     assert find_config(scm_revision) is None
 
