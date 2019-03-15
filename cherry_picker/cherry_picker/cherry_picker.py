@@ -51,7 +51,6 @@ WORKFLOW_STATES = enum.Enum(
     BACKPORT_LOOPING
     BACKPORT_LOOP_START
     BACKPORT_LOOP_END
-    BACKPORT_COMPLETE
 
     ABORTING
     ABORTED
@@ -82,7 +81,7 @@ class InvalidRepoException(Exception):
 
 class CherryPicker:
 
-    ALLOWED_STATES = WORKFLOW_STATES.BACKPORT_PAUSED, WORKFLOW_STATES.UNSET, WORKFLOW_STATES.BACKPORT_COMPLETE
+    ALLOWED_STATES = WORKFLOW_STATES.BACKPORT_PAUSED, WORKFLOW_STATES.UNSET
     """The list of states expected at the start of the app."""
 
     def __init__(self, pr_remote, commit_sha1, branches,
@@ -388,7 +387,8 @@ To abort the cherry-pick and cleanup:
                     self.set_paused_state()
                     return  # to preserve the correct state
             set_state(WORKFLOW_STATES.BACKPORT_LOOP_END)
-        set_state(WORKFLOW_STATES.BACKPORT_COMPLETE)
+        reset_state()
+
 
     def abort_cherry_pick(self):
         """
@@ -721,7 +721,7 @@ def set_state(state):
 
 def get_state():
     """Retrieve the progress state from Git config."""
-    return get_state_from_string(load_val_from_git_cfg('state') or 'UNSET')
+    return get_state_from_string(load_val_from_git_cfg('state') or "UNSET")
 
 
 def save_cfg_vals_to_git_cfg(**cfg_map):

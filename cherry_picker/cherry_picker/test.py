@@ -780,7 +780,7 @@ def test_backport_cherry_pick_crash_ignored(
             ):
         cherry_picker.backport()
 
-    assert get_state() == WORKFLOW_STATES.BACKPORT_COMPLETE
+    assert get_state() == WORKFLOW_STATES.UNSET
 
 
 def test_backport_success(
@@ -821,7 +821,7 @@ def test_backport_success(
             mock.patch.object(cherry_picker, 'amend_commit_message', return_value='commit message'):
         cherry_picker.backport()
 
-    assert get_state() == WORKFLOW_STATES.BACKPORT_COMPLETE
+    assert get_state() == WORKFLOW_STATES.UNSET
 
 
 def test_backport_pause_and_continue(
