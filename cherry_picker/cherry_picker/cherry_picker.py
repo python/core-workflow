@@ -82,7 +82,7 @@ class InvalidRepoException(Exception):
 
 class CherryPicker:
 
-    ALLOWED_STATES = WORKFLOW_STATES.BACKPORT_PAUSED, WORKFLOW_STATES.UNSET
+    ALLOWED_STATES = WORKFLOW_STATES.BACKPORT_PAUSED, WORKFLOW_STATES.UNSET, WORKFLOW_STATES.BACKPORT_COMPLETE
     """The list of states expected at the start of the app."""
 
     def __init__(self, pr_remote, commit_sha1, branches,
