@@ -84,9 +84,19 @@ def git_cherry_pick():
 
 
 @pytest.fixture
-def tmp_git_repo_dir(tmpdir, cd, git_init, git_commit):
+def git_config():
+    git_config_cmd = 'git', 'config'
+    return lambda *extra_args: (
+        subprocess.run(git_config_cmd + extra_args, check=True)
+    )
+
+
+@pytest.fixture
+def tmp_git_repo_dir(tmpdir, cd, git_init, git_commit, git_config):
     cd(tmpdir)
     git_init()
+    git_config('--local', 'user.name', 'Monty Python')
+    git_config('--local', 'user.email', 'bot@python.org')
     git_commit('Initial commit', '--allow-empty')
     yield tmpdir
 
