@@ -7,7 +7,7 @@ sudo: false
 cache: pip
 
 before_install:
-- &install-flit
+- &install-flit >-
   pip install --upgrade flit
 
 .mixtures:
