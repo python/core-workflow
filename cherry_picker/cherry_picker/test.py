@@ -417,7 +417,7 @@ def test_from_git_rev_read_uncommitted(tmp_git_repo_dir, git_add, git_commit):
     relative_file_path = '.some.file'
     (
         pathlib.Path(tmp_git_repo_dir) / relative_file_path
-    ).write_text(some_text)
+    ).write_text(some_text, encoding='utf-8')
     git_add('.')
     with pytest.raises(ValueError):
         from_git_rev_read('HEAD:' + relative_file_path) == some_text
@@ -428,7 +428,7 @@ def test_from_git_rev_read(tmp_git_repo_dir, git_add, git_commit):
     relative_file_path = '.some.file'
     (
         pathlib.Path(tmp_git_repo_dir) / relative_file_path
-    ).write_text(some_text)
+    ).write_text(some_text, encoding='utf-8')
     git_add('.')
     git_commit('Add some file')
     assert from_git_rev_read('HEAD:' + relative_file_path) == some_text
