@@ -19,4 +19,4 @@ requires-python = ">=3.6"
 cherry_picker = "cherry_picker.cherry_picker:cherry_pick_cli"
 
 [tool.flit.metadata.requires-extra]
-test = ["pytest"]
+dev = ["pytest"]
