@@ -84,9 +84,19 @@ def git_cherry_pick():
 
 
 @pytest.fixture
-def tmp_git_repo_dir(tmpdir, cd, git_init, git_commit):
+def git_config():
+    git_config_cmd = 'git', 'config'
+    return lambda *extra_args: (
+        subprocess.run(git_config_cmd + extra_args, check=True)
+    )
+
+
+@pytest.fixture
+def tmp_git_repo_dir(tmpdir, cd, git_init, git_commit, git_config):
     cd(tmpdir)
     git_init()
+    git_config('--local', 'user.name', 'Monty Python')
+    git_config('--local', 'user.email', 'bot@python.org')
     git_commit('Initial commit', '--allow-empty')
     yield tmpdir
 
@@ -258,22 +268,16 @@ def test_is_not_cpython_repo():
                      ["3.6"])
 
 
-def test_find_config(tmpdir, cd):
-    cd(tmpdir)
-    subprocess.run('git init .'.split(), check=True)
+def test_find_config(tmp_git_repo_dir, git_add, git_commit):
     relative_config_path = '.cherry_picker.toml'
-    cfg = tmpdir.join(relative_config_path)
-    cfg.write('param = 1')
-    subprocess.run('git add .'.split(), check=True)
-    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    tmp_git_repo_dir.join(relative_config_path).write('param = 1')
+    git_add(relative_config_path)
+    git_commit('Add config')
     scm_revision = get_sha1_from('HEAD')
-    assert find_config(scm_revision) == scm_revision + ':' + relative_config_path
+    assert find_config(scm_revision) == f'{scm_revision}:{relative_config_path}'
 
 
-def test_find_config_not_found(tmpdir, cd):
-    cd(tmpdir)
-    subprocess.run('git init .'.split(), check=True)
-    subprocess.run(('git', 'commit', '-m', 'Initial commit', '--allow-empty'), check=True)
+def test_find_config_not_found(tmp_git_repo_dir):
     scm_revision = get_sha1_from('HEAD')
     assert find_config(scm_revision) is None
 
@@ -283,19 +287,16 @@ def test_find_config_not_git(tmpdir, cd):
     assert find_config(None) is None
 
 
-def test_load_full_config(tmpdir, cd):
-    cd(tmpdir)
-    subprocess.run('git init .'.split(), check=True)
+def test_load_full_config(tmp_git_repo_dir, git_add, git_commit):
     relative_config_path = '.cherry_picker.toml'
-    cfg = tmpdir.join(relative_config_path)
-    cfg.write('''\
+    tmp_git_repo_dir.join(relative_config_path).write('''\
     team = "python"
     repo = "core-workfolow"
     check_sha = "5f007046b5d4766f971272a0cc99f8461215c1ec"
     default_branch = "devel"
     ''')
-    subprocess.run('git add .'.split(), check=True)
-    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    git_add(relative_config_path)
+    git_commit('Add config')
     scm_revision = get_sha1_from('HEAD')
     cfg = load_config(None)
     assert cfg == (
@@ -310,16 +311,13 @@ def test_load_full_config(tmpdir, cd):
     )
 
 
-def test_load_partial_config(tmpdir, cd):
-    cd(tmpdir)
-    subprocess.run('git init .'.split(), check=True)
+def test_load_partial_config(tmp_git_repo_dir, git_add, git_commit):
     relative_config_path = '.cherry_picker.toml'
-    cfg = tmpdir.join(relative_config_path)
-    cfg.write('''\
+    tmp_git_repo_dir.join(relative_config_path).write('''\
     repo = "core-workfolow"
     ''')
-    subprocess.run('git add .'.split(), check=True)
-    subprocess.run(('git', 'commit', '-m', 'Initial commit'), check=True)
+    git_add(relative_config_path)
+    git_commit('Add config')
     scm_revision = get_sha1_from('HEAD')
     cfg = load_config(relative_config_path)
     assert cfg == (
@@ -417,7 +415,9 @@ def test_from_git_rev_read_negative(
 def test_from_git_rev_read_uncommitted(tmp_git_repo_dir, git_add, git_commit):
     some_text = 'blah blah 🤖'
     relative_file_path = '.some.file'
-    tmp_git_repo_dir.join(relative_file_path).write(some_text)
+    (
+        pathlib.Path(tmp_git_repo_dir) / relative_file_path
+    ).write_text(some_text, encoding='utf-8')
     git_add('.')
     with pytest.raises(ValueError):
         from_git_rev_read('HEAD:' + relative_file_path) == some_text
@@ -426,7 +426,9 @@ def test_from_git_rev_read_uncommitted(tmp_git_repo_dir, git_add, git_commit):
 def test_from_git_rev_read(tmp_git_repo_dir, git_add, git_commit):
     some_text = 'blah blah 🤖'
     relative_file_path = '.some.file'
-    tmp_git_repo_dir.join(relative_file_path).write(some_text)
+    (
+        pathlib.Path(tmp_git_repo_dir) / relative_file_path
+    ).write_text(some_text, encoding='utf-8')
     git_add('.')
     git_commit('Add some file')
     assert from_git_rev_read('HEAD:' + relative_file_path) == some_text
