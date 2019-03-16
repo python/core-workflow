@@ -11,7 +11,7 @@ cache: pip
 
 before_install:
 - &install-flit >-
-  pip install --upgrade flit
+  pip install --upgrade pip flit
 
 .mixtures:
 - &run-if-tagged
