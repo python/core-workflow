@@ -176,6 +176,7 @@ def test_get_author_info_from_short_sha(subprocess_check_output):
     ],
 )
 @mock.patch("os.path.exists")
+@mock.patch("cherry_picker.cherry_picker.validate_sha")
 def test_sorted_branch(os_path_exists, config, input_branches, sorted_branches):
     os_path_exists.return_value = True
     cp = CherryPicker(
@@ -384,7 +385,6 @@ def test_load_config_no_head_sha(tmp_git_repo_dir, git_add, git_commit):
     )
     git_add(relative_config_path)
     git_commit(f"Add {relative_config_path}")
-    scm_revision = get_sha1_from("HEAD")
 
     with mock.patch("cherry_picker.cherry_picker.get_sha1_from", return_value=""):
         cfg = load_config(relative_config_path)
@@ -463,7 +463,7 @@ def test_from_git_rev_read_uncommitted(tmp_git_repo_dir, git_add, git_commit):
     )
     git_add(".")
     with pytest.raises(ValueError):
-        from_git_rev_read("HEAD:" + relative_file_path) == some_text
+        from_git_rev_read("HEAD:" + relative_file_path)
 
 
 def test_from_git_rev_read(tmp_git_repo_dir, git_add, git_commit):
