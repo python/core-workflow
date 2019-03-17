@@ -338,6 +338,13 @@ Changelog
 1.3.1 (in development)
 ----------------------
 
+- Modernize cherry_picker's pyproject.toml file. (`PR #316 <https://github.com/python/core-workflow/pull/316>`_)
+
+- Remove the ``BACKPORT_COMPLETE`` state. Unset the states when backport is completed.
+  (`PR #315 <https://github.com/python/core-workflow/pull/315>`_)
+
+- Run Travis CI test on Windows (`PR #311 <https://github.com/python/core-workflow/pull/311>`_).
+
 1.3.0
 -----
 
