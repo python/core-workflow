@@ -1,5 +1,8 @@
 conditions: v1
 
+git:
+  depth: false
+
 language: python
 
 dist: trusty
