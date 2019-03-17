@@ -225,7 +225,10 @@ def test_get_pr_url(config):
     with mock.patch("cherry_picker.cherry_picker.validate_sha"):
 
         cp = CherryPicker(
-            "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
+            "origin",
+            "22a594a0047d7706537ff2ac676cdc0f1dcb329c",
+            branches,
+            config=config,
         )
         backport_target_branch = cp.get_cherry_pick_branch("3.6")
         expected_pr_url = (
@@ -256,7 +259,10 @@ def test_username(url, config):
     branches = ["3.6"]
     with mock.patch("cherry_picker.cherry_picker.validate_sha"):
         cp = CherryPicker(
-            "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
+            "origin",
+            "22a594a0047d7706537ff2ac676cdc0f1dcb329c",
+            branches,
+            config=config,
         )
         with mock.patch("subprocess.check_output", return_value=url):
             assert cp.username == "mock_user"
@@ -282,7 +288,10 @@ def test_get_updated_commit_message_without_links_replacement(config):
     branches = ["3.6"]
     with mock.patch("cherry_picker.cherry_picker.validate_sha"):
         cp = CherryPicker(
-            "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
+            "origin",
+            "22a594a0047d7706537ff2ac676cdc0f1dcb329c",
+            branches,
+            config=config,
         )
         with mock.patch(
             "subprocess.check_output", return_value=b"bpo-123: Fix Spam Module (#113)"
