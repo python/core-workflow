@@ -196,6 +196,7 @@ def test_sorted_branch(os_path_exists, config, input_branches, sorted_branches):
     ],
 )
 @mock.patch("os.path.exists")
+@mock.patch("cherry_picker.cherry_picker.validate_sha")
 def test_invalid_branches(os_path_exists, config, input_branches):
     os_path_exists.return_value = True
     cp = CherryPicker(
@@ -209,6 +210,7 @@ def test_invalid_branches(os_path_exists, config, input_branches):
 
 
 @mock.patch("os.path.exists")
+@mock.patch("cherry_picker.cherry_picker.validate_sha")
 def test_get_cherry_pick_branch(os_path_exists, config):
     os_path_exists.return_value = True
     branches = ["3.6"]
@@ -220,21 +222,23 @@ def test_get_cherry_pick_branch(os_path_exists, config):
 
 def test_get_pr_url(config):
     branches = ["3.6"]
-    cp = CherryPicker(
-        "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
-    )
-    backport_target_branch = cp.get_cherry_pick_branch("3.6")
-    expected_pr_url = (
-        "https://github.com/python/cpython/compare/"
-        "3.6...mock_user:backport-22a594a-3.6?expand=1"
-    )
-    with mock.patch(
-        "subprocess.check_output",
-        return_value=b"https://github.com/mock_user/cpython.git",
-    ):
-        actual_pr_url = cp.get_pr_url("3.6", backport_target_branch)
+    with mock.patch("cherry_picker.cherry_picker.validate_sha"):
 
-    assert actual_pr_url == expected_pr_url
+        cp = CherryPicker(
+            "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
+        )
+        backport_target_branch = cp.get_cherry_pick_branch("3.6")
+        expected_pr_url = (
+            "https://github.com/python/cpython/compare/"
+            "3.6...mock_user:backport-22a594a-3.6?expand=1"
+        )
+        with mock.patch(
+            "subprocess.check_output",
+            return_value=b"https://github.com/mock_user/cpython.git",
+        ):
+            actual_pr_url = cp.get_pr_url("3.6", backport_target_branch)
+
+        assert actual_pr_url == expected_pr_url
 
 
 @pytest.mark.parametrize(
@@ -250,13 +254,15 @@ def test_get_pr_url(config):
 )
 def test_username(url, config):
     branches = ["3.6"]
-    cp = CherryPicker(
-        "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
-    )
-    with mock.patch("subprocess.check_output", return_value=url):
-        assert cp.username == "mock_user"
+    with mock.patch("cherry_picker.cherry_picker.validate_sha"):
+        cp = CherryPicker(
+            "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
+        )
+        with mock.patch("subprocess.check_output", return_value=url):
+            assert cp.username == "mock_user"
 
 
+@mock.patch("cherry_picker.cherry_picker.validate_sha")
 def test_get_updated_commit_message(config):
     branches = ["3.6"]
     cp = CherryPicker(
@@ -274,15 +280,16 @@ def test_get_updated_commit_message(config):
 def test_get_updated_commit_message_without_links_replacement(config):
     config["fix_commit_msg"] = False
     branches = ["3.6"]
-    cp = CherryPicker(
-        "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
-    )
-    with mock.patch(
-        "subprocess.check_output", return_value=b"bpo-123: Fix Spam Module (#113)"
-    ):
-        actual_commit_message = cp.get_commit_message(
-            "22a594a0047d7706537ff2ac676cdc0f1dcb329c"
+    with mock.patch("cherry_picker.cherry_picker.validate_sha"):
+        cp = CherryPicker(
+            "origin", "22a594a0047d7706537ff2ac676cdc0f1dcb329c", branches, config=config
         )
+        with mock.patch(
+            "subprocess.check_output", return_value=b"bpo-123: Fix Spam Module (#113)"
+        ):
+            actual_commit_message = cp.get_commit_message(
+                "22a594a0047d7706537ff2ac676cdc0f1dcb329c"
+            )
     assert actual_commit_message == "bpo-123: Fix Spam Module (#113)"
 
 

@@ -17,7 +17,7 @@ from gidgethub import sansio
 from . import __version__
 
 CREATE_PR_URL_TEMPLATE = (
-    "https://api.github.com/repos/" "{config[team]}/{config[repo]}/pulls"
+    "https://api.github.com/repos/{config[team]}/{config[repo]}/pulls"
 )
 DEFAULT_CONFIG = collections.ChainMap(
     {
