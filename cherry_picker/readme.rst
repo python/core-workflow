@@ -335,8 +335,11 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.3.1 (in development)
+1.3.2 (in development)
 ----------------------
+
+1.3.1
+-----
 
 - Modernize cherry_picker's pyproject.toml file. (`PR #316 <https://github.com/python/core-workflow/pull/316>`_)
 
