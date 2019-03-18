@@ -168,7 +168,7 @@ class CherryPicker:
     def fetch_upstream(self):
         """ git fetch <upstream> """
         set_state(WORKFLOW_STATES.FETCHING_UPSTREAM)
-        cmd = ["git", "fetch", self.upstream]
+        cmd = ["git", "fetch", self.upstream, "--no-tags"]
         self.run_cmd(cmd)
         set_state(WORKFLOW_STATES.FETCHED_UPSTREAM)
 
