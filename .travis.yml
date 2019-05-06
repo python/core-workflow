@@ -6,7 +6,6 @@ git:
 language: python
 
 dist: trusty
-sudo: false
 cache: pip
 
 before_install:
@@ -26,7 +25,6 @@ before_install:
   if: tag IS NOT present OR tag =~ ^blurb\-v\d+\.\d+\.\d+$
 - &base-3_7
   dist: xenial
-  sudo: required
   python: "3.7"
 - &install-and-test-cherry-picker
   <<: *run-if-cherry-picker-or-untagged
