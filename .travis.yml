@@ -95,12 +95,6 @@ jobs:
     <<: *install-and-test-cherry-picker
   - python: "nightly"  # currently, it's 3.8-dev
     <<: *install-and-test-cherry-picker
-
-  - <<: *deploy-base
-    <<: *run-if-cherry-picker
-    env:
-      TARGET_PKG: cherry_picker
-
   - os: windows
     language: sh
     python: 3.7
@@ -112,6 +106,11 @@ jobs:
     env:
       PATH: >-
         /c/Python37:/c/Python37/Scripts:$PATH
+      TARGET_PKG: cherry_picker
+
+  - <<: *deploy-base
+    <<: *run-if-cherry-picker
+    env:
       TARGET_PKG: cherry_picker
 
   - <<: *deploy-base
