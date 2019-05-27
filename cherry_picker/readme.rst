@@ -335,8 +335,8 @@ in the directory where ``pyproject.toml`` exists::
 Changelog
 =========
 
-1.3.2 (in development)
-----------------------
+1.3.2
+-----
 
 - Use ``--no-tags`` option when fetching upstream. (`PR 319 <https://github.com/python/core-workflow/pull/319>`_)
 
