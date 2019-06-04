@@ -32,8 +32,8 @@ Other core workflow tools
                                         CPython pull requests.
 `python/blurb_it`_                      ``blurb add`` on the    `GitHub <https://github.com/                    `Mariatta`_
                                         web.                    python/blurb_it/issues>`__
-`python/cherry_picker`_                 Command line tool for  `GitHub <https://github.com/                    `Mariatta`_
-                                        backporting CPython     python/cherry_picker/issues>`__
+`python/cherry-picker`_                 Command line tool for  `GitHub <https://github.com/                    `Mariatta`_
+                                        backporting CPython     python/cherry-picker/issues>`__
                                         pull requests.
 `python/miss-islington`_                A bot for backporting   `GitHub <https://github.com/                    `Mariatta`_
                                         CPython pull requests.  python/miss-islington/issues>`__
@@ -52,7 +52,7 @@ Other core workflow tools
 
 .. _`python/bedevere`: https://github.com/python/bedevere
 .. _`python/blurb_it`: https://github.com/python/blurb_it
-.. _`python/cherry_picker`: https://github.com/python/cherry_picker
+.. _`python/cherry-picker`: https://github.com/python/cherry-picker
 .. _`python/miss-islington`: https://github.com/python/miss-islington
 .. _`python/the-knights-who-say-ni`: https://github.com/python/the-knights-who-say-ni
 .. _`berkerpeksag/cpython-emailer-webhook`: https://github.com/berkerpeksag/cpython-emailer-webhook
