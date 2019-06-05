@@ -32,7 +32,7 @@ Other core workflow tools
                                         CPython pull requests.
 `python/blurb_it`_                      ``blurb add`` on the    `GitHub <https://github.com/                    `Mariatta`_
                                         web.                    python/blurb_it/issues>`__
-`python/cherry-picker`_                 Command line tool for  `GitHub <https://github.com/                    `Mariatta`_
+`python/cherry-picker`_                 Command line tool for   `GitHub <https://github.com/                    `Mariatta`_
                                         backporting CPython     python/cherry-picker/issues>`__
                                         pull requests.
 `python/miss-islington`_                A bot for backporting   `GitHub <https://github.com/                    `Mariatta`_
