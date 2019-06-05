@@ -9,25 +9,6 @@ Issue tracker and relevant tools for CPython's workflow
    :alt: Python Zulip chat
    :target: https://python.zulipchat.com
 
-cherry_picker 🐍 🍒 ⛏
-----------------------
-
-.. image:: https://img.shields.io/pypi/pyversions/cherry-picker.svg
-    :target: https://pypi.org/project/cherry-picker/
-
-.. image:: https://img.shields.io/pypi/v/cherry-picker.svg
-    :target: https://pypi.org/project/cherry-picker/
-
-.. image:: https://img.shields.io/pypi/l/cherry-picker.svg
-    :target: https://github.com/python/core-workflow/blob/master/LICENSE/
-
-Utility script for backporting/cherry-picking CPython changes from ``master``
-into one of the maintenance branches.  See the cherry_picker_
-directory for more details.
-
-.. _cherry_picker: https://github.com/python/core-workflow/tree/master/cherry_picker
-
-
 blurb
 -----
 
@@ -51,6 +32,9 @@ Other core workflow tools
                                         CPython pull requests.
 `python/blurb_it`_                      ``blurb add`` on the    `GitHub <https://github.com/                    `Mariatta`_
                                         web.                    python/blurb_it/issues>`__
+`python/cherry-picker`_                 Command line tool for  `GitHub <https://github.com/                    `Mariatta`_
+                                        backporting CPython     python/cherry-picker/issues>`__
+                                        pull requests.
 `python/miss-islington`_                A bot for backporting   `GitHub <https://github.com/                    `Mariatta`_
                                         CPython pull requests.  python/miss-islington/issues>`__
 `python/the-knights-who-say-ni`_        CLA enforcement bot for `GitHub <https://github.com/                    `Brett Cannon`_
@@ -68,6 +52,7 @@ Other core workflow tools
 
 .. _`python/bedevere`: https://github.com/python/bedevere
 .. _`python/blurb_it`: https://github.com/python/blurb_it
+.. _`python/cherry-picker`: https://github.com/python/cherry-picker
 .. _`python/miss-islington`: https://github.com/python/miss-islington
 .. _`python/the-knights-who-say-ni`: https://github.com/python/the-knights-who-say-ni
 .. _`berkerpeksag/cpython-emailer-webhook`: https://github.com/berkerpeksag/cpython-emailer-webhook

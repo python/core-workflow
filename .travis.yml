@@ -9,73 +9,28 @@ dist: trusty
 cache: pip
 
 before_install:
-- &install-flit >-
-  pip install --upgrade pip flit
+- pip install --upgrade pip flit
 
 .mixtures:
 - &run-if-tagged
   if: tag IS present
-- &run-if-cherry-picker
-  if: tag =~ ^cherry\-picker\-v\d+\.\d+\.\d+$
 - &run-if-blurb
   if: tag =~ ^blurb\-v\d+\.\d+\.\d+$
-- &run-if-cherry-picker-or-untagged
-  if: tag IS NOT present OR tag =~ ^cherry\-picker\-v\d+\.\d+\.\d+$
 - &run-if-blurb-or-untagged
   if: tag IS NOT present OR tag =~ ^blurb\-v\d+\.\d+\.\d+$
 - &base-3_7
   dist: xenial
   python: "3.7"
-- &install-and-test-cherry-picker
-  <<: *run-if-cherry-picker-or-untagged
-  env:
-    TARGET_PKG: cherry_picker
-  install:
-  - &cd-to-project pushd "$TARGET_PKG"
-  - flit install
-  script:
-  - pytest cherry_picker/test.py -v
-  - popd
 - &install-and-test-blurb
   <<: *run-if-blurb-or-untagged
   env:
     TARGET_PKG: blurb
   install:
-  - *cd-to-project
+  - &cd-to-project pushd "$TARGET_PKG"
   - flit install
   - popd
   script:
   - blurb test
-- &deploy-base
-  stage: Publish dists to PYPI
-  <<: *run-if-tagged
-  python: "3.6"
-  install:
-  - *cd-to-project
-  script:
-  - flit build
-  before_deploy:
-  # Add an empty setup.py stub, because pypi provider always calls it
-  - touch setup.py
-  deploy: &deployment-config
-    provider: pypi
-    # `skip-cleanup: true` is required to preserve binary wheel and sdist,
-    # built by during `install` step above.
-    skip-cleanup: true
-    # `skip-existing: true` is required to skip uploading dists, already
-    # present in PyPI instead of failing the whole process.
-    # This happenes when other CI (AppVeyor etc.) has already uploaded
-    # the very same dist (usually sdist).
-    skip-existing: true
-    user: &pypi-user core-workflow
-    password: &pypi-password
-      # Encrypt with `travis encrypt -r python/core-workflow --org` while using travis-ci.org;
-      # change to `travis encrypt -r python/core-workflow --api-endpoint 'https://api.travis-ci.com/'`
-      # upon switch to __free__ travis-ci.com:
-      secure: "bg1ZOOHlhaT+S3TQy2WpSsWekHaeZSq39kkZj/Ql3nvJ0ES+a+lTjk+gmuSnSX0Sf9V+88TdN5g1frYVcvYWwIQvLEQP2xhqIfq8K+MVe+GbshQGiTD4PC4f7vRcDY+B93X7cQ8HgkGho3c0/BaEaK6MtrS8WK7dIdHCPaea5D8rLF9jXtS2Lt8MYtqRDG1R2BsNN+o87eyr3qD3aJW6cFRPTHPr/x+gmlKuIJcVOwuVd4xyR701xRpE7hK5/bKvQwI2QZhD7wTyJwYqsl3Ce/ZlyS+IINktkFhD2BqH2ya4tdOHeVhA+b44eJEDXUR7gweyO+Ein5W3S3R2lDxHuX3Aq7nJBKHxU39kwcnPPaMRWYKey51d9zbIicmxjj5sLY0vPYmlX1zdbDUK9NqkdRf8aLzyowWFl3DtkXmyoakITOz9boqDIRiivTJQ/mLG8AFKgf0ms/z1yW4/PN+LoomdpmhQj05EfAJdAvdTw+ceteaeBSKc2uDql4Qj5AKUddeaoLQuPbWForfSPosv9DZZmvOXrmncY91HngrdclxFIssMtefQrC2USbQEIedih1cxfsXzwBrX7+f4eHH2MJt/GrOyNB0gaXc4sikYkaBKsIg7UCWC1/F4jmGkyDLlwp31zflZkjPKUJ3vp2SC9R6sHcT04tvxTVIMDCJgkc8="
-    on:
-      tags: true
-      all_branches: true
 
 jobs:
   include:
@@ -88,33 +43,7 @@ jobs:
     <<: *install-and-test-blurb
   - python: "nightly"  # currently, it's 3.8-dev
     <<: *install-and-test-blurb
-
-  - python: "3.6"
-    <<: *install-and-test-cherry-picker
-  - <<: *base-3_7
-    <<: *install-and-test-cherry-picker
-  - python: "nightly"  # currently, it's 3.8-dev
-    <<: *install-and-test-cherry-picker
-  - os: windows
-    language: sh
-    python: 3.7
-    before_install:
-      - choco install python --version 3.7
-      - python -m pip install --upgrade pip wheel
-      - *install-flit
-    <<: *install-and-test-cherry-picker
-    env:
-      PATH: >-
-        /c/Python37:/c/Python37/Scripts:$PATH
-      TARGET_PKG: cherry_picker
-
-  - <<: *deploy-base
-    <<: *run-if-cherry-picker
-    env:
-      TARGET_PKG: cherry_picker
-
-  - <<: *deploy-base
-    <<: *run-if-blurb
+  - <<: *run-if-blurb
     if: 1 != 1
     env:
       TARGET_PKG: blurb
