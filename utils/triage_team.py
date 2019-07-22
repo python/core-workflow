@@ -40,12 +40,16 @@ async def main():
         gh = GitHubAPI(session, "python", oauth_token=os.getenv("GH_AUTH"), cache=cache)
         core_team = await get_team(gh, "python-core")
         repo_names = [repo async for repo in get_core_repos(gh, core_team["id"])]
-        await gh.post("/orgs/python/teams", data={
-            "name": "Python triage",
-            "description": "Triagers for core Python",
-            "maintainers": "mariatta",
-            "privacy": "closed",
-            "repo_names": repo_names
-        })
+        await gh.post(
+            "/orgs/python/teams",
+            data={
+                "name": "Python triage",
+                "description": "Triagers for core Python",
+                "maintainers": "mariatta",
+                "privacy": "closed",
+                "repo_names": repo_names,
+            },
+        )
+
 
 asyncio.run(main())
