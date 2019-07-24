@@ -16,7 +16,7 @@ async def get_core_repos(gh, team_id):
     Return the team's public repos
     """
     async for repo in gh.getiter(f"/teams/{team_id}/repos"):
-        if not repo["private"]:
+        if not repo["private"] and not repo["forked"]:
             print(repo)
             yield repo["full_name"]
 
