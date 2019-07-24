@@ -45,7 +45,7 @@ async def main():
             data={
                 "name": "Python triage",
                 "description": "Triagers for core Python",
-                "maintainers": "mariatta",
+                "maintainers": ["mariatta", "zware", "vstinner"],
                 "privacy": "closed",
                 "repo_names": repo_names,
             },
