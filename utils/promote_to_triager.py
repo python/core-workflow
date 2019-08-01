@@ -25,8 +25,7 @@ async def add_to_team(gh, username, team_id):
 async def main():
     """
     - Get Python triage team
-    - Get Python core's public repos
-    - Create Python triage team, assign the repos
+    - Add people to Python Triage team
     :return:
     """
     async with aiohttp.ClientSession() as session:
