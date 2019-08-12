@@ -9,7 +9,7 @@ Core developers can create this issue to nominate someone to the Python Triage t
 Existing bug triagers on bpo and other Python contributors can create this issue
 to nominate themselves into the Python Triage team.
 
-More details: https://devguide.python.org/triaging.html#becoming-a-member-of-python-triage-team
+More details: https://devguide.python.org/triaging.html#becoming-a-member-of-the-python-triage-team
 -->
 
 # Request for Python Triage membership
