@@ -715,7 +715,7 @@ def run(s):
     return process.stdout.decode('ascii')
 
 
-readme_re = re.compile(r"This is Python version [23]\.\d").match
+readme_re = re.compile(r"This is (Py|Tau)thon version [23]\.\d").match
 
 def chdir_to_repo_root():
     global root
