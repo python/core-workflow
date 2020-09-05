@@ -157,86 +157,60 @@ def textwrap_body(body, *, subsequent_indent=''):
     Accepts either a string or an iterable of strings.
     (Iterable is assumed to be individual lines.)
     Returns a string.
+
+    Step 1: remove trailing whitespace from individual lines
+      (this means that empty lines will just have \n, no invisible whitespace)
+    Step 2: wrap
+
+    Why do we reflow the text twice?  Because it can actually change
+    between the first and second reflows, and we want the text to
+    be stable.  The problem is that textwrap.wrap is deliberately
+    dumb about how many spaces follow a period in prose.
+
+    We're reflowing at 76 columns, but let's pretend it's 30 for
+    illustration purposes.  If we give textwrap.wrap the following
+    text--ignore the line of 30 dashes, that's just to help you
+    with visualization:
+
+     ------------------------------
+     xxxx xxxx xxxx xxxx xxxx.  xxxx
+
+    The first textwrap.wrap will return this:
+     "xxxx xxxx xxxx xxxx xxxx.\nxxxx"
+
+    If we reflow it again, textwrap will rejoin the lines, but
+    only with one space after the period!  So this time it'll
+    all fit on one line, behold:
+     ------------------------------
+     xxxx xxxx xxxx xxxx xxxx. xxxx
+    and so it now returns:
+     "xxxx xxxx xxxx xxxx xxxx. xxxx"
+
+    textwrap.wrap supports trying to add two spaces after a peroid:
+       https://docs.python.org/3/library/textwrap.html#textwrap.TextWrapper.fix_sentence_endings
+    But it doesn't work all that well, because it's not smart enough
+    to do a really good job.
+
+    Since blurbs are eventually turned into ReST and rendered anyway,
+    and since the Zen says "In the face of ambiguity, refuse the
+    temptation to guess", I don't sweat it.  I run textwrap.wrap
+    twice, so it's stable, and this means occasionally it'll
+    convert two spaces to one space, no big deal.
     """
     if isinstance(body, str):
         text = body
     else:
         text = "\n".join(body).rstrip()
 
-    # textwrap merges paragraphs, ARGH
-
-    # step 1: remove trailing whitespace from individual lines
-    #   (this means that empty lines will just have \n, no invisible whitespace)
     lines = []
     for line in text.split("\n"):
         lines.append(line.rstrip())
     text = "\n".join(lines)
-    # step 2: break into paragraphs and wrap those
-    paragraphs = text.split("\n\n")
-    paragraphs2 = []
-    kwargs = {'break_long_words': False, 'break_on_hyphens': False}
-    if subsequent_indent:
-        kwargs['subsequent_indent'] = subsequent_indent
-    dont_reflow = False
-    for paragraph in paragraphs:
-        # don't reflow bulleted / numbered lists
-        dont_reflow = dont_reflow or paragraph.startswith(("* ", "1. ", "#. "))
-        if dont_reflow:
-            initial = kwargs.get("initial_indent", "")
-            subsequent = kwargs.get("subsequent_indent", "")
-            if initial or subsequent:
-                lines = [line.rstrip() for line in paragraph.split("\n")]
-                indents = itertools.chain(
-                    itertools.repeat(initial, 1),
-                    itertools.repeat(subsequent),
-                    )
-                lines = [indent + line for indent, line in zip(indents, lines)]
-                paragraph = "\n".join(lines)
-            paragraphs2.append(paragraph)
-        else:
-            # Why do we reflow the text twice?  Because it can actually change
-            # between the first and second reflows, and we want the text to
-            # be stable.  The problem is that textwrap.wrap is deliberately
-            # dumb about how many spaces follow a period in prose.
-            #
-            # We're reflowing at 76 columns, but let's pretend it's 30 for
-            # illustration purposes.  If we give textwrap.wrap the following
-            # text--ignore the line of 30 dashes, that's just to help you
-            # with visualization:
-            #
-            #  ------------------------------
-            #  xxxx xxxx xxxx xxxx xxxx.  xxxx
-            #
-            # The first textwrap.wrap will return this:
-            #  "xxxx xxxx xxxx xxxx xxxx.\nxxxx"
-            #
-            # If we reflow it again, textwrap will rejoin the lines, but
-            # only with one space after the period!  So this time it'll
-            # all fit on one line, behold:
-            #  ------------------------------
-            #  xxxx xxxx xxxx xxxx xxxx. xxxx
-            # and so it now returns:
-            #  "xxxx xxxx xxxx xxxx xxxx. xxxx"
-            #
-            # textwrap.wrap supports trying to add two spaces after a peroid:
-            #    https://docs.python.org/3/library/textwrap.html#textwrap.TextWrapper.fix_sentence_endings
-            # But it doesn't work all that well, because it's not smart enough
-            # to do a really good job.
-            #
-            # Since blurbs are eventually turned into ReST and rendered anyway,
-            # and since the Zen says "In the face of ambiguity, refuse the
-            # temptation to guess", I don't sweat it.  I run textwrap.wrap
-            # twice, so it's stable, and this means occasionally it'll
-            # convert two spaces to one space, no big deal.
-
-            paragraph = "\n".join(textwrap.wrap(paragraph.strip(), width=76, **kwargs)).rstrip()
-            paragraph = "\n".join(textwrap.wrap(paragraph.strip(), width=76, **kwargs)).rstrip()
-            paragraphs2.append(paragraph)
-        # don't reflow literal code blocks (I hope)
-        dont_reflow = paragraph.endswith("::")
-        if subsequent_indent:
-            kwargs['initial_indent'] = subsequent_indent
-    text = "\n\n".join(paragraphs2).rstrip()
+    kwargs = {'break_long_words': False,
+              'break_on_hyphens': False,
+              'subsequent_indent': subsequent_indent}
+    text = "\n".join(textwrap.wrap(text.strip(), width=76, **kwargs)).rstrip()
+    text = "\n".join(textwrap.wrap(text.strip(), width=76, **kwargs)).rstrip()
     if not text.endswith("\n"):
         text += "\n"
     return text
@@ -388,6 +362,9 @@ def printable_version(version):
 class BlurbError(RuntimeError):
     pass
 
+class MultipleParagraphError(BlurbError):
+    pass
+
 """
 
 The format of a blurb file:
@@ -468,6 +445,9 @@ blurb in a blurb file.
 """
 
 class Blurbs(list):
+    def __init__(self, allow_multiple_paragraphs=False, **kwargs):
+        self.allow_multiple_paragraphs = allow_multiple_paragraphs
+        super().__init__(**kwargs)
 
     def parse(self, text, *, metadata=None, filename="input"):
         """
@@ -493,6 +473,12 @@ class Blurbs(list):
 
             if not body:
                 throw("Blurb 'body' text must not be empty!")
+            if "" in body[:-1] and not self.allow_multiple_paragraphs:
+                raise MultipleParagraphError(
+                    f("Error in {filename}:{line_number}:\n"
+                      "You have multiple paragraphs! "
+                      "News blurbs should only be a single paragraph."))
+
             text = textwrap_body(body)
             for naughty_prefix in ("- ", "Issue #", "bpo-"):
                 if text.startswith(naughty_prefix):
@@ -944,28 +930,46 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
         if not shutil.which(args[0]):
             sys.exit(f("Invalid GIT_EDITOR / EDITOR value: {editor}"))
     args.append(tmp_path)
-
+    skip_next_editor = False
+    allow_multiple_paragraphs = False
     while True:
-        subprocess.run(args)
+        if not skip_next_editor:
+            subprocess.run(args)
 
         failure = None
-        blurb = Blurbs()
+        recoverable_failure = None
+        blurb = Blurbs(allow_multiple_paragraphs)
         try:
             blurb.load(tmp_path)
+        except MultipleParagraphError as e:
+            recoverable_failure = str(e)
         except BlurbError as e:
             failure = str(e)
 
-        if not failure:
+        if not failure and not recoverable_failure:
             assert len(blurb) # if parse_blurb succeeds, we should always have a body
             if len(blurb) > 1:
                 failure = "Too many entries!  Don't specify '..' on a line by itself."
 
-        if failure:
+        if failure or recoverable_failure:
             print()
-            print(f("Error: {failure}"))
+            if failure:
+                print(f("Error: {failure}"))
+            if recoverable_failure:
+                print(f("Error: {recoverable_failure}"))
             print()
             try:
-                prompt("Hit return to retry (or Ctrl-C to abort)")
+                if failure:
+                    prompt("Hit return to retry (or Ctrl-C to abort)")
+                else:
+                    response = prompt(
+                        "Are you sure? "
+                        "Type 'yes' to use this file, anything else to re-edit "
+                        "(or Ctrl-C to abort).")
+                    if response == 'yes':
+                        allow_multiple_paragraphs = True
+                        skip_next_editor = True
+                        continue
             except KeyboardInterrupt:
                 print()
                 return
