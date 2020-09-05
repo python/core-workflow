@@ -882,11 +882,29 @@ Run unit tests.  Only works inside source repo, not when installed.
     print(tests_run, "tests passed.")
 
 
+def resolve_command(s):
+    # "unquoted path to editor"?
+    if os.path.exists(s):
+        return [s]
+    # "'quoted path to editor' -with -options"?
+    args = shlex.split(s, posix=os.name == 'posix')
+    if os.path.exists(args[0]):
+        return args
+    raise ValueError("Cannot find editor")
+
+
 def find_editor():
+    # Try relevant environment variables; if set, the value must be valid.
     for var in 'GIT_EDITOR', 'EDITOR':
-        editor = os.environ.get(var)
-        if editor is not None:
-            return editor
+        value = os.environ.get(var)
+        if value is None:
+            continue
+        try:
+            return resolve_command(value)
+        except ValueError as e:
+            error('Invalid %r environment variable %r: %s.' % (var, value, e))
+
+    # If not configured, fallback to platform specific user friendly editor.
     if sys.platform == 'win32':
         fallbacks = ['notepad.exe']
     else:
@@ -897,7 +915,7 @@ def find_editor():
         else:
             found_path = shutil.which(fallback)
         if found_path and os.path.exists(found_path):
-            return found_path
+            return [found_path]
     error('Could not find an editor! Set the EDITOR environment variable.')
 
 
@@ -907,11 +925,12 @@ def add():
 Add a blurb (a Misc/NEWS entry) to the current CPython repo.
     """
 
-    editor = find_editor()
+    editor_command = find_editor()
 
     handle, tmp_path = tempfile.mkstemp(".rst")
     os.close(handle)
     atexit.register(lambda : os.unlink(tmp_path))
+    editor_command.append(tmp_path)
 
     def init_tmp_with_template():
         with open(tmp_path, "wt", encoding="utf-8") as file:
