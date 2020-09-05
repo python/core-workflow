@@ -247,6 +247,13 @@ part of the cherry-picking process.
 Changelog
 ---------
 
+1.0.8
+~~~~~
+
+- Added the ``--bpo`` and ``--section`` flags to
+  the ``add`` command.  This lets you pre-fill-in
+  the bpo and section fields in the template.
+
 1.0.7
 ~~~~~
 
