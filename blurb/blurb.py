@@ -1064,8 +1064,10 @@ To force it to overwrite, use -f.
         builtins.print("You already have a", repr(output), "file.")
         require_ok("Type ok to overwrite")
 
-    news = open(output, "wt", encoding="utf-8")
+    write_news(output, versions=versions)
 
+
+def write_news(output, *, versions):
     def print(*a, sep=" "):
         s = sep.join(str(x) for x in a)
         return builtins.print(s, file=news)
