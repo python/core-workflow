@@ -49,10 +49,12 @@ import builtins
 from collections import OrderedDict
 import glob
 import hashlib
+import io
 import inspect
 import itertools
 import math
 import os
+from pathlib import Path
 import re
 import shlex
 import shutil
@@ -1068,9 +1070,11 @@ To force it to overwrite, use -f.
 
 
 def write_news(output, *, versions):
+    buff = io.StringIO()
+
     def print(*a, sep=" "):
         s = sep.join(str(x) for x in a)
-        return builtins.print(s, file=news)
+        return builtins.print(s, file=buff)
 
     print ("""
 +++++++++++
@@ -1131,7 +1135,20 @@ Python News
             print(text)
     print()
     print("**(For information about older versions, consult the HISTORY file.)**")
-    news.close()
+
+
+    new_contents = buff.getvalue()
+
+    # Only write in `output` if the contents are different
+    # This speeds up subsequent Sphinx builds
+    try:
+        previous_contents = Path(output).read_text(encoding="UTF-8")
+    except (FileNotFoundError, UnicodeError):
+        previous_contents = None
+    if new_contents != previous_contents:
+        Path(output).write_text(new_contents, encoding="UTF-8")
+    else:
+        builtins.print(output, "is already up to date")
 
 
 git_add_files = []
