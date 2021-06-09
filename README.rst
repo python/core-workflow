@@ -44,10 +44,6 @@ Other core workflow tools
                                         CPython commit to       berkerpeksag/cpython-emailer-webhook/issues>`__
                                         python-checkins mailing 
                                         list.
-`berkerpeksag/cpython-bpo-linkify`_     An extension that finds `GitHub <https://github.com/                    `Berker Peksag`_
-                                        bpo-NNNN annonations    berkerpeksag/cpython-bpo-linkify/issues>`__
-                                        and converts them to    
-                                        bugs.python.org links.  
 ======================================= ======================= =============================================== ================
 
 .. _`python/bedevere`: https://github.com/python/bedevere
@@ -56,7 +52,6 @@ Other core workflow tools
 .. _`python/miss-islington`: https://github.com/python/miss-islington
 .. _`python/the-knights-who-say-ni`: https://github.com/python/the-knights-who-say-ni
 .. _`berkerpeksag/cpython-emailer-webhook`: https://github.com/berkerpeksag/cpython-emailer-webhook
-.. _`berkerpeksag/cpython-bpo-linkify`: https://github.com/berkerpeksag/cpython-bpo-linkify
 .. _`Brett Cannon`: https://github.com/brettcannon
 .. _`Berker Peksag`: https://github.com/berkerpeksag
 .. _`Mariatta`: https://github.com/mariatta
