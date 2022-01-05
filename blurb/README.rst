@@ -25,7 +25,7 @@ and automatically uses the correct file paths.
 
 You can install **blurb** from PyPI using ``pip``.  Alternatively,
 simply add ``blurb`` to a directory on your path.
-**blurb**'s only dependency is Python 3.5+.
+**blurb**'s only dependency is Python 3.7+.
 
 
 Files used by blurb
