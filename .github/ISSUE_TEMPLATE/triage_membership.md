@@ -1,12 +1,12 @@
 ---
 name: Python Triage Membership
-about: Request to become a member of Python Triage team
+about: Request by a core dev for someone to join the Python Triage team
 ---
 
 <!--
 Core developers can create this issue to nominate someone to the Python Triage team.
 
-Existing bug triagers on bpo and other Python contributors can create this issue
+Existing bug triagers on bpo and other Python contributors with elevated privileges can create this issue
 to nominate themselves into the Python Triage team.
 
 More details: https://devguide.python.org/triaging.html#becoming-a-member-of-the-python-triage-team
