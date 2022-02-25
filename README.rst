@@ -2,12 +2,13 @@ core-workflow
 =============
 Issue tracker and relevant tools for CPython's workflow
 
-.. image:: https://travis-ci.org/python/core-workflow.svg?branch=master
-    :target: https://travis-ci.org/python/core-workflow
+.. image:: https://github.com/python/core-workflow/actions/workflows/tests.yml/badge.svg
+   :alt: GitHub Actions
+   :target: https://github.com/python/core-workflow/actions
 
-.. image:: https://img.shields.io/badge/zulip-join_chat-brightgreen.svg
-   :alt: Python Zulip chat
-   :target: https://python.zulipchat.com
+.. image:: https://img.shields.io/badge/Discourse-join_chat-brightgreen.svg
+   :alt: Python Discourse chat
+   :target: https://discuss.python.org/
 
 blurb
 -----

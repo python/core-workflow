@@ -521,7 +521,7 @@ Read a blurb file.
 
 Broadly equivalent to blurb.parse(open(filename).read()).
         """
-        with open(filename, "rt", encoding="utf-8") as file:
+        with open(filename, encoding="utf-8") as file:
             text = file.read()
         self.parse(text, metadata=metadata, filename=filename)
 
@@ -683,7 +683,7 @@ class TestParserFailures(TestParserPasses):
 
 
 def run(s):
-    process = subprocess.run(s.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.run(s.split(), capture_output=True)
     process.check_returncode()
     return process.stdout.decode('ascii')
 
@@ -711,7 +711,7 @@ def chdir_to_repo_root():
         def test_first_line(filename, test):
             if not os.path.exists(filename):
                 return False
-            with open(filename, "rt") as file:
+            with open(filename) as file:
                 lines = file.read().split('\n')
                 if not (lines and test(lines[0])):
                     return False
@@ -1335,7 +1335,7 @@ Also runs "blurb populate" for you.
         blurbs.clear()
         version_count += 1
 
-    with open("NEWS", "rt", encoding="utf-8") as file:
+    with open("NEWS", encoding="utf-8") as file:
         for line_number, line in enumerate(file):
             line = line.rstrip()
 
