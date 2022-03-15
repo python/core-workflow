@@ -250,7 +250,7 @@ Changelog
 1.1.0
 ~~~~~
 
-- Support GitHub Issues instead of B.P.O. The metadata now contains "issue"
+- Support GitHub Issues instead of bugs.python.org. The metadata now contains "issue"
   instead of "bpo". The Misc/News filename now uses `gh-<number>` instead of `bpo-<number>`
 
 1.0.7
