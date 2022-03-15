@@ -1,1 +1,1 @@
-bpo-12345: Fixed some problem or other.
+gh-12345: Fixed some problem or other.

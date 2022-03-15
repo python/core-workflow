@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Command-line tool to manage CPython Misc/NEWS.d entries."""
-__version__ = "1.0.8"
+__version__ = "1.1.0"
 
 ##
 ## blurb version 1.0
@@ -73,9 +73,9 @@ import unittest
 template = """
 
 #
-# Please enter the relevant bugs.python.org issue number here:
+# Please enter the relevant GitHub issue number here:
 #
-.. bpo:
+.. issue:
 
 #
 # Uncomment one of these "section:" lines to specify which section
@@ -94,7 +94,7 @@ template = """
 #.. section: C API
 
 # Write your Misc/NEWS entry below.  It should be a simple ReST paragraph.
-# Don't start with "- Issue #<n>: " or "- bpo-<n>: " or that sort of stuff.
+# Don't start with "- Issue #<n>: " or "- gh-<n>: " or that sort of stuff.
 ###########################################################################
 
 
@@ -408,11 +408,11 @@ Format of the BODY section:
   * Trailing whitespace is stripped.  Leading whitespace is preserved.
   * Empty lines between non-empty lines are preserved.
     Trailing empty lines are stripped.
-  * The BODY mustn't start with "Issue #", "bpo-", or "- ".
+  * The BODY mustn't start with "Issue #", "gh-", or "- ".
     (This formatting will be inserted when rendering the final output.)
   * Lines longer than 76 characters will be wordwrapped.
       * In the final output, the first line will have
-        "- bpo-<bpo-number>: " inserted at the front,
+        "- gh-<gh-number>: " inserted at the front,
         and subsequent lines will have two spaces inserted
         at the front.
 
@@ -423,11 +423,11 @@ also terminates the last ENTRY.
 
 The format of a "next" file is exactly the same, except that we're storing
 four pieces of metadata in the filename instead of in the metadata section.
-Those four pieces of metadata are: section, bpo, date, and nonce.
+Those four pieces of metadata are: section, issue, date, and nonce.
 
 -----------------------------------------------------------------------------
 
-In addition to the four conventional metadata (section, bpo, date, and nonce),
+In addition to the four conventional metadata (section, issue, date, and nonce),
 there are two additional metadata used per-version: "release date" and
 "no changes".  These may only be present in the metadata block in the *first*
 blurb in a blurb file.
@@ -436,7 +436,7 @@ blurb in a blurb file.
     for this version.  When used, there are two more things that must be
     true about the the blurb file:
       * There should only be one entry inside the blurb file.
-      * That entry's bpo number must be 0.
+      * That entry's issue number must be 0.
 
 """
 
@@ -467,7 +467,7 @@ class Blurbs(list):
             if not body:
                 throw("Blurb 'body' text must not be empty!")
             text = textwrap_body(body)
-            for naughty_prefix in ("- ", "Issue #", "bpo-"):
+            for naughty_prefix in ("- ", "Issue #", "bpo-", "gh-"):
                 if text.startswith(naughty_prefix):
                     throw("Blurb 'body' can't start with " + repr(naughty_prefix) + "!")
 
@@ -480,11 +480,11 @@ class Blurbs(list):
                 elif section not in sections:
                     throw("Invalid 'section'!  You must use one of the predefined sections.")
 
-            bpo = None
+            issue_number = None
             try:
-                bpo = int(metadata.get('bpo'))
+                issue_number = int(metadata.get('issue'))
             except (TypeError, ValueError):
-                throw("Invalid bpo issue number! (" + repr(bpo) + ")")
+                throw("Invalid GitHub issue number! (" + repr(issue_number) + ")")
 
             self.append((metadata, text))
             metadata = {}
@@ -567,7 +567,7 @@ Returns a dict.
         metadata = {"date": fields[0], "nonce": fields[-2], "section": section}
 
         for field in fields[1:-2]:
-            for name in ("bpo",):
+            for name in ("issue",):
                 _, got, value = field.partition(name + "-")
                 if got:
                     metadata[name] = value.strip()
@@ -588,7 +588,7 @@ Returns a dict.
         metadata, body = self[-1]
         assert 'section' in metadata
         for name, default in (
-            ("bpo", "0"),
+            ("issue", "0"),
             ("date", sortable_datetime()),
             ("nonce", nonceify(body)),
             ):
@@ -603,8 +603,8 @@ Returns a dict.
         metadata, body = self[-1]
         metadata['section'] = sanitize_section(metadata['section'])
         metadata['root'] = root
-        path = "{root}/Misc/NEWS.d/next/{section}/{date}.bpo-{bpo}.{nonce}.rst".format_map(metadata)
-        for name in "root section date bpo nonce".split():
+        path = "{root}/Misc/NEWS.d/next/{section}/{date}.gh-{issue}.{nonce}.rst".format_map(metadata)
+        for name in "root section date issue nonce".split():
             del metadata[name]
         return path
 
@@ -892,14 +892,14 @@ Add a blurb (a Misc/NEWS entry) to the current CPython repo.
             # my editor likes to strip trailing whitespace from lines.
             # normally this is a good idea.  but in the case of the template
             # it's unhelpful.
-            # so, manually ensure there's a space at the end of the bpo line.
+            # so, manually ensure there's a space at the end of the issue line.
             text = template
 
-            bpo_line = ".. bpo:"
-            without_space = "\n" + bpo_line + "\n"
-            with_space = "\n" + bpo_line + " \n"
+            issue_line = ".. issue:"
+            without_space = "\n" + issue_line + "\n"
+            with_space = "\n" + issue_line + " \n"
             if without_space not in text:
-                sys.exit("Can't find BPO line to ensure there's a space on the end!")
+                sys.exit("Can't find Issue line to ensure there's a space on the end!")
             text = text.replace(without_space, with_space)
             file.write(text)
 
@@ -977,7 +977,7 @@ This is used by the release manager when cutting a new release.
     if not filenames:
         print(f"No blurbs found.  Setting {version} as having no changes.")
         body = f"There were no new changes in version {version}.\n"
-        metadata = {"no changes": "True", "bpo": "0", "section": "Library", "date": date, "nonce": nonceify(body)}
+        metadata = {"no changes": "True", "issue": "0", "section": "Library", "date": date, "nonce": nonceify(body)}
         blurbs.append((metadata, body))
     else:
         no_changes = None
@@ -1098,9 +1098,9 @@ Python News
                 print("-" * len(section))
                 print()
 
-            bpo = metadata['bpo']
-            if int(bpo):
-                body = "bpo-" + bpo + ": " + body
+            issue_number = metadata['issue']
+            if int(issue_number):
+                body = "gh-" + issue_number + ": " + body
             body = "- " + body
             text = textwrap_body(body, subsequent_indent='  ')
             print(text)
@@ -1220,7 +1220,7 @@ Also runs "blurb populate" for you.
     blurbs = Blurbs()
 
     accumulator = []
-    bpo = "0"
+    issue_number = "0"
     serial_number = 9999
     version = None
     release_date = None
@@ -1235,7 +1235,7 @@ Also runs "blurb populate" for you.
     def flush_blurb():
         nonlocal accumulator
         nonlocal serial_number
-        nonlocal bpo
+        nonlocal issue_number
         nonlocal release_date
         nonlocal see_also
         nonlocal no_changes
@@ -1266,7 +1266,7 @@ Also runs "blurb populate" for you.
                             field = field[1:]
                         try:
                             int(field)
-                            field = "bpo-" + field
+                            field = "gh-" + field
                         except ValueError:
                             pass
                         fields.append(field)
@@ -1281,7 +1281,7 @@ Also runs "blurb populate" for you.
 
                 body = "\n".join(accumulator) + "\n"
                 metadata = {}
-                metadata["bpo"] = bpo
+                metadata["issue"] = issue_number
                 metadata["date"] = str(serial_number)
                 if section:
                     metadata["section"] = section
@@ -1305,7 +1305,7 @@ Also runs "blurb populate" for you.
                 blurbs.append((metadata, body))
                 blurb_count += 1
 
-            bpo = "0"
+            issue_number = "0"
             serial_number -= 1
             accumulator.clear()
 
@@ -1328,7 +1328,7 @@ Also runs "blurb populate" for you.
         else:
             # saving a million old-school blurb next files
             # with serial numbers instead of dates
-            # e.g. Misc/NEWS.d/next/IDLE/094.bpo-25514.882pXa.rst
+            # e.g. Misc/NEWS.d/next/IDLE/094.gh-25514.882pXa.rst
             filenames = blurbs.save_split_next()
             git_add_files.extend(filenames)
             released = True
@@ -1359,7 +1359,7 @@ Also runs "blurb populate" for you.
                     line = new
             # 2. unusual indenting
             _line = line.lstrip()
-            if _line.startswith(("- Issue #", "- bpo-")):
+            if _line.startswith(("- Issue #", "- gh-")):
                 line = _line
             if _line == ".characters() and ignorableWhitespace() methods.  Original patch by Sebastian":
                 line = " " + line
@@ -1501,54 +1501,54 @@ Also runs "blurb populate" for you.
                     line = line.lstrip()
                     if line.startswith("#"):
                         line = line[1:].lstrip()
-                    parse_bpo = True
-                elif line.startswith("bpo-"):
-                    line = line[4:]
-                    parse_bpo = True
+                    parse_issue = True
+                elif line.startswith("gh-"):
+                    line = line[3:]
+                    parse_issue = True
                 else:
-                    # print(f"[[{line_number:8} no bpo]] {line}")
-                    parse_bpo = False
-                if parse_bpo:
+                    # print(f"[[{line_number:8} no gh]] {line}")
+                    parse_issue = False
+                if parse_issue:
                     # GAAAH
                     if line == "17500, and https://github.com/python/pythondotorg/issues/945: Remove":
                         line = "Remove"
-                        bpo = "17500"
+                        issue = "17500"
                         see_also = "https://github.com/python/pythondotorg/issues/945"
                     else:
-                        bpo, colon, line = line.partition(":")
+                        issue, colon, line = line.partition(":")
                         line = line.lstrip()
-                        bpo, comma, see_also = bpo.partition(",")
+                        issue, comma, see_also = issue.partition(",")
                         if comma:
                             see_also = see_also.strip()
-                            # if it's just an integer, add bpo- to the front
+                            # if it's just an integer, add gh- to the front
                             try:
                                 int(see_also)
-                                see_also = "bpo-" + see_also
+                                see_also = "gh-" + see_also
                             except ValueError:
                                 pass
                         else:
                             # - Issue #21529 (CVE-2014-4616)
-                            bpo, space_paren, see_also = bpo.partition(" (")
+                            issue, space_paren, see_also = issue.partition(" (")
                             if space_paren:
                                 see_also = see_also.rstrip(")")
                             else:
                                 # - Issue #19544 and Issue #1180:
-                                bpo, space_and, see_also = bpo.partition(" and ")
+                                issue, space_and, see_also = issue.partition(" and ")
                                 if not space_and:
-                                    bpo, space_and, see_also = bpo.partition(" & ")
+                                    issue, space_and, see_also = issue.partition(" & ")
                                 if space_and:
-                                    see_also = see_also.replace("Issue #", "bpo-").strip()
+                                    see_also = see_also.replace("Issue #", "gh-").strip()
                                 else:
                                     # - Issue #5258/#10642: if site.py
-                                    bpo, slash, see_also = bpo.partition("/")
+                                    issue, slash, see_also = issue.partition("/")
                                     if space_and:
-                                        see_also = see_also.replace("#", "bpo-").strip()
+                                        see_also = see_also.replace("#", "gh-").strip()
                     try:
-                        int(bpo) # this will throw if it's not a legal int
+                        int(issue) # this will throw if it's not a legal int
                     except ValueError:
-                        sys.exit(f"Couldn't convert bpo number to int on line {line_number}! {bpo!r}")
+                        sys.exit(f"Couldn't convert issue number to int on line {line_number}! {issue!r}")
                     if see_also == "partially":
-                        sys.exit(f"What the hell on line {line_number}! {bpo!r}")
+                        sys.exit(f"What the hell on line {line_number}! {issue!r}")
 
             # 4.6.1 continuation of blurb
             elif line.startswith("  "):

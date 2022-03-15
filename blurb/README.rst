@@ -45,7 +45,7 @@ Under ``Misc/NEWS.d`` you'll find the following:
   the various ``Misc/NEWS`` categories.  Inside these subdirectories
   are more ``.rst`` files with long, uninteresting, computer-generated
   names.  Example:
-  ``Misc/NEWS.d/next/Library/2017-05-04-12-24-06.bpo-25458.Yl4gI2.rst``
+  ``Misc/NEWS.d/next/Library/2017-05-04-12-24-06.gh-25458.Yl4gI2.rst``
 
 
 blurb subcommands
@@ -85,9 +85,9 @@ in the correct place, and stages it in ``git`` for you.
 The template for the ``blurb add`` message looks like this::
 
     #
-    # Please enter the relevant bugs.python.org issue number here:
+    # Please enter the relevant GitHub issue number here:
     #
-    .. bpo:
+    .. issue:
 
     #
     # Uncomment one of these "section:" lines to specify which section
@@ -106,13 +106,13 @@ The template for the ``blurb add`` message looks like this::
     #.. section: C API
 
     # Write your Misc/NEWS entry below.  It should be a simple ReST paragraph.
-    # Don't start with "- Issue #<n>: " or "- bpo-<n>: "or that sort of stuff.
+    # Don't start with "- Issue #<n>: " or "- gh-<n>: "or that sort of stuff.
     ###########################################################################
 
 Here's how you interact with the file:
 
-* Add the ``bugs.python.org`` issue number for this checkin to the
-  end of the ``.. bpo:`` line.
+* Add the GitHub issue number for this checkin to the
+  end of the ``.. issue:`` line.
 
 * Uncomment the line with the relevant ``Misc/NEWS`` section for this entry.
   For example, if this should go in the ``Library`` section, uncomment
@@ -126,11 +126,11 @@ Here's how you interact with the file:
 When ``blurb add`` gets a valid entry, it writes it to a file
 with the following format::
 
-    Misc/NEWS.d/next/<section>/<datetime>.bpo-<bpo>.<nonce>.rst
+    Misc/NEWS.d/next/<section>/<datetime>.gh-<issue_number>.<nonce>.rst
 
 For example, a file added by ``blurb add`` might look like this::
 
-    Misc/NEWS.d/next/Library/2017-05-04-12-24-06.bpo-25458.Yl4gI2.rst
+    Misc/NEWS.d/next/Library/2017-05-04-12-24-06.gh-25458.Yl4gI2.rst
 
 ``<section>`` is the section provided in the checkin message.
 
@@ -172,7 +172,7 @@ for the "sections" inside each release, whereas ``blurb merge``
 has a hard-coded preferred ordering for the sections.  Also,
 **blurb** aggressively reflows paragraphs to < 78 columns,
 wheras the original hand-edited file occasionally had lines
-> 80 columns.  Finally, **blurb** strictly uses ``bpo-<n>:`` to
+> 80 columns.  Finally, **blurb** strictly uses ``gh-<n>:`` to
 specify issue numbers at the beginnings of entries, wheras
 the legacy approach to ``Misc/NEWS`` required using ``Issue #<n>:``.
 
@@ -246,6 +246,12 @@ part of the cherry-picking process.
 
 Changelog
 ---------
+
+1.1.0
+~~~~~
+
+- Support GitHub Issues instead of B.P.O. The metadata now contains "issue"
+  instead of "bpo". The Misc/News filename now uses `gh-<number>` instead of `bpo-<number>`
 
 1.0.7
 ~~~~~
