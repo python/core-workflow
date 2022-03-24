@@ -1,5 +1,5 @@
 .. date: 7333
-.. issue: 21121
+.. gh-issue: 21121
 .. nonce: ZLsRil
 .. section: Library
 

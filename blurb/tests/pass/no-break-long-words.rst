@@ -1,5 +1,5 @@
 .. date: 1234
-.. issue: 0
+.. gh-issue: 0
 .. nonce: xyz
 .. section: Library
 

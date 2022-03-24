@@ -87,7 +87,7 @@ The template for the ``blurb add`` message looks like this::
     #
     # Please enter the relevant GitHub issue number here:
     #
-    .. issue:
+    .. gh-issue:
 
     #
     # Uncomment one of these "section:" lines to specify which section
@@ -106,13 +106,13 @@ The template for the ``blurb add`` message looks like this::
     #.. section: C API
 
     # Write your Misc/NEWS entry below.  It should be a simple ReST paragraph.
-    # Don't start with "- Issue #<n>: " or "- gh-<n>: "or that sort of stuff.
+    # Don't start with "- Issue #<n>: " or "- gh-issue<n>: " or that sort of stuff.
     ###########################################################################
 
 Here's how you interact with the file:
 
 * Add the GitHub issue number for this checkin to the
-  end of the ``.. issue:`` line.
+  end of the ``.. gh-issue:`` line.
 
 * Uncomment the line with the relevant ``Misc/NEWS`` section for this entry.
   For example, if this should go in the ``Library`` section, uncomment
@@ -126,7 +126,7 @@ Here's how you interact with the file:
 When ``blurb add`` gets a valid entry, it writes it to a file
 with the following format::
 
-    Misc/NEWS.d/next/<section>/<datetime>.gh-<issue_number>.<nonce>.rst
+    Misc/NEWS.d/next/<section>/<datetime>.gh-issue-<issue_number>.<nonce>.rst
 
 For example, a file added by ``blurb add`` might look like this::
 
@@ -172,7 +172,7 @@ for the "sections" inside each release, whereas ``blurb merge``
 has a hard-coded preferred ordering for the sections.  Also,
 **blurb** aggressively reflows paragraphs to < 78 columns,
 wheras the original hand-edited file occasionally had lines
-> 80 columns.  Finally, **blurb** strictly uses ``gh-<n>:`` to
+> 80 columns.  Finally, **blurb** strictly uses ``gh-issue-<n>:`` to
 specify issue numbers at the beginnings of entries, wheras
 the legacy approach to ``Misc/NEWS`` required using ``Issue #<n>:``.
 
@@ -250,8 +250,8 @@ Changelog
 1.1.0
 ~~~~~
 
-- Support GitHub Issues instead of bugs.python.org. The metadata now contains "issue"
-  instead of "bpo". The Misc/News filename now uses `gh-<number>` instead of `bpo-<number>`
+- Support GitHub Issues in addition to b.p.o (bugs.python.org).
+  If "gh-issue" is in the metadata, then the filename will contain "gh-issue-<number>" instead of "bpo-".
 
 1.0.7
 ~~~~~
