@@ -467,7 +467,7 @@ class Blurbs(list):
             if not body:
                 throw("Blurb 'body' text must not be empty!")
             text = textwrap_body(body)
-            for naughty_prefix in ("- ", "Issue #", "bpo-", "gh-"):
+            for naughty_prefix in ("- ", "Issue #", "bpo-", "gh-", "gh-issue-"):
                 if re.match(naughty_prefix, text, re.I):
                     throw("Blurb 'body' can't start with " + repr(naughty_prefix) + "!")
 

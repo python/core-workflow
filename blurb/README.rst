@@ -45,7 +45,7 @@ Under ``Misc/NEWS.d`` you'll find the following:
   the various ``Misc/NEWS`` categories.  Inside these subdirectories
   are more ``.rst`` files with long, uninteresting, computer-generated
   names.  Example:
-  ``Misc/NEWS.d/next/Library/2017-05-04-12-24-06.gh-25458.Yl4gI2.rst``
+  ``Misc/NEWS.d/next/Library/2017-05-04-12-24-06.gh-issue-25458.Yl4gI2.rst``
 
 
 blurb subcommands
@@ -130,7 +130,7 @@ with the following format::
 
 For example, a file added by ``blurb add`` might look like this::
 
-    Misc/NEWS.d/next/Library/2017-05-04-12-24-06.gh-25458.Yl4gI2.rst
+    Misc/NEWS.d/next/Library/2017-05-04-12-24-06.gh-issue-25458.Yl4gI2.rst
 
 ``<section>`` is the section provided in the checkin message.
 
