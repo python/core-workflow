@@ -45,15 +45,12 @@ __version__ = "1.0.8"
 
 import atexit
 import base64
-import builtins
 import glob
 import hashlib
-import io
 import inspect
 import itertools
 import math
 import os
-from pathlib import Path
 import re
 import shlex
 import shutil
@@ -79,7 +76,7 @@ template = """
 
 #
 # Uncomment one of these "section:" lines to specify which section
-# this entry should go in in Misc/NEWS.
+# this entry should go in in Misc/NEWS.d.
 #
 #.. section: Security
 #.. section: Core and Builtins
@@ -93,7 +90,7 @@ template = """
 #.. section: Tools/Demos
 #.. section: C API
 
-# Write your Misc/NEWS entry below.  It should be a simple ReST paragraph.
+# Write your Misc/NEWS.d entry below.  It should be a simple ReST paragraph.
 # Don't start with "- Issue #<n>: " or "- bpo-<n>: " or that sort of stuff.
 ###########################################################################
 
@@ -225,12 +222,6 @@ def sortable_datetime():
 def prompt(prompt):
     return input(f"[{prompt}> ")
 
-def require_ok(prompt):
-    prompt = f"[{prompt}> "
-    while True:
-        s = input(prompt).strip()
-        if s == 'ok':
-            return s
 
 class pushd:
     def __init__(self, path):
@@ -283,49 +274,9 @@ def longest_line(lines):
     return longest
 
 
-def version_key(element):
-    fields = list(element.split("."))
-    if len(fields) == 1:
-        return element
-
-    # in sorted order,
-    # 3.5.0a1 < 3.5.0b1 < 3.5.0rc1 < 3.5.0
-    # so for sorting purposes we transform
-    # "3.5." and "3.5.0" into "3.5.0zz0"
-    last = fields.pop()
-    for s in ("a", "b", "rc"):
-        if s in last:
-            last, stage, stage_version = last.partition(s)
-            break
-    else:
-        stage = 'zz'
-        stage_version = "0"
-
-    fields.append(last)
-    while len(fields) < 3:
-        fields.append("0")
-
-    fields.extend([stage, stage_version])
-    fields = [s.rjust(6, "0") for s in fields]
-
-    return ".".join(fields)
-
-
 def nonceify(body):
     digest = hashlib.md5(body.encode("utf-8")).digest()
     return base64.urlsafe_b64encode(digest)[0:6].decode('ascii')
-
-
-def glob_versions():
-    with pushd("Misc/NEWS.d"):
-        versions = []
-        for wildcard in ("2.*.rst", "3.*.rst", "next"):
-            files = [x.partition(".rst")[0] for x in glob.glob(wildcard)]
-            versions.extend(files)
-    xform = [version_key(x) for x in versions]
-    xform.sort(reverse=True)
-    versions = sorted(versions, key=version_key, reverse=True)
-    return versions
 
 
 def glob_blurbs(version):
@@ -344,18 +295,6 @@ def glob_blurbs(version):
                 entries.remove(filename)
             filenames.extend(entries)
     return filenames
-
-
-def printable_version(version):
-    if version == "next":
-        return version
-    if "a" in version:
-        return version.replace("a", " alpha ")
-    if "b" in version:
-        return version.replace("b", " beta ")
-    if "rc" in version:
-        return version.replace("rc", " release candidate ")
-    return version + " final"
 
 
 class BlurbError(RuntimeError):
@@ -767,7 +706,7 @@ If subcommand is not specified, prints one-line summaries for every command.
     if not subcommand:
         print("blurb version", __version__)
         print()
-        print("Management tool for CPython Misc/NEWS and Misc/NEWS.d entries.")
+        print("Management tool for CPython Misc/NEWS.d entries.")
         print()
         print("Usage:")
         print("    blurb [subcommand] [options...]")
@@ -877,7 +816,7 @@ def find_editor():
 @subcommand
 def add():
     """
-Add a blurb (a Misc/NEWS entry) to the current CPython repo.
+Add a blurb (a Misc/NEWS.d/next entry) to the current CPython repo.
     """
 
     editor = find_editor()
@@ -1012,116 +951,6 @@ This is used by the release manager when cutting a new release.
     print("Ready for commit.")
 
 
-
-@subcommand
-def merge(output=None, *, forced=False):
-    """
-Merge all blurbs together into a single Misc/NEWS file.
-
-Optional output argument specifies where to write to.
-Default is <cpython-root>/Misc/NEWS.
-
-If overwriting, blurb merge will prompt you to make sure it's okay.
-To force it to overwrite, use -f.
-    """
-    if output:
-        output = os.path.join(original_dir, output)
-    else:
-        output = "Misc/NEWS"
-
-    versions = glob_versions()
-    if not versions:
-        sys.exit("You literally don't have ANY blurbs to merge together!")
-
-    if os.path.exists(output) and not forced:
-        builtins.print("You already have a", repr(output), "file.")
-        require_ok("Type ok to overwrite")
-
-    write_news(output, versions=versions)
-
-
-def write_news(output, *, versions):
-    buff = io.StringIO()
-
-    def print(*a, sep=" "):
-        s = sep.join(str(x) for x in a)
-        return builtins.print(s, file=buff)
-
-    print ("""
-+++++++++++
-Python News
-+++++++++++
-
-""".strip())
-
-    for version in versions:
-        filenames = glob_blurbs(version)
-
-        blurbs = Blurbs()
-        if version == "next":
-            for filename in filenames:
-                if os.path.basename(filename) == "README.rst":
-                    continue
-                blurbs.load_next(filename)
-            if not blurbs:
-                continue
-            metadata = blurbs[0][0]
-            metadata['release date'] = "XXXX-XX-XX"
-        else:
-            assert len(filenames) == 1
-            blurbs.load(filenames[0])
-
-        header = "What's New in Python " + printable_version(version) + "?"
-        print()
-        print(header)
-        print("=" * len(header))
-        print()
-
-
-        metadata, body = blurbs[0]
-        release_date = metadata["release date"]
-
-        print(f"*Release date: {release_date}*")
-        print()
-
-        if "no changes" in metadata:
-            print(body)
-            print()
-            continue
-
-        last_section = None
-        for metadata, body in blurbs:
-            section = metadata['section']
-            if last_section != section:
-                last_section = section
-                print(section)
-                print("-" * len(section))
-                print()
-
-            bpo = metadata['bpo']
-            if int(bpo):
-                body = "bpo-" + bpo + ": " + body
-            body = "- " + body
-            text = textwrap_body(body, subsequent_indent='  ')
-            print(text)
-    print()
-    print("**(For information about older versions, consult the HISTORY file.)**")
-
-
-    new_contents = buff.getvalue()
-
-    # Only write in `output` if the contents are different
-    # This speeds up subsequent Sphinx builds
-    try:
-        previous_contents = Path(output).read_text(encoding="UTF-8")
-    except (FileNotFoundError, UnicodeError):
-        previous_contents = None
-    if new_contents != previous_contents:
-        Path(output).write_text(new_contents, encoding="UTF-8")
-    else:
-        builtins.print(output, "is already up to date")
-
-
 git_add_files = []
 def flush_git_add_files():
     if git_add_files:
@@ -1188,391 +1017,6 @@ Removes blurb data files, for building release tarballs/installers.
 #    Test function for blurb command-line processing.
 #    """
 #    print(f"arg: boolean {boolean} option {option}")
-
-
-@subcommand
-def split(*, released=False):
-    """
-Split the current Misc/NEWS into a zillion little blurb files.
-
-Assumes that the newest version section in Misc/NEWS is under
-development, and splits those entries into the "next" subdirectory.
-If the current version has actually been released, use the
---released flag.
-
-Also runs "blurb populate" for you.
-    """
-
-    # note: populate also does chdir $python_root/Misc for you
-    populate()
-
-    if not os.path.isfile("NEWS"):
-        error("You don't have a Misc/NEWS file!")
-
-    def global_sections():
-        global sections
-        return sections
-
-    sections = set(global_sections())
-    release_date_marker = "Release date:"
-    whats_new_marker = "What's New in Python "
-
-    blurbs = Blurbs()
-
-    accumulator = []
-    bpo = "0"
-    serial_number = 9999
-    version = None
-    release_date = None
-    section = None
-    see_also = None
-    no_changes = None
-    security = None
-    blurb_count = 0
-    version_count = 0
-
-
-    def flush_blurb():
-        nonlocal accumulator
-        nonlocal serial_number
-        nonlocal bpo
-        nonlocal release_date
-        nonlocal see_also
-        nonlocal no_changes
-        nonlocal blurb_count
-        nonlocal security
-
-        if accumulator:
-            if version:
-                # strip trailing blank lines
-                while accumulator:
-                    line = accumulator.pop()
-                    if not line.rstrip():
-                        continue
-                    accumulator.append(line)
-                    break
-                if see_also:
-                    fields = []
-                    see_also = see_also.replace(" and ", ",")
-                    for field in see_also.split(","):
-                        field = field.strip()
-                        if not field:
-                            continue
-                        if field.startswith("and "):
-                            field = field[5:].lstrip()
-                        if field.lower().startswith("issue"):
-                            field = field[5:].strip()
-                        if field.startswith("#"):
-                            field = field[1:]
-                        try:
-                            int(field)
-                            field = "bpo-" + field
-                        except ValueError:
-                            pass
-                        fields.append(field)
-                    see_also = ", ".join(fields)
-                    # print("see_also: ", repr(see_also))
-                    accumulator.append(f"(See also: {see_also})")
-                    see_also = None
-                if not accumulator:
-                    return
-                if not (section or no_changes):
-                    error("No section for line " + str(line_number) + "!")
-
-                body = "\n".join(accumulator) + "\n"
-                metadata = {}
-                metadata["bpo"] = bpo
-                metadata["date"] = str(serial_number)
-                if section:
-                    metadata["section"] = section
-                else:
-                    assert no_changes
-                metadata["nonce"] = nonceify(body)
-                if security:
-                    # retroactively change section to "Security"
-                    assert section
-                    metadata["original section"] = metadata["section"]
-                    metadata["section"] = "Security"
-
-                if release_date is not None:
-                    assert not len(blurbs)
-                    metadata["release date"] = release_date
-                    release_date = None
-                if no_changes is not None:
-                    assert not len(blurbs)
-                    metadata["no changes"] = "True"
-                    no_changes = None
-                blurbs.append((metadata, body))
-                blurb_count += 1
-
-            bpo = "0"
-            serial_number -= 1
-            accumulator.clear()
-
-    def flush_version():
-        global git_add_files
-        nonlocal released
-        nonlocal version_count
-
-        flush_blurb()
-        if version is None:
-            assert not blurbs, "version should only be None initially, we shouldn't have blurbs yet"
-            return
-        assert blurbs, f"No blurbs defined when flushing version {version}!"
-        output = f"NEWS.d/{version}.rst"
-
-        if released:
-            # saving merged blurb file for version, e.g. Misc/NEWS.d/3.7.0a1.rst
-            blurbs.save(output)
-            git_add_files.append(output)
-        else:
-            # saving a million old-school blurb next files
-            # with serial numbers instead of dates
-            # e.g. Misc/NEWS.d/next/IDLE/094.bpo-25514.882pXa.rst
-            filenames = blurbs.save_split_next()
-            git_add_files.extend(filenames)
-            released = True
-        blurbs.clear()
-        version_count += 1
-
-    with open("NEWS", encoding="utf-8") as file:
-        for line_number, line in enumerate(file):
-            line = line.rstrip()
-
-            if line.startswith("\ufeff"):
-                line = line[1:]
-
-            # clean the slightly dirty data:
-            # 1. inconsistent names for sections, etc
-            for old, new in (
-                ("C-API", "C API"),
-                ("Core and builtins", "Core and Builtins"),
-                ("Tools", "Tools/Demos"),
-                ("Tools / Demos", "Tools/Demos"),
-                ("Misc", "Windows"), # only used twice, both were really Windows
-                ("Mac", "macOS"),
-                ("Mac OS X", "macOS"),
-                ("Extension Modules", "Library"),
-                ("Whats' New in Python 2.7.6?", "What's New in Python 2.7.6?"),
-                ):
-                if line == old:
-                    line = new
-            # 2. unusual indenting
-            _line = line.lstrip()
-            if _line.startswith(("- Issue #", "- bpo-")):
-                line = _line
-            if _line == ".characters() and ignorableWhitespace() methods.  Original patch by Sebastian":
-                line = " " + line
-            # 3. fix version for What's New
-            if line.startswith(whats_new_marker):
-                flush_version()
-                version = line[len(whats_new_marker):].strip().lower()
-                for old, new in (
-                    ("?", ""),
-                    (" alpha ", "a"),
-                    (" beta ", "b"),
-                    (" release candidate ", "rc"),
-                    (" final", ""),
-                    ("3.5a", "3.5.0a"),
-                    ):
-                    version = version.replace(old, new)
-                section = None
-                continue
-            # 3.a. fix specific precious little snowflakes
-            # who can't be bothered to follow our stifling style conventions
-            # and like, did their own *thing*, man.
-            if line.startswith("- Issue #27181 remove statistics.geometric_mean"):
-                line = line.replace(" remove", ": remove")
-            elif line.startswith("* bpo-30357: test_thread: setUp()"):
-                line = line.replace("* bpo-30357", "- bpo-30357")
-            elif line.startswith("- Issue #25262. Added support for BINBYTES8"):
-                line = line.replace("#25262.", "#25262:")
-            elif line.startswith("- Issue #21032. Fixed socket leak if"):
-                line = line.replace("#21032.", "#21032:")
-            elif line.startswith("- Issue ##665194: Update "):
-                line = line.replace("##665194", "#665194")
-            elif line.startswith("- Issue #13449 sched.scheduler.run()"):
-                line = line.replace("#13449 sched", "#13449: sched")
-            elif line.startswith("- Issue #8684 sched.scheduler class"):
-                line = line.replace("#8684 sched", "#8684: sched")
-            elif line.startswith(" bpo-29243: Prevent unnecessary rebuilding"):
-                line = line.replace(" bpo-29243:", "- bpo-29243:")
-            elif line.startswith((
-                "- Issue #11603 (again): Setting",
-                "- Issue #15801 (again): With string",
-                )):
-                line = line.replace(" (again):", ":")
-            elif line.startswith("- Issue #1665206 (partially): "):
-                line = line.replace(" (partially):", ":")
-            elif line.startswith("- Issue #2885 (partial): The"):
-                line = line.replace(" (partial):", ":")
-            elif line.startswith("- Issue #2885 (partial): The"):
-                line = line.replace(" (partial):", ":")
-            elif line.startswith("- Issue #1797 (partial fix):"):
-                line = line.replace(" (partial fix):", ":")
-            elif line.startswith("- Issue #5828 (Invalid behavior of unicode.lower): Fixed bogus logic in"):
-                line = line.replace(" (Invalid behavior of unicode.lower):", ":")
-            elif line.startswith("- Issue #4512 (part 2): Promote ``ZipImporter._get_filename()`` to be a public"):
-                line = line.replace(" (part 2):", ":")
-            elif line.startswith("- Revert bpo-26293 for zipfile breakage. See also bpo-29094."):
-                line = "- bpo-26293, bpo-29094: Change resulted because of zipfile breakage."
-            elif line.startswith("- Revert a37cc3d926ec (Issue #5322)."):
-                line = "- Issue #5322: Revert a37cc3d926ec."
-            elif line.startswith("- Patch #1970 by Antoine Pitrou: Speedup unicode whitespace and"):
-                line = "- Issue #1970: Speedup unicode whitespace and"
-            elif line.startswith("  linebreak detection"):
-                line = "  linebreak detection.  (Patch by Antoine Pitrou.)"
-            elif line.startswith("- Patch #1182394 from Shane Holloway: speed up HMAC.hexdigest."):
-                line = "- Issue #1182394: Speed up ``HMAC.hexdigest``.  (Patch by Shane Holloway.)"
-            elif line.startswith("- Variant of patch #697613: don't exit the interpreter on a SystemExit"):
-                line = "- Issue #697613: Don't exit the interpreter on a SystemExit"
-            elif line.startswith("- Bugs #1668596/#1720897: distutils now copies data files even if"):
-                line = "- Issue #1668596, #1720897: distutils now copies data files even if"
-            elif line.startswith("- Reverted patch #1504333 to sgmllib because it introduced an infinite"):
-                line = "- Issue #1504333: Reverted change to sgmllib because it introduced an infinite"
-            elif line.startswith("- PEP 465 and Issue #21176: Add the '@' operator for matrix multiplication."):
-                line = "- Issue #21176: PEP 465: Add the '@' operator for matrix multiplication."
-            elif line.startswith("- Issue: #15138: base64.urlsafe_{en,de}code() are now 3-4x faster."):
-                line = "- Issue #15138: base64.urlsafe_{en,de}code() are now 3-4x faster."
-            elif line.startswith("- Issue #9516: Issue #9516: avoid errors in sysconfig when MACOSX_DEPLOYMENT_TARGET"):
-                line = "- Issue #9516 and Issue #9516: avoid errors in sysconfig when MACOSX_DEPLOYMENT_TARGET"
-            elif line.title().startswith(("- Request #", "- Bug #", "- Patch #", "- Patches #")):
-                # print(f"FIXING LINE {line_number}: {line!r}")
-                line = "- Issue #" + line.partition('#')[2]
-                # print(f"FIXED LINE {line_number}: {line!r}")
-            # else:
-            #     print(f"NOT FIXING LINE {line_number}: {line!r}")
-
-
-            # 4. determine the actual content of the line
-
-            # 4.1 section declaration
-            if line in sections:
-                flush_blurb()
-                section = line
-                continue
-
-            # 4.2 heading ReST marker
-            if line.startswith((
-                "===",
-                "---",
-                "---",
-                "+++",
-                "Python News",
-                "**(For information about older versions, consult the HISTORY file.)**",
-                )):
-                continue
-
-            # 4.3 version release date declaration
-            if line.startswith(release_date_marker) or (
-                line.startswith("*") and release_date_marker in line):
-                while line.startswith("*"):
-                    line = line[1:]
-                while line.endswith("*"):
-                    line = line[:-1]
-                release_date = line[len(release_date_marker):].strip()
-                continue
-
-            # 4.4 no changes declaration
-            if line.strip() in (
-                '- No changes since release candidate 2',
-                'No changes from release candidate 2.',
-                'There were no code changes between 3.5.3rc1 and 3.5.3 final.',
-                'There were no changes between 3.4.6rc1 and 3.4.6 final.',
-                ):
-                no_changes = True
-                if line.startswith("- "):
-                    line = line[2:]
-                accumulator.append(line)
-                continue
-
-            # 4.5 start of new blurb
-            if line.startswith("- "):
-                flush_blurb()
-                line = line[2:]
-                security = line.startswith("[Security]")
-                if security:
-                    line = line[10:].lstrip()
-
-                if line.startswith("Issue"):
-                    line = line[5:].lstrip()
-                    if line.startswith("s"):
-                        line = line[1:]
-                    line = line.lstrip()
-                    if line.startswith("#"):
-                        line = line[1:].lstrip()
-                    parse_bpo = True
-                elif line.startswith("bpo-"):
-                    line = line[4:]
-                    parse_bpo = True
-                else:
-                    # print(f"[[{line_number:8} no bpo]] {line}")
-                    parse_bpo = False
-                if parse_bpo:
-                    # GAAAH
-                    if line == "17500, and https://github.com/python/pythondotorg/issues/945: Remove":
-                        line = "Remove"
-                        bpo = "17500"
-                        see_also = "https://github.com/python/pythondotorg/issues/945"
-                    else:
-                        bpo, colon, line = line.partition(":")
-                        line = line.lstrip()
-                        bpo, comma, see_also = bpo.partition(",")
-                        if comma:
-                            see_also = see_also.strip()
-                            # if it's just an integer, add bpo- to the front
-                            try:
-                                int(see_also)
-                                see_also = "bpo-" + see_also
-                            except ValueError:
-                                pass
-                        else:
-                            # - Issue #21529 (CVE-2014-4616)
-                            bpo, space_paren, see_also = bpo.partition(" (")
-                            if space_paren:
-                                see_also = see_also.rstrip(")")
-                            else:
-                                # - Issue #19544 and Issue #1180:
-                                bpo, space_and, see_also = bpo.partition(" and ")
-                                if not space_and:
-                                    bpo, space_and, see_also = bpo.partition(" & ")
-                                if space_and:
-                                    see_also = see_also.replace("Issue #", "bpo-").strip()
-                                else:
-                                    # - Issue #5258/#10642: if site.py
-                                    bpo, slash, see_also = bpo.partition("/")
-                                    if space_and:
-                                        see_also = see_also.replace("#", "bpo-").strip()
-                    try:
-                        int(bpo) # this will throw if it's not a legal int
-                    except ValueError:
-                        sys.exit(f"Couldn't convert bpo number to int on line {line_number}! {bpo!r}")
-                    if see_also == "partially":
-                        sys.exit(f"What the hell on line {line_number}! {bpo!r}")
-
-            # 4.6.1 continuation of blurb
-            elif line.startswith("  "):
-                line = line[2:]
-            # 4.6.2 continuation of blurb
-            elif line.startswith(" * "):
-                line = line[3:]
-            elif line:
-                sys.exit(f"Didn't recognize line {line_number}! {line!r}")
-            # only add blank lines if we have an initial line in the accumulator
-            if line or accumulator:
-                accumulator.append(line)
-
-    flush_version()
-
-    assert git_add_files
-    flush_git_add_files()
-    git_rm_files.append("NEWS")
-    flush_git_rm_files()
-
-    print(f"Wrote {blurb_count} news items across {version_count} versions.")
-    print()
-    print("Ready for commit.")
-
 
 
 def main():
