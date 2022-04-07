@@ -612,11 +612,11 @@ Returns a dict.
         metadata, body = self[-1]
         metadata['section'] = sanitize_section(metadata['section'])
         metadata['root'] = root
-        if int(metadata["bpo"]) > 0 :
-            path = "{root}/Misc/NEWS.d/next/{section}/{date}.bpo-{bpo}.{nonce}.rst".format_map(metadata)
-        else:
-            # assume it's a GH issue number
+        if int(metadata["gh-issue"]) > 0 :
             path = "{root}/Misc/NEWS.d/next/{section}/{date}.gh-issue-{gh-issue}.{nonce}.rst".format_map(metadata)
+        elif int(metadata["bpo"]) > 0:
+            # assume it's a GH issue number
+            path = "{root}/Misc/NEWS.d/next/{section}/{date}.bpo-{bpo}.{nonce}.rst".format_map(metadata)
         for name in "root section date gh-issue bpo nonce".split():
             del metadata[name]
         return path
@@ -1114,7 +1114,7 @@ Python News
                 issue_number = metadata['gh-issue']
                 if int(issue_number):
                     body = "gh-issue-" + issue_number + ": " + body
-            if metadata.get("bpo"):
+            elif metadata.get("bpo"):
                 issue_number = metadata['bpo']
                 if int(issue_number):
                     body = "bpo-" + issue_number + ": " + body
