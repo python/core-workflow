@@ -1,5 +1,5 @@
-.. bpo: 21121
 .. date: 7333
+.. gh-issue: 21121
 .. nonce: ZLsRil
 .. section: Library
 
