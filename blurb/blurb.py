@@ -45,12 +45,15 @@ __version__ = "1.1.0"
 
 import atexit
 import base64
+import builtins
 import glob
 import hashlib
+import io
 import inspect
 import itertools
 import math
 import os
+from pathlib import Path
 import re
 import shlex
 import shutil
@@ -222,6 +225,12 @@ def sortable_datetime():
 def prompt(prompt):
     return input(f"[{prompt}> ")
 
+def require_ok(prompt):
+    prompt = f"[{prompt}> "
+    while True:
+        s = input(prompt).strip()
+        if s == 'ok':
+            return s
 
 class pushd:
     def __init__(self, path):
@@ -279,6 +288,18 @@ def nonceify(body):
     return base64.urlsafe_b64encode(digest)[0:6].decode('ascii')
 
 
+def glob_versions():
+    with pushd("Misc/NEWS.d"):
+        versions = []
+        for wildcard in ("2.*.rst", "3.*.rst", "next"):
+            files = [x.partition(".rst")[0] for x in glob.glob(wildcard)]
+            versions.extend(files)
+    xform = [version_key(x) for x in versions]
+    xform.sort(reverse=True)
+    versions = sorted(versions, key=version_key, reverse=True)
+    return versions
+
+
 def glob_blurbs(version):
     filenames = []
     base = os.path.join("Misc", "NEWS.d", version)
@@ -295,6 +316,18 @@ def glob_blurbs(version):
                 entries.remove(filename)
             filenames.extend(entries)
     return filenames
+
+
+def printable_version(version):
+    if version == "next":
+        return version
+    if "a" in version:
+        return version.replace("a", " alpha ")
+    if "b" in version:
+        return version.replace("b", " beta ")
+    if "rc" in version:
+        return version.replace("rc", " release candidate ")
+    return version + " final"
 
 
 class BlurbError(RuntimeError):
@@ -962,6 +995,117 @@ This is used by the release manager when cutting a new release.
 
     print()
     print("Ready for commit.")
+
+
+
+@subcommand
+def merge(output=None, *, forced=False):
+    """
+Merge all blurbs together into a single Misc/NEWS file.
+
+Optional output argument specifies where to write to.
+Default is <cpython-root>/Misc/NEWS.
+
+If overwriting, blurb merge will prompt you to make sure it's okay.
+To force it to overwrite, use -f.
+    """
+    if output:
+        output = os.path.join(original_dir, output)
+    else:
+        output = "Misc/NEWS"
+
+    versions = glob_versions()
+    if not versions:
+        sys.exit("You literally don't have ANY blurbs to merge together!")
+
+    if os.path.exists(output) and not forced:
+        builtins.print("You already have a", repr(output), "file.")
+        require_ok("Type ok to overwrite")
+
+    write_news(output, versions=versions)
+
+
+
+def write_news(output, *, versions):
+    buff = io.StringIO()
+
+    def print(*a, sep=" "):
+        s = sep.join(str(x) for x in a)
+        return builtins.print(s, file=buff)
+
+    print ("""
++++++++++++
+Python News
++++++++++++
+
+""".strip())
+
+    for version in versions:
+        filenames = glob_blurbs(version)
+
+        blurbs = Blurbs()
+        if version == "next":
+            for filename in filenames:
+                if os.path.basename(filename) == "README.rst":
+                    continue
+                blurbs.load_next(filename)
+            if not blurbs:
+                continue
+            metadata = blurbs[0][0]
+            metadata['release date'] = "XXXX-XX-XX"
+        else:
+            assert len(filenames) == 1
+            blurbs.load(filenames[0])
+
+        header = "What's New in Python " + printable_version(version) + "?"
+        print()
+        print(header)
+        print("=" * len(header))
+        print()
+
+
+        metadata, body = blurbs[0]
+        release_date = metadata["release date"]
+
+        print(f"*Release date: {release_date}*")
+        print()
+
+        if "no changes" in metadata:
+            print(body)
+            print()
+            continue
+
+        last_section = None
+        for metadata, body in blurbs:
+            section = metadata['section']
+            if last_section != section:
+                last_section = section
+                print(section)
+                print("-" * len(section))
+                print()
+
+            bpo = metadata['bpo']
+            if int(bpo):
+                body = "bpo-" + bpo + ": " + body
+            body = "- " + body
+            text = textwrap_body(body, subsequent_indent='  ')
+            print(text)
+    print()
+    print("**(For information about older versions, consult the HISTORY file.)**")
+
+
+    new_contents = buff.getvalue()
+
+    # Only write in `output` if the contents are different
+    # This speeds up subsequent Sphinx builds
+    try:
+        previous_contents = Path(output).read_text(encoding="UTF-8")
+    except (FileNotFoundError, UnicodeError):
+        previous_contents = None
+    if new_contents != previous_contents:
+        Path(output).write_text(new_contents, encoding="UTF-8")
+    else:
+        builtins.print(output, "is already up to date")
 
 
 git_add_files = []
