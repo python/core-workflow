@@ -288,6 +288,34 @@ def nonceify(body):
     return base64.urlsafe_b64encode(digest)[0:6].decode('ascii')
 
 
+def version_key(element):
+    fields = list(element.split("."))
+    if len(fields) == 1:
+        return element
+
+    # in sorted order,
+    # 3.5.0a1 < 3.5.0b1 < 3.5.0rc1 < 3.5.0
+    # so for sorting purposes we transform
+    # "3.5." and "3.5.0" into "3.5.0zz0"
+    last = fields.pop()
+    for s in ("a", "b", "rc"):
+        if s in last:
+            last, stage, stage_version = last.partition(s)
+            break
+    else:
+        stage = 'zz'
+        stage_version = "0"
+
+    fields.append(last)
+    while len(fields) < 3:
+        fields.append("0")
+
+    fields.extend([stage, stage_version])
+    fields = [s.rjust(6, "0") for s in fields]
+
+    return ".".join(fields)
+
+
 def glob_versions():
     with pushd("Misc/NEWS.d"):
         versions = []
@@ -752,7 +780,7 @@ If subcommand is not specified, prints one-line summaries for every command.
     if not subcommand:
         print("blurb version", __version__)
         print()
-        print("Management tool for CPython Misc/NEWS.d entries.")
+        print("Management tool for CPython Misc/NEWS and Misc/NEWS.d entries.")
         print()
         print("Usage:")
         print("    blurb [subcommand] [options...]")
@@ -1083,10 +1111,15 @@ Python News
                 print(section)
                 print("-" * len(section))
                 print()
+            if metadata.get("gh-issue"):
+                issue_number = metadata['gh-issue']
+                if int(issue_number):
+                    body = "gh-issue-" + issue_number + ": " + body
+            elif metadata.get("bpo"):
+                issue_number = metadata['bpo']
+                if int(issue_number):
+                    body = "bpo-" + issue_number + ": " + body
 
-            bpo = metadata['bpo']
-            if int(bpo):
-                body = "bpo-" + bpo + ": " + body
             body = "- " + body
             text = textwrap_body(body, subsequent_indent='  ')
             print(text)
