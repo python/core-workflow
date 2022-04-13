@@ -283,11 +283,6 @@ def longest_line(lines):
     return longest
 
 
-def nonceify(body):
-    digest = hashlib.md5(body.encode("utf-8")).digest()
-    return base64.urlsafe_b64encode(digest)[0:6].decode('ascii')
-
-
 def version_key(element):
     fields = list(element.split("."))
     if len(fields) == 1:
@@ -314,6 +309,11 @@ def version_key(element):
     fields = [s.rjust(6, "0") for s in fields]
 
     return ".".join(fields)
+
+
+def nonceify(body):
+    digest = hashlib.md5(body.encode("utf-8")).digest()
+    return base64.urlsafe_b64encode(digest)[0:6].decode('ascii')
 
 
 def glob_versions():
@@ -1051,7 +1051,6 @@ To force it to overwrite, use -f.
         require_ok("Type ok to overwrite")
 
     write_news(output, versions=versions)
-
 
 
 def write_news(output, *, versions):
