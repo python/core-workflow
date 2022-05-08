@@ -1113,7 +1113,7 @@ Python News
             if metadata.get("gh-issue"):
                 issue_number = metadata['gh-issue']
                 if int(issue_number):
-                    body = "gh-issue-" + issue_number + ": " + body
+                    body = "gh-" + issue_number + ": " + body
             elif metadata.get("bpo"):
                 issue_number = metadata['bpo']
                 if int(issue_number):
