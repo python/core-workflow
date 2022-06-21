@@ -13,6 +13,7 @@ More details: https://devguide.python.org/triaging.html#becoming-a-member-of-the
 -->
 
 # Request for Python Triage membership
+@python/organization-owners, please add a new triager:
 
 <!-- replace with real info -->
 
@@ -21,3 +22,4 @@ More details: https://devguide.python.org/triaging.html#becoming-a-member-of-the
 | GitHub username   | @bedevere-bot |
 | bpo username   | bedevere     |
 | Additional info   | e.g. _"already a bpo triager"_, _"I've made 1 million PRs"_, _"recommended by @miss-islington"_| |
+
