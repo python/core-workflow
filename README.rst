@@ -40,7 +40,7 @@ Other core workflow tools
                                         CPython pull requests.  python/miss-islington/issues>`__
 `ambv/cla-bot`_                         CLA enforcement bot for                                                 `Łukasz Langa`_
                                         Python organization
-                                        projects.             
+                                        projects.
 `berkerpeksag/cpython-emailer-webhook`_ A webhook to send every `GitHub <https://github.com/                    `Berker Peksag`_
                                         CPython commit to       berkerpeksag/cpython-emailer-webhook/issues>`__
                                         python-checkins mailing 
