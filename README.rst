@@ -38,9 +38,6 @@ Other core workflow tools
                                         pull requests.
 `python/miss-islington`_                A bot for backporting   `GitHub <https://github.com/                    `Mariatta`_
                                         CPython pull requests.  python/miss-islington/issues>`__
-`python/the-knights-who-say-ni`_        CLA enforcement bot for `GitHub <https://github.com/                    `Brett Cannon`_
-                                        Python organization     python/the-knights-who-say-ni/issues>`__
-                                        projects.
 `berkerpeksag/cpython-emailer-webhook`_ A webhook to send every `GitHub <https://github.com/                    `Berker Peksag`_
                                         CPython commit to       berkerpeksag/cpython-emailer-webhook/issues>`__
                                         python-checkins mailing 
@@ -51,7 +48,6 @@ Other core workflow tools
 .. _`python/blurb_it`: https://github.com/python/blurb_it
 .. _`python/cherry-picker`: https://github.com/python/cherry-picker
 .. _`python/miss-islington`: https://github.com/python/miss-islington
-.. _`python/the-knights-who-say-ni`: https://github.com/python/the-knights-who-say-ni
 .. _`berkerpeksag/cpython-emailer-webhook`: https://github.com/berkerpeksag/cpython-emailer-webhook
 .. _`Brett Cannon`: https://github.com/brettcannon
 .. _`Berker Peksag`: https://github.com/berkerpeksag
