@@ -38,8 +38,8 @@ Other core workflow tools
                                         pull requests.
 `python/miss-islington`_                A bot for backporting   `GitHub <https://github.com/                    `Mariatta`_
                                         CPython pull requests.  python/miss-islington/issues>`__
-`ambv/cla-bot`_                         CLA enforcement bot for                                                 `Łukasz Langa`_
-                                        Python organization
+`python/cla-bot`_                       CLA enforcement bot for `GitHub <https://github.com/                    `Łukasz Langa`_
+                                        Python organization     python/cla-bot/issues>`__
                                         projects.
 `berkerpeksag/cpython-emailer-webhook`_ A webhook to send every `GitHub <https://github.com/                    `Berker Peksag`_
                                         CPython commit to       berkerpeksag/cpython-emailer-webhook/issues>`__
@@ -51,7 +51,7 @@ Other core workflow tools
 .. _`python/blurb_it`: https://github.com/python/blurb_it
 .. _`python/cherry-picker`: https://github.com/python/cherry-picker
 .. _`python/miss-islington`: https://github.com/python/miss-islington
-.. _`ambv/cla-bot`: https://github.com/ambv/cla-bot
+.. _`python/cla-bot`: https://github.com/python/cla-bot
 .. _`berkerpeksag/cpython-emailer-webhook`: https://github.com/berkerpeksag/cpython-emailer-webhook
 .. _`Brett Cannon`: https://github.com/brettcannon
 .. _`Berker Peksag`: https://github.com/berkerpeksag
