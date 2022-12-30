@@ -724,7 +724,7 @@ def chdir_to_repo_root():
         def test_first_line(filename, test):
             if not os.path.exists(filename):
                 return False
-            with open(filename) as file:
+            with open(filename, encoding="utf-8") as file:
                 lines = file.read().split('\n')
                 if not (lines and test(lines[0])):
                     return False
