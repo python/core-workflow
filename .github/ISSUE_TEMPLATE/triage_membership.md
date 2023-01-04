@@ -21,5 +21,5 @@ More details: https://devguide.python.org/triaging.html#becoming-a-member-of-the
 | --- | -------------------------- |
 | GitHub username   | @bedevere-bot |
 | bpo username   | bedevere     |
-| Additional info   | e.g. _"already a bpo triager"_, _"I've made 1 million PRs"_, _"recommended by @miss-islington"_| |
+| Additional info   | e.g. _"I've made 1 million PRs"_, _"I like helping review and triage other people's issues and PRs"_, _"recommended by @miss-islington"_| |
 
