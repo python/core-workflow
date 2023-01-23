@@ -19,7 +19,7 @@ blurb
 Interactive utility for writing CPython ``Misc/NEWS.d`` entries. See
 the blurb_ directory for more details.
 
-.. _blurb: https://github.com/python/core-workflow/tree/master/blurb
+.. _blurb: https://github.com/python/core-workflow/tree/main/blurb
 
 
 Other core workflow tools
