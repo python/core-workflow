@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Command-line tool to manage CPython Misc/NEWS.d entries."""
+from __future__ import annotations
 __version__ = "1.1.0"
 
 ##
@@ -110,17 +111,19 @@ for line in template.split('\n'):
         sections.append(section.strip())
 
 
-def sanitize_section(section):
+def sanitize_section(section: str) -> str:
     """
-Cleans up a section string, making it viable as a directory name.
+    Cleans up a section string, making it viable as a directory name.
     """
     return section.replace("/", "-")
+
 
 _unsanitize_section = {
     "Tools-Demos": "Tools/Demos",
     }
 
-def unsanitize_section(section):
+
+def unsanitize_section(section: str) -> str:
     return _unsanitize_section.get(section, section)
 
 
@@ -293,7 +296,7 @@ def glob_versions():
     return versions
 
 
-def glob_blurbs(version):
+def glob_blurbs(version: str) -> list[str]:
     filenames = []
     base = os.path.join("Misc", "NEWS.d", version)
     if version != "next":
@@ -523,10 +526,10 @@ Broadly equivalent to blurb.parse(open(filename).read()).
             file.write(text)
 
     @staticmethod
-    def _parse_next_filename(filename):
+    def _parse_next_filename(filename: str) -> dict[str, str]:
         """
-Parses a "next" filename into its equivalent blurb metadata.
-Returns a dict.
+        Parses a "next" filename into its equivalent blurb metadata.
+        Returns a dict.
         """
         components = filename.split(os.sep)
         section, filename = components[-2:]
@@ -540,7 +543,7 @@ Returns a dict.
         metadata = {"date": fields[0], "nonce": fields[-2], "section": section}
 
         for field in fields[1:-2]:
-            for name in ("gh-issue","bpo"):
+            for name in ("gh-issue", "bpo"):
                 _, got, value = field.partition(name + "-")
                 if got:
                     metadata[name] = value.strip()
@@ -569,7 +572,7 @@ Returns a dict.
             if name not in metadata:
                 metadata[name] = default
 
-    def _extract_next_filename(self):
+    def _extract_next_filename(self) -> str:
         """
         changes metadata!
         """
@@ -577,7 +580,7 @@ Returns a dict.
         metadata, body = self[-1]
         metadata['section'] = sanitize_section(metadata['section'])
         metadata['root'] = root
-        if int(metadata["gh-issue"]) > 0 :
+        if int(metadata["gh-issue"]) > 0:
             path = "{root}/Misc/NEWS.d/next/{section}/{date}.gh-issue-{gh-issue}.{nonce}.rst".format_map(metadata)
         elif int(metadata["bpo"]) > 0:
             # assume it's a GH issue number
