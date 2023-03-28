@@ -2,6 +2,9 @@ name: Tests
 
 on: [push, pull_request, workflow_dispatch]
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   build_ubuntu:
     strategy:
@@ -21,10 +24,23 @@ jobs:
           python --version
           python -m pip install --upgrade pip
           python -m pip install --upgrade flit
+          python -m pip install --upgrade pytest pytest-cov pyfakefs
       - name: install
         run: |
           cd blurb
-          flit install
+          pip install -e .
       - name: test
         run: |
           blurb test
+      - name: pytest
+        # TODO Pending https://github.com/pytest-dev/pyfakefs/issues/770
+        if: matrix.python-version != '3.12-dev'
+        run: |
+          pytest --cov blurb
+      - name: Upload coverage
+        # TODO Pending https://github.com/pytest-dev/pyfakefs/issues/770
+        if: matrix.python-version != '3.12-dev'
+        uses: codecov/codecov-action@v3
+        with:
+          flags: ${{ matrix.python-version }}
+          name: Python ${{ matrix.python-version }}
