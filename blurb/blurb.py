@@ -115,10 +115,19 @@ def sanitize_section(section: str) -> str:
     """
     Cleans up a section string, making it viable as a directory name.
     """
+    return section.replace("/", "-").replace(" ", "-")
+
+
+def sanitize_section_legacy(section: str) -> str:
+    """
+    Cleans up a section string, making it viable as a directory name (allow spaces).
+    """
     return section.replace("/", "-")
 
 
 _unsanitize_section = {
+    "C-API": "C API",
+    "Core-and-Builtins": "Core and Builtins",
     "Tools-Demos": "Tools/Demos",
     }
 
@@ -303,8 +312,12 @@ def glob_blurbs(version: str) -> list[str]:
         wildcard = base + ".rst"
         filenames.extend(glob.glob(wildcard))
     else:
-        for section in sections:
-            wildcard = os.path.join(base, sanitize_section(section), "*.rst")
+        sanitized_sections = (
+                {sanitize_section(section) for section in sections} |
+                {sanitize_section_legacy(section) for section in sections}
+        )
+        for section in sanitized_sections:
+            wildcard = os.path.join(base, section, "*.rst")
             entries = glob.glob(wildcard)
             entries.sort(reverse=True)
             deletables = [x for x in entries if x.endswith("/README.rst")]
