@@ -8,6 +8,7 @@ env:
 jobs:
   build_ubuntu:
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12-dev"]
     name: ${{ matrix.python-version }}
@@ -23,7 +24,7 @@ jobs:
         run: |
           python --version
           python -m pip install --upgrade pip
-          python -m pip install --upgrade pytest pytest-cov pyfakefs
+          python -m pip install --upgrade build pytest pytest-cov pyfakefs
       - name: install
         run: |
           cd blurb
