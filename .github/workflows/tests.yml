@@ -27,7 +27,8 @@ jobs:
       - name: install
         run: |
           cd blurb
-          pip install -e .
+          python -m build
+          echo dist/*.whl | xargs -I % python -m pip install %
       - name: test
         run: |
           blurb test
@@ -35,7 +36,7 @@ jobs:
         # TODO Pending https://github.com/pytest-dev/pyfakefs/issues/770
         if: matrix.python-version != '3.12-dev'
         run: |
-          pytest --cov blurb
+          python -I -m pytest --cov blurb
       - name: Upload coverage
         # TODO Pending https://github.com/pytest-dev/pyfakefs/issues/770
         if: matrix.python-version != '3.12-dev'
