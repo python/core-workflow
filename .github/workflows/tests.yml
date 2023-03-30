@@ -24,12 +24,11 @@ jobs:
         run: |
           python --version
           python -m pip install --upgrade pip
-          python -m pip install --upgrade build pytest pytest-cov pyfakefs
+          python -m pip install --upgrade pytest pytest-cov pyfakefs
       - name: install
         run: |
           cd blurb
-          python -m build
-          echo dist/*.whl | xargs -I % python -m pip install %
+          python -m pip install -e .
       - name: test
         run: |
           blurb test
