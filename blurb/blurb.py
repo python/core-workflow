@@ -38,7 +38,6 @@ __version__ = "1.1.0"
 ## Licensed to the Python Software Foundation under a contributor agreement.
 ##
 
-
 # TODO
 #
 # automatic git adds and removes
@@ -133,6 +132,15 @@ _unsanitize_section = {
 
 def unsanitize_section(section):
     return _unsanitize_section.get(section, section)
+
+def next_filename_unsanitize_sections(filename):
+    s = filename
+    for key, value in _unsanitize_section.items():
+        for separator in "/\\":
+            key = f"{separator}{key}{separator}"
+            value = f"{separator}{value}{separator}"
+            filename = filename.replace(key, value)
+    return filename
 
 
 def textwrap_body(body, *, subsequent_indent=''):
@@ -318,11 +326,11 @@ def glob_blurbs(version):
         for section in sanitized_sections:
             wildcard = os.path.join(base, section, "*.rst")
             entries = glob.glob(wildcard)
-            entries.sort(reverse=True)
             deletables = [x for x in entries if x.endswith("/README.rst")]
             for filename in deletables:
                 entries.remove(filename)
             filenames.extend(entries)
+    filenames.sort(reverse=True, key=next_filename_unsanitize_sections)
     return filenames
 
 
