@@ -472,27 +472,34 @@ class Blurbs(list):
                     throw("Blurb 'body' can't start with " + repr(naughty_prefix) + "!")
 
             no_changes = metadata.get('no changes')
-            section = metadata.get('section')
 
-            if not no_changes:
-                if not section:
-                    throw("No 'section' specified.  You must provide one!")
-                elif section not in sections:
-                    throw("Invalid 'section'!  You must use one of the predefined sections.")
+            issue_keys = {
+                'gh-issue': 'GitHub',
+                'bpo': 'bpo',
+                }
+            for key, value in metadata.items():
+                # Iterate over metadata items in order.
+                # We parsed the blurb file line by line,
+                # so we'll insert metadata keys in the
+                # order we see them.  So if we issue the
+                # errors in the order we see the keys,
+                # we'll complain about the *first* error
+                # we see in the blurb file, which is a
+                # better user experience.
+                if key in issue_keys:
+                    try:
+                        int(value)
+                    except (TypeError, ValueError):
+                        throw(f"Invalid {issue_keys[key]} issue number! ({value!r})")
 
-            issue_number = None
+                if key == "section":
+                    if no_changes:
+                        continue
+                    if value not in sections:
+                        throw(f"Invalid section {value!r}!  You must use one of the predefined sections.")
 
-            if metadata.get("gh-issue") is not None:
-                try:
-                    issue_number = int(metadata.get('gh-issue'))
-                except (TypeError, ValueError):
-                    throw("Invalid GitHub issue number! (" + repr(issue_number) + ")")
-            elif metadata.get("bpo") is not None:
-                try:
-                    issue_number = int(metadata.get('bpo'))
-                except (TypeError, ValueError):
-                    throw("Invalid bpo issue number! (" + repr(issue_number) + ")")
-
+            if not 'section' in metadata:
+                throw("No 'section' specified.  You must provide one!")
 
             self.append((metadata, text))
             metadata = {}
@@ -853,6 +860,13 @@ Run unit tests.  Only works inside source repo, not when installed.
     """
     # unittest.main doesn't work because this isn't a module
     # so we'll do it ourselves
+
+    while not (os.path.isdir(".git") and os.path.isdir("blurb")):
+        old_dir = os.getcwd()
+        os.chdir("..")
+        if old_dir == os.getcwd():
+            # we reached the root and never found it!
+            sys.exit("Error: Couldn't find the root of your blurb repo!")
 
     print("-" * 79)
 
