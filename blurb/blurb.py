@@ -114,7 +114,7 @@ def sanitize_section(section):
     """
     Cleans up a section string, making it viable as a directory name.
     """
-    return section.replace("/", "-").replace(" ", "-")
+    return section.replace("/", "-").replace(" ", "_")
 
 
 def sanitize_section_legacy(section):
@@ -125,8 +125,8 @@ def sanitize_section_legacy(section):
 
 
 _unsanitize_section = {
-    "C-API": "C API",
-    "Core-and-Builtins": "Core and Builtins",
+    "C_API": "C API",
+    "Core_and_Builtins": "Core and Builtins",
     "Tools-Demos": "Tools/Demos",
     }
 
