@@ -1,5 +1,4 @@
 import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
 
 import blurb
 
@@ -13,7 +12,7 @@ import blurb
         ("Tools/Demos", "Tools-Demos"),
     ),
 )
-def test_sanitize_section(section: str, expected: str) -> None:
+def test_sanitize_section(section, expected):
     sanitized = blurb.sanitize_section(section)
     assert sanitized == expected
 
@@ -27,7 +26,7 @@ def test_sanitize_section(section: str, expected: str) -> None:
         ("Tools/Demos", "Tools-Demos"),
     ),
 )
-def test_sanitize_section_legacy(section: str, expected: str) -> None:
+def test_sanitize_section_legacy(section, expected):
     sanitized = blurb.sanitize_section_legacy(section)
     assert sanitized == expected
 
@@ -43,12 +42,12 @@ def test_sanitize_section_legacy(section: str, expected: str) -> None:
         ("Tools-Demos", "Tools/Demos"),
     ),
 )
-def test_unsanitize_section(section: str, expected: str) -> None:
+def test_unsanitize_section(section, expected):
     unsanitized = blurb.unsanitize_section(section)
     assert unsanitized == expected
 
 
-def test_glob_blurbs_next(fs: FakeFilesystem) -> None:
+def test_glob_blurbs_next(fs):
     # Arrange
     fake_news_entries = (
         "Misc/NEWS.d/next/Library/2022-04-11-18-34-33.gh-issue-11111.pC7gnM.rst",
@@ -101,7 +100,7 @@ def test_glob_blurbs_next(fs: FakeFilesystem) -> None:
         ),
     ),
 )
-def test_load_next(news_entry: str, expected_section: str, fs: FakeFilesystem) -> None:
+def test_load_next(news_entry, expected_section, fs):
     # Arrange
     fs.create_file(news_entry, contents="testing")
     blurbs = blurb.Blurbs()
@@ -135,9 +134,7 @@ def test_load_next(news_entry: str, expected_section: str, fs: FakeFilesystem) -
         ),
     ),
 )
-def test_extract_next_filename(
-    news_entry: str, expected_path: str, fs: FakeFilesystem
-) -> None:
+def test_extract_next_filename(news_entry, expected_path, fs):
     # Arrange
     fs.create_file(news_entry, contents="testing")
     blurb.root = "root"

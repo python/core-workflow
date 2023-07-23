@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Command-line tool to manage CPython Misc/NEWS.d entries."""
-from __future__ import annotations
 __version__ = "1.1.0"
 
 ##
@@ -111,14 +110,14 @@ for line in template.split('\n'):
         sections.append(section.strip())
 
 
-def sanitize_section(section: str) -> str:
+def sanitize_section(section):
     """
     Cleans up a section string, making it viable as a directory name.
     """
     return section.replace("/", "-").replace(" ", "-")
 
 
-def sanitize_section_legacy(section: str) -> str:
+def sanitize_section_legacy(section):
     """
     Cleans up a section string, making it viable as a directory name (allow spaces).
     """
@@ -132,7 +131,7 @@ _unsanitize_section = {
     }
 
 
-def unsanitize_section(section: str) -> str:
+def unsanitize_section(section):
     return _unsanitize_section.get(section, section)
 
 
@@ -305,7 +304,7 @@ def glob_versions():
     return versions
 
 
-def glob_blurbs(version: str) -> list[str]:
+def glob_blurbs(version):
     filenames = []
     base = os.path.join("Misc", "NEWS.d", version)
     if version != "next":
@@ -539,7 +538,7 @@ Broadly equivalent to blurb.parse(open(filename).read()).
             file.write(text)
 
     @staticmethod
-    def _parse_next_filename(filename: str) -> dict[str, str]:
+    def _parse_next_filename(filename):
         """
         Parses a "next" filename into its equivalent blurb metadata.
         Returns a dict.
@@ -585,7 +584,7 @@ Broadly equivalent to blurb.parse(open(filename).read()).
             if name not in metadata:
                 metadata[name] = default
 
-    def _extract_next_filename(self) -> str:
+    def _extract_next_filename(self):
         """
         changes metadata!
         """
