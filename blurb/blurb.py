@@ -111,14 +111,14 @@ for line in template.split('\n'):
 
 def sanitize_section(section):
     """
-    Cleans up a section string, making it viable as a directory name.
+    Clean up a section string, making it viable as a directory name.
     """
     return section.replace("/", "-").replace(" ", "_")
 
 
 def sanitize_section_legacy(section):
     """
-    Cleans up a section string, making it viable as a directory name (allow spaces).
+    Clean up a section string, making it viable as a directory name (allow spaces).
     """
     return section.replace("/", "-")
 
