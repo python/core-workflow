@@ -956,13 +956,14 @@ Add a blurb (a Misc/NEWS.d/next entry) to the current CPython repo.
             failure = str(e)
 
         if not failure:
-            with open(tmp_path, "rt", encoding="utf-8") as file:
-                for line in file:
-                    if line.startswith(".. gh-issue:"):
-                        issue_number = line.split(":")[1].strip()
-                        if issue_number.isdigit() and int(issue_number) < 32426:
-                            failure = "The gh-issue number should be 32426 or above."
-                            break
+            assert len(blurb)  # if parse_blurb succeeds, we should always have a body
+            if len(blurb) > 1:
+                failure = "Too many entries!  Don't specify '..' on a line by itself."
+            gh_issue_number = blurb[0][0]["gh-issue"]
+            if not gh_issue_number.isdigit():
+                failure = "The gh-issue number must be a number."
+            if int(gh_issue_number) < 32426:
+                failure = "The gh-issue number should be 32426 or above."
 
         if failure:
             print()
