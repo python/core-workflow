@@ -486,6 +486,9 @@ class Blurbs(list):
                 # we'll complain about the *first* error
                 # we see in the blurb file, which is a
                 # better user experience.
+                if key == "gh-issue" and int(value) < 32426:
+                    throw("The gh-issue number should be 32426 or above.")
+
                 if key in issue_keys:
                     try:
                         int(value)
@@ -959,11 +962,6 @@ Add a blurb (a Misc/NEWS.d/next entry) to the current CPython repo.
             assert len(blurb)  # if parse_blurb succeeds, we should always have a body
             if len(blurb) > 1:
                 failure = "Too many entries!  Don't specify '..' on a line by itself."
-            gh_issue_number = blurb[0][0]["gh-issue"]
-            if not gh_issue_number.isdigit():
-                failure = "The gh-issue number must be a number."
-            if int(gh_issue_number) < 32426:
-                failure = "The gh-issue number should be 32426 or above."
 
         if failure:
             print()
