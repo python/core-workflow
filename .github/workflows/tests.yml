@@ -6,7 +6,7 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  build_ubuntu:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -15,27 +15,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
           cache: pip
-          cache-dependency-path: ".github/workflows/tests.yml"
-      - name: setup
+
+      - name: Install dependencies
         run: |
           python --version
           python -m pip install --upgrade pip
-          python -m pip install --upgrade pytest pytest-cov pyfakefs
-      - name: install
+          python -m pip install --upgrade tox
+
+      - name: Tox tests
         run: |
           cd blurb
+          tox -e py
+
           python -m pip install -e .
-      - name: test
-        run: |
-          blurb test
-      - name: pytest
-        run: |
-          python -I -m pytest --cov blurb
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
