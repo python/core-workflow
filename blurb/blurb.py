@@ -473,6 +473,8 @@ class Blurbs(list):
 
             no_changes = metadata.get('no changes')
 
+            lowest_possible_gh_issue_number = 32426
+
             issue_keys = {
                 'gh-issue': 'GitHub',
                 'bpo': 'bpo',
@@ -486,7 +488,7 @@ class Blurbs(list):
                 # we'll complain about the *first* error
                 # we see in the blurb file, which is a
                 # better user experience.
-                if key == "gh-issue" and int(value) < 32426:
+                if key == "gh-issue" and int(value) < lowest_possible_gh_issue_number:
                     throw("The gh-issue number should be 32426 or above.")
 
                 if key in issue_keys:
@@ -959,7 +961,7 @@ Add a blurb (a Misc/NEWS.d/next entry) to the current CPython repo.
             failure = str(e)
 
         if not failure:
-            assert len(blurb)  # if parse_blurb succeeds, we should always have a body
+            assert len(blurb) # if parse_blurb succeeds, we should always have a body
             if len(blurb) > 1:
                 failure = "Too many entries!  Don't specify '..' on a line by itself."
 
