@@ -489,7 +489,7 @@ class Blurbs(list):
                 # we see in the blurb file, which is a
                 # better user experience.
                 if key == "gh-issue" and int(value) < lowest_possible_gh_issue_number:
-                    throw("The gh-issue number should be 32426 or above.")
+                    throw("The gh-issue number must be 32426 or above, not a PR number.")
 
                 if key in issue_keys:
                     try:
