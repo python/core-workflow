@@ -9,7 +9,7 @@ author-email = "larry@hastings.org"
 maintainer = "Python Core Developers"
 maintainer-email = "core-workflow@mail.python.org"
 home-page = "https://github.com/python/core-workflow/tree/main/blurb"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 description-file = "README.rst"
 classifiers = [
     "Intended Audience :: Developers",
