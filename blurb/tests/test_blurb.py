@@ -4,14 +4,14 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 import blurb
 
 
-@pytest.mark.parametrize(
-    "section",
-    (
-        "C API",
-        "Core and Builtins",
-        "Library",
-    ),
+UNCHANGED_SECTIONS = (
+    "C API",
+    "Core and Builtins",
+    "Library",
 )
+
+
+@pytest.mark.parametrize("section", UNCHANGED_SECTIONS)
 def test_sanitize_section_no_change(section: str) -> None:
     sanitized = blurb.sanitize_section(section)
     assert sanitized == section
@@ -28,14 +28,7 @@ def test_sanitize_section_changed(section: str, expected: str) -> None:
     assert sanitized == expected
 
 
-@pytest.mark.parametrize(
-    "section",
-    (
-        "C API",
-        "Core and Builtins",
-        "Library",
-    ),
-)
+@pytest.mark.parametrize("section", UNCHANGED_SECTIONS)
 def test_unsanitize_section_no_change(section: str) -> None:
     unsanitized = blurb.unsanitize_section(section)
     assert unsanitized == section
