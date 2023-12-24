@@ -5,29 +5,49 @@ import blurb
 
 
 @pytest.mark.parametrize(
-    "section, expected",
+    "section",
     (
-        ("C API", "C API"),
-        ("Core and Builtins", "Core and Builtins"),
-        ("Library", "Library"),
-        ("Tools/Demos", "Tools-Demos"),
+        "C API",
+        "Core and Builtins",
+        "Library",
     ),
 )
-def test_sanitize_section(section: str, expected: str) -> None:
+def test_sanitize_section_no_change(section: str) -> None:
     sanitized = blurb.sanitize_section(section)
-    assert sanitized == expected
+    assert sanitized == section
 
 
 @pytest.mark.parametrize(
     "section, expected",
     (
-        ("C API", "C API"),
-        ("Core and Builtins", "Core and Builtins"),
-        ("Library", "Library"),
+        ("Tools/Demos", "Tools-Demos"),
+    ),
+)
+def test_sanitize_section_changed(section: str, expected: str) -> None:
+    sanitized = blurb.sanitize_section(section)
+    assert sanitized == expected
+
+
+@pytest.mark.parametrize(
+    "section",
+    (
+        "C API",
+        "Core and Builtins",
+        "Library",
+    ),
+)
+def test_unsanitize_section_no_change(section: str) -> None:
+    unsanitized = blurb.unsanitize_section(section)
+    assert unsanitized == section
+
+
+@pytest.mark.parametrize(
+    "section, expected",
+    (
         ("Tools-Demos", "Tools/Demos"),
     ),
 )
-def test_unsanitize_section(section: str, expected: str) -> None:
+def test_unsanitize_section_changed(section: str, expected: str) -> None:
     unsanitized = blurb.unsanitize_section(section)
     assert unsanitized == expected
 
