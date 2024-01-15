@@ -73,7 +73,7 @@ def test_glob_blurbs_next(fs: FakeFilesystem) -> None:
     "news_entry, expected_section",
     (
         (
-            "Misc/NEWS.d/next/Library/2022-04-11-18-34-33.gh-issue-11111.pC7gnM.rst",
+            "Misc/NEWS.d/next/Library/2022-04-11-18-34-33.gh-issue-55555.pC7gnM.rst",
             "Library",
         ),
         (
@@ -107,8 +107,8 @@ def test_load_next(news_entry: str, expected_section: str, fs: FakeFilesystem) -
     "news_entry, expected_path",
     (
         (
-            "Misc/NEWS.d/next/Library/2022-04-11-18-34-33.gh-issue-11111.pC7gnM.rst",
-            "root/Misc/NEWS.d/next/Library/2022-04-11-18-34-33.gh-issue-11111.pC7gnM.rst",
+            "Misc/NEWS.d/next/Library/2022-04-11-18-34-33.gh-issue-55555.pC7gnM.rst",
+            "root/Misc/NEWS.d/next/Library/2022-04-11-18-34-33.gh-issue-55555.pC7gnM.rst",
         ),
         (
             "Misc/NEWS.d/next/Core and Builtins/2023-03-17-12-09-45.gh-issue-33333.Pf_BI7.rst",
