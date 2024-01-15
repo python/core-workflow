@@ -51,7 +51,6 @@ import hashlib
 import io
 import inspect
 import itertools
-import math
 import os
 from pathlib import Path
 import re
@@ -247,40 +246,6 @@ class pushd:
 def safe_mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
-
-
-def which(cmd, path="PATH"):
-    """Find cmd on PATH."""
-    if os.path.exists(cmd):
-        return cmd
-    if cmd[0] == '/':
-        return None
-    for segment in os.getenv(path).split(":"):
-        program = os.path.normpath(os.path.join(segment, cmd))
-        if os.path.exists(program):
-            return program
-    return None
-
-
-def strip_whitespace_lines(lines):
-    # strip from head
-    while lines:
-        if lines[0]:
-            break
-        lines.pop(0)
-
-    # strip from tail
-    while lines:
-        if lines[-1]:
-            return
-        lines.pop()
-
-
-def longest_line(lines):
-    longest = 0
-    for line in lines:
-        longest = max(longest, len(line))
-    return longest
 
 
 def version_key(element):
@@ -644,31 +609,6 @@ Returns a dict.
         blurb.save(filename)
         return filename
 
-    def save_split_next(self):
-        """
-        Save out blurbs created from "blurb split".
-        They don't have dates, so we have to get creative.
-        """
-        filenames = []
-        # the "date" MUST have a leading zero.
-        # this ensures these files sort after all
-        # newly created blurbs.
-        width = int(math.ceil(math.log(len(self), 10))) + 1
-        i = 1
-        blurb = Blurbs()
-        while self:
-            metadata, body = self.pop()
-            metadata['date'] = str(i).rjust(width, '0')
-            if 'release date' in metadata:
-                del metadata['release date']
-            blurb.append((metadata, body))
-            filename = blurb._extract_next_filename()
-            blurb.save(filename)
-            blurb.clear()
-            filenames.append(filename)
-            i += 1
-        return filenames
-
 
 tests_run = 0
 
@@ -704,13 +644,6 @@ class TestParserFailures(TestParserPasses):
         b = Blurbs()
         with self.assertRaises(Exception):
             b.load(filename)
-
-
-
-def run(s):
-    process = subprocess.run(s.split(), capture_output=True)
-    process.check_returncode()
-    return process.stdout.decode('ascii')
 
 
 readme_re = re.compile(r"This is \w+ version \d+\.\d+").match
@@ -1012,7 +945,6 @@ This is used by the release manager when cutting a new release.
         metadata = {"no changes": "True", "gh-issue": "0", "section": "Library", "date": date, "nonce": nonceify(body)}
         blurbs.append((metadata, body))
     else:
-        no_changes = None
         count = len(filenames)
         print(f'Merging {count} blurbs to "{output}".')
 

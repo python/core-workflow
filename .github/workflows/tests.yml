@@ -2,9 +2,13 @@ name: Tests
 
 on: [push, pull_request, workflow_dispatch]
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   build_ubuntu:
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     name: ${{ matrix.python-version }}
@@ -14,17 +18,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
           cache: pip
           cache-dependency-path: ".github/workflows/tests.yml"
       - name: setup
         run: |
           python --version
           python -m pip install --upgrade pip
-          python -m pip install --upgrade flit
+          python -m pip install --upgrade pytest pytest-cov pyfakefs
       - name: install
         run: |
           cd blurb
-          flit install
+          python -m pip install -e .
       - name: test
         run: |
           blurb test
+      - name: pytest
+        run: |
+          python -I -m pytest --cov blurb
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          flags: ${{ matrix.python-version }}
+          name: Python ${{ matrix.python-version }}
