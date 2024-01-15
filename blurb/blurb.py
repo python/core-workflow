@@ -438,6 +438,8 @@ class Blurbs(list):
 
             no_changes = metadata.get('no changes')
 
+            lowest_possible_gh_issue_number = 32426
+
             issue_keys = {
                 'gh-issue': 'GitHub',
                 'bpo': 'bpo',
@@ -451,6 +453,9 @@ class Blurbs(list):
                 # we'll complain about the *first* error
                 # we see in the blurb file, which is a
                 # better user experience.
+                if key == "gh-issue" and int(value) < lowest_possible_gh_issue_number:
+                    throw(f"The gh-issue number must be {lowest_possible_gh_issue_number} or above, not a PR number.")
+
                 if key in issue_keys:
                     try:
                         int(value)
