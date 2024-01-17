@@ -109,11 +109,18 @@ for line in template.split('\n'):
         sections.append(section.strip())
 
 
+_sanitize_section = {
+    "C API": "C_API",
+    "Core and Builtins": "Core_and_Builtins",
+    "Tools/Demos": "Tools-Demos",
+    }
+
+
 def sanitize_section(section):
     """
     Clean up a section string, making it viable as a directory name.
     """
-    return section.replace("/", "-").replace(" ", "_")
+    return _sanitize_section.get(section, section)
 
 
 def sanitize_section_legacy(section):
