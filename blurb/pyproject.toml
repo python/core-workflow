@@ -1,21 +1,33 @@
 [build-system]
-requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
-
-[tool.flit.metadata]
-module = "blurb"
-author = "Larry Hastings"
-author-email = "larry@hastings.org"
-maintainer = "Python Core Developers"
-maintainer-email = "core-workflow@mail.python.org"
-home-page = "https://github.com/python/core-workflow/tree/main/blurb"
-requires-python = ">=3.8"
-description-file = "README.rst"
-classifiers = [
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: BSD License",
-    "Programming Language :: Python :: 3 :: Only"
+requires = [
+  "flit_core<4,>=2",
 ]
 
-[tool.flit.scripts]
+[project]
+name = "blurb"
+description = "Command-line tool to manage CPython Misc/NEWS.d entries."
+readme = "README.rst"
+maintainers = [{name = "Python Core Developers", email="core-workflow@mail.python.org"}]
+authors = [{ name="Larry Hastings", email="larry@hastings.org"}]
+requires-python = ">=3.8"
+classifiers = [
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: BSD License",
+  "Programming Language :: Python :: 3 :: Only",
+]
+dynamic = [
+  "version",
+]
+[project.optional-dependencies]
+tests = [
+  "pyfakefs",
+  "pytest",
+  "pytest-cov",
+]
+[project.urls]
+Changelog = "https://github.com/python/core-workflow/tree/main/blurb#changelog"
+Homepage = "https://github.com/python/core-workflow/tree/main/blurb"
+Source = "https://github.com/python/core-workflow/tree/main/blurb"
+[project.scripts]
 blurb = "blurb:main"
