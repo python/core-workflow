@@ -38,7 +38,6 @@ __version__ = "1.1.0"
 ## Licensed to the Python Software Foundation under a contributor agreement.
 ##
 
-
 # TODO
 #
 # automatic git adds and removes
@@ -110,18 +109,45 @@ for line in template.split('\n'):
         sections.append(section.strip())
 
 
+_sanitize_section = {
+    "C API": "C_API",
+    "Core and Builtins": "Core_and_Builtins",
+    "Tools/Demos": "Tools-Demos",
+    }
+
+
 def sanitize_section(section):
     """
-Cleans up a section string, making it viable as a directory name.
+    Clean up a section string, making it viable as a directory name.
+    """
+    return _sanitize_section.get(section, section)
+
+
+def sanitize_section_legacy(section):
+    """
+    Clean up a section string, making it viable as a directory name (allow spaces).
     """
     return section.replace("/", "-")
 
+
 _unsanitize_section = {
+    "C_API": "C API",
+    "Core_and_Builtins": "Core and Builtins",
     "Tools-Demos": "Tools/Demos",
     }
 
+
 def unsanitize_section(section):
     return _unsanitize_section.get(section, section)
+
+def next_filename_unsanitize_sections(filename):
+    s = filename
+    for key, value in _unsanitize_section.items():
+        for separator in "/\\":
+            key = f"{separator}{key}{separator}"
+            value = f"{separator}{value}{separator}"
+            filename = filename.replace(key, value)
+    return filename
 
 
 def textwrap_body(body, *, subsequent_indent=''):
@@ -300,14 +326,18 @@ def glob_blurbs(version):
         wildcard = base + ".rst"
         filenames.extend(glob.glob(wildcard))
     else:
-        for section in sections:
-            wildcard = os.path.join(base, sanitize_section(section), "*.rst")
+        sanitized_sections = (
+                {sanitize_section(section) for section in sections} |
+                {sanitize_section_legacy(section) for section in sections}
+        )
+        for section in sanitized_sections:
+            wildcard = os.path.join(base, section, "*.rst")
             entries = glob.glob(wildcard)
-            entries.sort(reverse=True)
             deletables = [x for x in entries if x.endswith("/README.rst")]
             for filename in deletables:
                 entries.remove(filename)
             filenames.extend(entries)
+    filenames.sort(reverse=True, key=next_filename_unsanitize_sections)
     return filenames
 
 
@@ -537,8 +567,8 @@ Broadly equivalent to blurb.parse(open(filename).read()).
     @staticmethod
     def _parse_next_filename(filename):
         """
-Parses a "next" filename into its equivalent blurb metadata.
-Returns a dict.
+        Parses a "next" filename into its equivalent blurb metadata.
+        Returns a dict.
         """
         components = filename.split(os.sep)
         section, filename = components[-2:]
@@ -552,7 +582,7 @@ Returns a dict.
         metadata = {"date": fields[0], "nonce": fields[-2], "section": section}
 
         for field in fields[1:-2]:
-            for name in ("gh-issue","bpo"):
+            for name in ("gh-issue", "bpo"):
                 _, got, value = field.partition(name + "-")
                 if got:
                     metadata[name] = value.strip()
@@ -589,7 +619,7 @@ Returns a dict.
         metadata, body = self[-1]
         metadata['section'] = sanitize_section(metadata['section'])
         metadata['root'] = root
-        if int(metadata["gh-issue"]) > 0 :
+        if int(metadata["gh-issue"]) > 0:
             path = "{root}/Misc/NEWS.d/next/{section}/{date}.gh-issue-{gh-issue}.{nonce}.rst".format_map(metadata)
         elif int(metadata["bpo"]) > 0:
             # assume it's a GH issue number
