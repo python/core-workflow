@@ -2,7 +2,7 @@ core-workflow
 =============
 Issue tracker and relevant tools for CPython's workflow
 
-.. image:: https://github.com/python/core-workflow/actions/workflows/tests.yml/badge.svg
+.. image:: https://github.com/python/core-workflow/actions/workflows/lint.yml/badge.svg
    :alt: GitHub Actions
    :target: https://github.com/python/core-workflow/actions
 
@@ -10,20 +10,8 @@ Issue tracker and relevant tools for CPython's workflow
    :alt: Python Discourse chat
    :target: https://discuss.python.org/
 
-blurb
------
-
-.. image:: https://img.shields.io/pypi/v/blurb.svg
-    :target: https://pypi.org/project/blurb/
-
-Interactive utility for writing CPython ``Misc/NEWS.d`` entries. See
-the blurb_ directory for more details.
-
-.. _blurb: https://github.com/python/core-workflow/tree/main/blurb
-
-
-Other core workflow tools
--------------------------
+Core workflow tools
+-------------------
 
 ======================================= ======================= =============================================== ================
  Name                                   Description             Issue tracker                                   Owner/Maintainer
@@ -31,6 +19,8 @@ Other core workflow tools
 `python/bedevere`_                      A bot to help identify  `GitHub <https://github.com/                    `Brett Cannon`_
                                         missing information for python/bedevere/issues>`__
                                         CPython pull requests.
+`python/blurb`_                         ``blurb add`` on the    `GitHub <https://github.com/                    ...
+                                        command line.           python/blurb/issues>`__
 `python/blurb_it`_                      ``blurb add`` on the    `GitHub <https://github.com/                    `Mariatta`_
                                         web.                    python/blurb_it/issues>`__
 `python/cherry-picker`_                 Command line tool for   `GitHub <https://github.com/                    `Mariatta`_
@@ -48,6 +38,7 @@ Other core workflow tools
 ======================================= ======================= =============================================== ================
 
 .. _`python/bedevere`: https://github.com/python/bedevere
+.. _`python/blurb`: https://github.com/python/blurb
 .. _`python/blurb_it`: https://github.com/python/blurb_it
 .. _`python/cherry-picker`: https://github.com/python/cherry-picker
 .. _`python/miss-islington`: https://github.com/python/miss-islington
@@ -57,5 +48,3 @@ Other core workflow tools
 .. _`Berker Peksag`: https://github.com/berkerpeksag
 .. _`Łukasz Langa`: https://github.com/ambv
 .. _`Mariatta`: https://github.com/mariatta
-
-
