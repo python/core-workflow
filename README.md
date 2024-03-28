@@ -7,12 +7,45 @@ Issue tracker and relevant tools for CPython's workflow.
 
 ## Core workflow tools
 
-| Name                                                                                            | Description                                                          | Issue tracker                                                            | Owner/Maintainer                                 |
-|-------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|--------------------------------------------------------------------------|--------------------------------------------------|
-| [python/bedevere](https://github.com/python/bedevere)                                           | Bot to help identify missing information for CPython pull requests   | [GitHub](https://github.com/python/bedevere/issues)                      | [Brett Cannon](https://github.com/brettcannon)   |
-| [python/blurb](https://github.com/python/blurb)                                                 | `blurb add` on the command line                                      | [GitHub](https://github.com/python/blurb/issues)                         |                                                  |
-| [python/blurb_it](https://github.com/python/blurb_it)                                           | `blurb add` on the web                                               | [GitHub](https://github.com/python/blurb_it/issues)                      | [Mariatta](https://github.com/mariatta)          |
-| [python/cherry-picker](https://github.com/python/cherry-picker)                                 | Command line tool for backporting CPython pull requests              | [GitHub](https://github.com/python/cherry-picker/issues)                 | [Mariatta](https://github.com/mariatta)          |
-| [python/miss-islington](https://github.com/python/miss-islington)                               | Bot for backporting CPython pull requests                            | [GitHub](https://github.com/python/miss-islington/issues)                | [Mariatta](https://github.com/mariatta)          |
-| [ambv/cla-bot](https://github.com/ambv/cla-bot)                                                 | CLA enforcement bot for Python organization projects                 |                                                                          | [Łukasz Langa](https://github.com/ambv)          |
-| [berkerpeksag/cpython-emailer-webhook](https://github.com/berkerpeksag/cpython-emailer-webhook) | Webhook to send every CPython commit to python-checkins mailing list | [GitHub](https://github.com/berkerpeksag/cpython-emailer-webhook/issues) | [Berker Peksag](https://github.com/berkerpeksag) |
+<table>
+<tr>
+<th>Name
+<th>Description
+<th>Issue tracker
+<th>Owner/Maintainer
+<tr>
+<td><a href="https://github.com/python/bedevere">python/bedevere</a>
+<td>Bot to help identify missing information for CPython pull requests
+<td><a href="https://github.com/python/bedevere/issues">GitHub</a>
+<td><a href="https://github.com/brettcannon">Brett Cannon</a>
+<tr>
+<td><a href="https://github.com/python/blurb">python/blurb</a>
+<td><code>blurb add</code> on the command line
+<td><a href="https://github.com/python/blurb/issues">GitHub</a>
+<td>
+<tr>
+<td><a href="https://github.com/python/blurb_it">python/blurb_it</a>
+<td><code>blurb add</code> on the web
+<td><a href="https://github.com/python/blurb_it/issues">GitHub</a>
+<td><a href="https://github.com/mariatta">Mariatta</a>
+<tr>
+<td><a href="https://github.com/python/cherry-picker">python/cherry-picker</a>
+<td>Command line tool for backporting CPython pull requests
+<td><a href="https://github.com/python/cherry-picker/issues">GitHub</a>
+<td><a href="https://github.com/mariatta">Mariatta</a>
+<tr>
+<td><a href="https://github.com/python/miss-islington">python/miss-islington</a>
+<td>Bot for backporting CPython pull requests
+<td><a href="https://github.com/python/miss-islington/issues">GitHub</a>
+<td><a href="https://github.com/mariatta">Mariatta</a>
+<tr>
+<td><a href="https://github.com/ambv/cla-bot">ambv/cla-bot</a>
+<td>CLA enforcement bot for Python organization projects
+<td>
+<td><a href="https://github.com/ambv">Łukasz Langa</a>
+<tr>
+<td><a href="https://github.com/berkerpeksag/cpython-emailer-webhook">berkerpeksag/cpython-emailer-webhook</a>
+<td>Webhook to send every CPython commit to python-checkins mailing list
+<td><a href="https://github.com/berkerpeksag/cpython-emailer-webhook/issues">GitHub</a>
+<td><a href="https://github.com/berkerpeksag">Berker Peksag</a>
+</table>
