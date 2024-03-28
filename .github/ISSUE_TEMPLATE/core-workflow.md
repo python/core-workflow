@@ -9,6 +9,7 @@ Feature-request/bug specific to GitHub bots/tools can be reported in their own r
 
 the-knights-who-say-ni: https://github.com/python/the-knights-who-say-ni
 bedevere: https://github.com/python/bedevere
+blurb: https://github.com/python/blurb
 blurb-it: https://github.com/python/blurb-it
 miss-islington: https://github.com/python/miss-islington
 
