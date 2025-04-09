@@ -39,10 +39,10 @@ Issue tracker and relevant tools for CPython's workflow.
 <td><a href="https://github.com/python/miss-islington/issues">GitHub</a>
 <td><a href="https://github.com/mariatta">Mariatta</a>
 <tr>
-<td><a href="https://github.com/ambv/cla-bot">ambv/cla-bot</a>
+<td><a href="https://github.com/psf/clabot">psf/clabot</a>
 <td>CLA enforcement bot for Python organization projects
 <td>
-<td><a href="https://github.com/ambv">Łukasz Langa</a>
+<td><a href="https://github.com/ewdurbin">Ee Durbin</a>
 <tr>
 <td><a href="https://github.com/berkerpeksag/cpython-emailer-webhook">berkerpeksag/cpython-emailer-webhook</a>
 <td>Webhook to send every CPython commit to python-checkins mailing list
