@@ -44,8 +44,8 @@ Issue tracker and relevant tools for CPython's workflow.
 <td>
 <td><a href="https://github.com/ambv">Łukasz Langa</a>
 <tr>
-<td><a href="https://github.com/berkerpeksag/cpython-emailer-webhook">berkerpeksag/cpython-emailer-webhook</a>
+<td><a href="https://github.com/python/webhook-mailer">python/webhook-mailer</a>
 <td>Webhook to send every CPython commit to python-checkins mailing list
-<td><a href="https://github.com/berkerpeksag/cpython-emailer-webhook/issues">GitHub</a>
+<td><a href="https://github.com/python/webhook-mailer/issues">GitHub</a>
 <td><a href="https://github.com/berkerpeksag">Berker Peksag</a>
 </table>
