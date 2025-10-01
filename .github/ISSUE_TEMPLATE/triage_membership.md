@@ -7,7 +7,7 @@ title: "Request for Python triage membership: name"
 <!--
 Core developers can create this issue to nominate someone to the Python Triage team.
 
-More details: https://devguide.python.org/triaging.html#becoming-a-member-of-the-python-triage-team
+More details: https://devguide.python.org/triage/triage-team/#becoming-a-member-of-the-python-triage-team
 -->
 
 # Request for Python Triage membership
